@@ -2,7 +2,7 @@
 
 This is your study guide for the evaluation interview. It explains what was built, how the pieces fit, and *why* each decision was made. Read it top to bottom once, then use the "Likely interview questions" section to rehearse.
 
-> Status: **in progress.** Sections marked 🚧 get filled in as each part lands.
+> Status: **complete for the submitted build.** Section 11 lists what is mocked or not built.
 
 ---
 
@@ -87,35 +87,54 @@ If your friend is offline at step 6, their receipts stay "sent" until they next 
 - **Disappearing messages**: when a chat has a timer, each new message gets `expires_at`. A background task on the server deletes expired messages every 5 s and pushes the update.
 - **Reconnects**: the socket reconnects with exponential backoff (1 s, 2 s, 4 s… up to 10 s, plus a little randomness so all clients don't reconnect at once) and pings every 25 s to keep the connection alive.
 
-## 7. Frontend structure 🚧
+## 7. Frontend structure
 
 - `src/components/ui/`: the design system ported to React. Each component is *presentational*: it receives data through props and reports clicks through callbacks, and never fetches anything. That makes the components reusable and easy to reason about.
 - `src/lib/`: framework-free logic, including API calls, the socket client, time formatting, and timeline grouping (which bubbles join into a run).
 - `src/store/`: app state and the actions that change it.
-- `src/app/`: pages (routes) that connect store hooks to UI components.
+- `src/features/`: screens that connect store hooks to UI components. `auth/` (login, OTP, profile), `sidebar/` (list, search, filters), `dialogs/` (new chat, new group, contacts), `chat/` (header, timeline, composer, info panel), `settings/`, and `shell/` (session gate and the three-column frame).
+- `src/app/`: thin routes: `/login`, `/` (empty pane), `/c/[id]`, `/settings/[section]`, `/calls` and `/stories` (coming soon). Routes only pick a feature; they hold no logic.
 
-## 8. Backend structure 🚧
+Request flow for one action, e.g. reacting to a message: `MessageRow` (UI) calls a store action, the store calls `lib/api.ts` (REST), the server saves it and pushes a `reaction` event, `lib/socket.ts` receives it, `store/realtime.ts` updates the message store, and every open tab re-renders from that one source of truth.
+
+## 8. Backend structure
 
 - `routers/`: thin HTTP layer that parses input, checks auth, and calls a service.
 - `services/`: the rules, e.g. "only admins can add members" and "the last admin leaving promotes the oldest member".
 - `realtime/`: the connection registry and event pushes.
 - `models.py` / `schemas.py`: database tables / API shapes. They're kept separate so the API can change without changing the DB, and vice versa.
 
-## 9. How the UI matches Signal 🚧
+## 9. How the UI matches Signal
 
-## 10. Running, seeding, deploying 🚧
+- **Design system first.** Every colour, radius, spacing and shadow comes from `src/styles/tokens.css`, generated from your Signal design system. Components never hard-code a hex value, which is why dark mode is one attribute (`data-theme="dark"`) and why the phone layout can change metrics without touching components.
+- **Desktop layout:** a 68px rail, a 320px conversation list and the chat pane (`AppShell`). Below 600px the same components become the phone layout: the list is the home screen with a tab bar, and a chat is a full screen with a back button. This is one codebase, not two.
+- **Details copied from Signal:** message runs share a tail and tight spacing, sender names and colours in groups, delivery circles (sending, sent, delivered, read), a day pill that sticks while scrolling, "N unread messages" divider, typing bubbles, system lines such as "Mom added you", the encryption notice at the top of a chat, a blue Ultramarine accent on desktop, and Title Case settings rows.
+- **Where each piece lives:** `src/components/ui/<Name>` is the pixel-level piece; `src/features/*` composes pieces into screens.
+- **How it was checked:** every screen was opened with Playwright at 1440x900 and 390x844 in light and dark and compared by eye with Signal. Screenshots are in `docs/screenshots/`.
+
+## 10. Running, seeding, deploying
+
+Everything needed is in [`RUNNING.md`](./RUNNING.md): backend and frontend commands, environment variables, the demo account (`+15550000001`, OTP `123456`), Docker, and the Playwright smoke test (`e2e/smoke.mjs`). The Docker files and `scripts/dev.sh` were written but not run end to end in the build environment (no Docker daemon there), so run them once before relying on them.
 
 ## 11. Assumptions and mocked parts
 
 - OTP is fixed at `123456`. There's no SMS.
 - No real end-to-end encryption. Messages are stored in plain text on the server. The UI shows Signal's encryption notice as decoration.
 - Calls, Stories and Linked devices show "Coming soon".
+- Not built, because the API contract has no endpoint for it: editing a sent message, delete for me, forwarding, group avatars, attachments, voice notes, emoji picker and stickers. The buttons for the last four show a "coming soon" toast.
 - One account per phone number. A "Session" is one browser login, and logout ends only that one.
 
-## 12. Likely interview questions (and short answers) 🚧
+## 12. Likely interview questions (and short answers)
 
 - *Why REST for sending instead of the WebSocket?* See §1: validation, error codes, retries, testability. The socket is for pushes.
 - *How do you prevent duplicate messages on retry?* `client_id` with a UNIQUE(sender_id, client_id) constraint (§4.6).
 - *How is "read" computed in groups?* Per-recipient receipts, weakest state wins (§4.5).
 - *How is unread count computed?* Read pointer, not per-message flags (§4.4).
 - *What happens if two people create the same DM at once?* `direct_key` UNIQUE, so the second insert fails and we return the existing one (§4.2).
+- *Why zustand and not Redux or context?* Small API, no provider tree, and the socket handler can update state outside React.
+- *How does the phone layout work without a second app?* One `AppShell` switches which column is visible below 600px (`useIsPhone`), and the tokens change metrics under the same media query.
+- *How do you keep two tabs of one user in sync?* The server pushes every change to all of that user's open sockets, including the sender's other tabs, and the store reconciles by `client_id` and message id.
+- *What happens to messages from someone who left a group?* The conversation detail returns `former_members`, so old messages and "X left" lines still show their name.
+- *How is auth done?* Phone plus mocked OTP gives a random session token. Only its sha256 is stored, so a database leak does not leak live tokens. REST sends it as `Authorization: Bearer`, the socket as `?token=`.
+- *What would you do next with more time?* Real SMS, end-to-end encryption, attachments, message editing, and replacing the polling expiry task with a scheduler or queue.
+- *What is deliberately not built?* See section 11 and the README's known limitations: editing messages, delete-for-me, forwarding, group avatars, calls, stories, attachments.

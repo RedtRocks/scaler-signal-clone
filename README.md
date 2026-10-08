@@ -88,7 +88,15 @@ docker-compose.yml, backend/Dockerfile, frontend/Dockerfile
 
 ## Screenshots
 
-_To be added: desktop (1440x900) and phone (390x844), light and dark._
+| Desktop, direct chat (light) | Desktop, group chat (dark) |
+|---|---|
+| ![Direct chat](docs/screenshots/desktop-direct-light.png) | ![Group chat](docs/screenshots/desktop-group-dark.png) |
+
+| Phone, chat list (light) | Phone, chat (dark) | Login |
+|---|---|---|
+| ![Phone list](docs/screenshots/phone-list-light.png) | ![Phone chat](docs/screenshots/phone-chat-dark.png) | ![Login](docs/screenshots/login-light.png) |
+
+Settings: [`docs/screenshots/desktop-settings-light.png`](docs/screenshots/desktop-settings-light.png).
 
 ## Known limitations
 
