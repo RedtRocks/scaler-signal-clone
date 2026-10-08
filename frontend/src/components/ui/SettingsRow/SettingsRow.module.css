@@ -1,0 +1,125 @@
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  width: 100%;
+  min-height: var(--ios-settings-row);
+  padding: 5px var(--ios-gutter);
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+button.row:hover {
+  background: var(--surface-hover);
+}
+.static {
+  cursor: default;
+}
+div.row {
+  cursor: default;
+}
+.row:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: -2px;
+}
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 58px;
+  right: 0;
+  border-top: 1px solid var(--ios-separator);
+}
+.row.noLead + .row.noLead::before {
+  left: var(--ios-gutter);
+}
+
+.lead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  flex: none;
+  color: var(--ios-row-icon);
+}
+.leadAvatar :global(.sg-avatar) {
+  margin-left: -6px;
+}
+
+.add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-left: -6px;
+  border-radius: var(--radius-pill);
+  background: var(--ios-pill);
+  color: var(--ink);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 18px;
+  line-height: 22px;
+  letter-spacing: -0.03em;
+}
+
+.sub {
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+}
+
+.value {
+  font-size: 16px;
+  letter-spacing: -0.03em;
+  color: var(--ios-placeholder);
+}
+
+.chevron {
+  color: var(--ios-placeholder);
+}
+
+.destructive,
+.destructive .lead {
+  color: var(--ios-destructive);
+}
+
+/* Desktop (Signal Desktop settings): denser rows; phones keep the Figma 18px metrics */
+@media (min-width: 600px) {
+  .row {
+    min-height: 48px;
+  }
+  .label {
+    font-size: 15px;
+    line-height: 20px;
+    letter-spacing: -0.01em;
+  }
+  .value {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+}
+:global(.sg-mobile) .row {
+  min-height: var(--ios-settings-row);
+}
+:global(.sg-mobile) .label {
+  font-size: 18px;
+  line-height: 22px;
+  letter-spacing: -0.03em;
+}
+:global(.sg-mobile) .value {
+  font-size: 16px;
+  letter-spacing: -0.03em;
+}

@@ -1,0 +1,15 @@
+.status {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+}
+
+.sending {
+  animation: spin 2.4s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

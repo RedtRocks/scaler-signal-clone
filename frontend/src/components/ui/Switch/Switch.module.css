@@ -1,0 +1,68 @@
+.switch {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-selected);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+:global(:root[data-theme="dark"]) .switch {
+  background: #5a5a5a;
+}
+.on,
+:global(:root[data-theme="dark"]) .on {
+  background: var(--ultramarine);
+}
+.switch:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.switch:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+
+.thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 160ms ease;
+}
+.on .thumb {
+  transform: translateX(16px);
+}
+
+/* Phone: iOS 51×31 */
+:global(.sg-mobile) .switch {
+  width: 51px;
+  height: 31px;
+}
+:global(.sg-mobile) .thumb {
+  width: 27px;
+  height: 27px;
+}
+:global(.sg-mobile) .on .thumb {
+  transform: translateX(20px);
+}
+@media (max-width: 599px) {
+  .switch {
+    width: 51px;
+    height: 31px;
+  }
+  .thumb {
+    width: 27px;
+    height: 27px;
+  }
+  .on .thumb {
+    transform: translateX(20px);
+  }
+}

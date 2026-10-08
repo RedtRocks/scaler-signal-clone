@@ -1,0 +1,51 @@
+.tabbar {
+  --sg-icon-knock: var(--surface-pane-mobile);
+  display: flex;
+  justify-content: space-around;
+  flex: none;
+  height: calc(var(--ios-tabbar-height) + env(safe-area-inset-bottom, 0px));
+  padding: 7px 0 env(safe-area-inset-bottom, 0px);
+  background: var(--surface-pane-mobile);
+  border-top: 0.5px solid var(--ios-separator);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 72px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ios-placeholder);
+  cursor: pointer;
+  font: inherit;
+}
+.active {
+  color: var(--ink);
+}
+.tab:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+
+.icon {
+  position: relative;
+  display: flex;
+  height: 27px;
+  align-items: center;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+}
+
+.label {
+  font-size: 11px;
+  line-height: 13px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}

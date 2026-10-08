@@ -1,0 +1,219 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0 calc(-1 * var(--space-3));
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 8px var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.item:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+.item:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: -2px;
+}
+.item:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.name {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sub {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glyph {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-field);
+  color: var(--ink);
+}
+
+.check {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1.5px var(--ink-tertiary);
+  color: transparent;
+}
+.checked {
+  background: var(--ultramarine);
+  box-shadow: none;
+  color: var(--on-ultramarine);
+}
+
+.heading {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.empty {
+  margin: var(--space-6) 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--alert);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 8px 3px 3px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-field);
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+.fileInput {
+  display: none;
+}
+
+.row2 {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+/* Phone sheet: lists sit on white cards over the grouped background. */
+@media (max-width: 599px) {
+  .list {
+    margin: 0;
+    border-radius: var(--radius-lg);
+    background: var(--ios-card);
+    overflow: hidden;
+  }
+  .item {
+    border-radius: 0;
+    padding: 8px var(--ios-gutter);
+  }
+  .name {
+    font-size: 18px;
+    line-height: 22px;
+    letter-spacing: -0.03em;
+  }
+  .sub {
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    color: var(--ios-placeholder);
+  }
+}
+
+.shortcuts {
+  margin: 0;
+  padding: 0;
+}
+
+.shortcutRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.shortcutRow:last-child {
+  border-bottom: 0;
+}
+
+.shortcutRow dt {
+  color: var(--ink);
+}
+
+.shortcutRow dd {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+}
+
+.kbd {
+  min-width: 24px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--divider);
+  background: var(--surface-field);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+}

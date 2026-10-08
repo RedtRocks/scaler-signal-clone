@@ -1,0 +1,125 @@
+/*
+ * Global base for the Signal clone. Tokens live in styles/tokens.css (generated).
+ * Component styles live in co-located CSS modules under components/ui.
+ */
+
+:root {
+  /* SF on Apple devices, Inter (next/font, --font-inter) elsewhere. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", var(--font-inter), Inter,
+    "Segoe UI", Roboto, sans-serif;
+  /* Knockout fill for the Figma glyphs that cut a shape out of themselves. */
+  --sg-icon-knock: var(--surface-pane);
+  --focus-ring: 0 0 0 2px var(--ultramarine);
+  color-scheme: light;
+}
+
+/*
+ * Phone metrics (Figma). Below 600px the whole app switches; .sg-mobile forces the
+ * same variables on any subtree (gallery phone frame, previews).
+ * Selector includes :root[data-theme] so it beats the dark block (phone dark is true black).
+ */
+.sg-mobile,
+:root .sg-mobile {
+  --bubble-outgoing: var(--ios-ultramarine);
+  --bubble-incoming: var(--bubble-incoming-mobile);
+  --surface-pane: var(--surface-pane-mobile);
+  --surface-sidebar: var(--surface-pane-mobile);
+  --surface-composer: var(--ios-field);
+  --surface-field: var(--ios-field);
+  --on-ultramarine: var(--ios-bubble-text);
+  --on-ultramarine-muted: var(--ios-bubble-meta);
+  --ink-secondary: var(--ios-placeholder);
+  --sg-icon-knock: var(--surface-pane-mobile);
+}
+
+@media (max-width: 599px) {
+  :root,
+  :root[data-theme] {
+    --bubble-outgoing: var(--ios-ultramarine);
+    --bubble-incoming: var(--bubble-incoming-mobile);
+    --surface-pane: var(--surface-pane-mobile);
+    --surface-sidebar: var(--surface-pane-mobile);
+    --surface-composer: var(--ios-field);
+    --surface-field: var(--ios-field);
+    --on-ultramarine: var(--ios-bubble-text);
+    --on-ultramarine-muted: var(--ios-bubble-meta);
+    --ink-secondary: var(--ios-placeholder);
+    --sg-icon-knock: var(--surface-pane-mobile);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink);
+  background: var(--surface-pane);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--ultramarine);
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+.sg-icon {
+  display: block;
+  flex: none;
+}
+
+.sg-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--ultramarine) 30%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

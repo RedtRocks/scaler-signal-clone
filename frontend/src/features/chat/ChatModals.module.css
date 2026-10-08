@@ -1,0 +1,32 @@
+.text {
+  margin: 0 0 var(--space-3);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pickList {
+  max-height: 50dvh;
+  overflow-y: auto;
+  margin: 0 calc(-1 * var(--space-2));
+}
+
+.safety {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3) var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--surface-sidebar);
+  font-size: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--ink);
+}

@@ -1,0 +1,26 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-pane);
+  border-bottom: 1px solid var(--divider);
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+}
+
+.count {
+  flex: none;
+  min-width: 56px;
+  font-size: 13px;
+  color: var(--ink-secondary);
+  text-align: right;
+}
+
+.up {
+  transform: rotate(180deg);
+}

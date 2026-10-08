@@ -1,0 +1,14 @@
+<!-- @dsCard group="Conversation list" height=780 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ConversationRow</title>
+<style>body{padding:16px;background:var(--surface-pane)} .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap} .col{display:flex;flex-direction:column;gap:6px} .lbl{font-size:12px;color:var(--ink-secondary);margin:0 0 6px} .phone{width:390px;background:var(--surface-pane-mobile)} .pair{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var S=window.SignalUI,h=React.createElement;
+function lbl(t){return h("p",{className:"lbl"},t)}
+ReactDOM.createRoot(document.getElementById("root")).render(h("div",{className:"pair"},h("div",{style:{width:320,background:"var(--surface-sidebar)",padding:"8px 0"}},lbl("Desktop"),h(S.ConversationRow,{name:"Family",time:"20m",preview:"📎 File",kind:"group",selected:true}),h(S.ConversationRow,{name:"Paige Hall",time:"40m",preview:"Yeah, I just got the group link - thanks for adding me 😎",status:"read"}),h(S.ConversationRow,{name:"Maya Johnson",time:"9:24 AM",preview:"View-once media",unread:1,online:true}),h(S.ConversationRow,{name:"Roommates",time:"Tue",sender:"Kai",preview:"Working late - can one of you please feed Spooky? One tin of wet food",unread:3,kind:"group"}),h(S.ConversationRow,{name:"Rock climbers",time:"Now",typing:true,kind:"group"}),h(S.ConversationRow,{name:"Note to Self",kind:"note",time:"Tue",preview:"Groceries: Coffee, yogurt, grapefruit, biscuits"})),h("div",{className:"phone sg-mobile"},lbl("Phone (Figma Output 1)"),h("div",{className:"col",style:{gap:17}},h(S.ConversationRow,{name:"Emily’s 27th",kind:"group",time:"Now",preview:"You made Maya Johnson an admin. You have left the group."}),h(S.ConversationRow,{name:"Cooking Mania",kind:"group",time:"25m",preview:"Julian Smith made you an admin. Julian Smith made Maya Johnson an admin."}),h(S.ConversationRow,{name:"Julian Smith",time:"Thu",preview:"Julian Smith set disappearing message time to 30 seconds."}),h(S.ConversationRow,{name:"Maya Johnson",time:"Thu",preview:"You set disappearing message time to 5 minutes.",unread:1})))));
+</script>
+</body>
+</html>

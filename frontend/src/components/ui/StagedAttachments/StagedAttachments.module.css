@@ -1,0 +1,79 @@
+.strip {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 2px 4px 6px;
+  list-style: none;
+  overflow-x: auto;
+}
+.item {
+  position: relative;
+  flex: none;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-composer);
+}
+.thumb {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 200px;
+  padding: 0 var(--space-3) 0 var(--space-2);
+}
+.fileIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--surface-hover);
+  color: var(--icon);
+}
+.fileText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.fileName {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fileDetail {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+}
+.remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid var(--surface-pane);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--surface-pane);
+  cursor: pointer;
+}
+.remove:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 1px;
+}

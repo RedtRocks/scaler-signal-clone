@@ -1,0 +1,23 @@
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  color: var(--ink-secondary);
+}
+.reverse {
+  flex-direction: row-reverse;
+}
+
+.btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-pill);
+  color: var(--ink-secondary);
+}
+.btn:hover {
+  color: var(--icon);
+}
+.btn[aria-expanded="true"] {
+  background: var(--surface-hover);
+  color: var(--icon);
+}

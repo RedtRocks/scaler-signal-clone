@@ -1,0 +1,37 @@
+.button {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--icon);
+  box-shadow: var(--shadow-popover), 0 0 0 0.5px var(--divider);
+  cursor: pointer;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.button:hover {
+  background: var(--surface-hover);
+}
+.button:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+.hidden {
+  opacity: 0;
+  transform: translateY(8px) scale(0.9);
+  pointer-events: none;
+}
+.badge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  translate: -50% 0;
+}

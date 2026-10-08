@@ -1,0 +1,39 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Cover</title>
+<style>
+  html, body { margin: 0; height: 288px; width: 960px; overflow: hidden; background: var(--surface-pane); font-family: var(--font-sans); }
+  .cv { position: relative; width: 960px; height: 288px; }
+  svg { position: absolute; left: 0; top: 0; }
+  .ultra { fill: var(--ultramarine); }
+  .tint { fill: var(--bubble-incoming); }
+  .side { fill: var(--surface-sidebar); }
+  .wash { fill: var(--note-to-self-bg); }
+  .deep { fill: var(--surface-selected); }
+  .ink2 { fill: var(--ink); }
+  .name { position: absolute; left: 48px; bottom: 84px; max-width: 440px; margin: 0; font-size: 120px; line-height: .92; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); }
+  .tag { position: absolute; left: 52px; bottom: 28px; max-width: 440px; margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-secondary); }
+</style></head>
+<body>
+<div class="cv">
+<!--
+  blocks: surface-sidebar slab (x480–960, full height) + ultramarine pills (radius-pill) + bubble-incoming pills + note-to-self-bg disc
+  arrangement: one tall sidebar slab bleeding right/top/bottom, with pills stacked on it like a conversation: alternating left (incoming) / right (outgoing)
+  pattern: literal motif, the tail-less chat bubble, drawn as pills (README: "Round, not tailed"); a single ultramarine disc stands in for the unread pill
+  scales: pill height 40 (space-8 + space-2), gaps space-3 (12), inset space-6 (24); rx = half the short side (20)
+-->
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+  <rect class="side" x="480" y="0" width="480" height="288"/>
+  <rect class="tint" x="504" y="24" width="208" height="40" rx="20"/>
+  <rect class="ultra" x="664" y="76" width="272" height="40" rx="20"/>
+  <rect class="tint" x="504" y="128" width="296" height="64" rx="20"/>
+  <rect class="ultra" x="776" y="204" width="160" height="40" rx="20"/>
+  <circle class="wash" cx="540" cy="244" r="28"/>
+  <circle class="ultra" cx="914" cy="34" r="12"/>
+</svg>
+<h1 class="name">Signal</h1>
+<p class="tag">Plain greys, one ultramarine, round bubbles.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Official Signal mark and lockup (logo + wordmark) as supplied with the assignment. Ultramarine ink is #3b45fd (`brand-ultramarine`). Use the white versions on dark or ultramarine grounds and the black versions for single-colour print. Keep clear space of at least half the mark's width on every side, and never recolour or redraw the mark.
