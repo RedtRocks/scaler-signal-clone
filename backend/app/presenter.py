@@ -140,7 +140,11 @@ class Presenter:
             if peer is None:  # a group
                 title, avatar_url = conversation.name or "", conversation.avatar_url
             else:
-                title = nicknames.get(peer.id) or peer.display_name or peer.phone
+                title = (
+                    "Note to Self"
+                    if peer.id == self.viewer_id
+                    else nicknames.get(peer.id) or peer.display_name or peer.phone
+                )
                 avatar_url = peer.avatar_url
             summaries.append(
                 schemas.ConversationSummary(
@@ -236,11 +240,15 @@ class Presenter:
             .join(models.Conversation, models.Conversation.id == Member.conversation_id)
             .where(
                 Member.conversation_id.in_(conversation_ids),
-                Member.user_id != self.viewer_id,
                 models.Conversation.kind == models.ConversationKind.DIRECT,
             )
         )
-        return {conversation_id: user for conversation_id, user in rows}
+        peers: dict[int, models.User] = {}
+        for conversation_id, user in rows:
+            # Note to Self has only the viewer, who then stands in as the peer.
+            if user.id != self.viewer_id or conversation_id not in peers:
+                peers[conversation_id] = user
+        return peers
 
     def _nicknames(self, user_ids: list[int]) -> dict[int, str]:
         if not user_ids:

@@ -14,6 +14,8 @@ import type {
   RequestOtpResponse,
   SearchResults,
   SendMessageBody,
+  Story,
+  StoryBackground,
   UserPublic,
   VerifyOtpResponse,
 } from "./types";
@@ -188,4 +190,9 @@ export const api = {
   deleteMessage: (messageId: Id) => request<void>("DELETE", `/messages/${messageId}`),
   editMessage: (messageId: Id, body: string) => request<Message>("PATCH", `/messages/${messageId}`, { json: { body } }),
   hideMessage: (messageId: Id) => request<void>("POST", `/messages/${messageId}/hide`),
+  listStories: () => request<Story[]>("GET", "/stories"),
+  createStory: (body: string, background: StoryBackground) =>
+    request<Story>("POST", "/stories", { json: { body, background } }),
+  viewStory: (storyId: Id) => request<void>("POST", `/stories/${storyId}/view`),
+  deleteStory: (storyId: Id) => request<void>("DELETE", `/stories/${storyId}`),
 };

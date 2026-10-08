@@ -45,9 +45,8 @@ def _require_users(db: Session, user_ids: Iterable[int]) -> list[User]:
 def get_or_create_direct(db: Session, me: User, other_user_id: int) -> tuple[Conversation, bool]:
     """Return the one Direct Conversation between `me` and the other user, creating it if
     needed. The second value is True when it was just created."""
-    if other_user_id == me.id:
-        raise BadRequest("Note to Self is not supported yet")
-    _require_users(db, [other_user_id])
+    if other_user_id != me.id:
+        _require_users(db, [other_user_id])
     key = Conversation.direct_key_for(me.id, other_user_id)
 
     existing = db.scalar(select(Conversation).where(Conversation.direct_key == key))
@@ -55,7 +54,9 @@ def get_or_create_direct(db: Session, me: User, other_user_id: int) -> tuple[Con
         return existing, False
 
     conversation = Conversation(kind=ConversationKind.DIRECT, direct_key=key, created_by=me.id)
-    conversation.members = [Member(user_id=me.id), Member(user_id=other_user_id)]
+    # Note to Self is a direct conversation with yourself: one member, key "id:id".
+    user_ids = sorted({me.id, other_user_id})
+    conversation.members = [Member(user_id=user_id) for user_id in user_ids]
     db.add(conversation)
     try:
         db.commit()

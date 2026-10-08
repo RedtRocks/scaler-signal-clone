@@ -231,3 +231,23 @@ export type ServerEvent =
 
 export type ServerEventType = ServerEvent["type"];
 export type ServerEventData<T extends ServerEventType> = Extract<ServerEvent, { type: T }>["data"];
+
+export type StoryBackground = "ultramarine" | "crimson" | "forest" | "plum" | "sunset" | "ink";
+
+export interface StoryView {
+  user: UserPublic;
+  viewed_at: IsoTime;
+}
+
+export interface Story {
+  id: Id;
+  author: UserPublic;
+  body: string;
+  background: StoryBackground;
+  created_at: IsoTime;
+  expires_at: IsoTime;
+  /** Always true for my own stories. */
+  viewed: boolean;
+  /** Who viewed it: only on my own stories. */
+  views: StoryView[] | null;
+}

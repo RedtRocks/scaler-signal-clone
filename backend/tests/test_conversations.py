@@ -14,7 +14,7 @@ def test_direct_conversation_is_unique_per_pair(client, signup):
     assert first["my_role"] == "member"
 
 
-def test_direct_with_unknown_user_or_self(client, signup):
+def test_direct_with_unknown_user(client, signup):
     aarav = signup("Aarav")
     assert (
         client.post(
@@ -22,12 +22,18 @@ def test_direct_with_unknown_user_or_self(client, signup):
         ).status_code
         == 404
     )
-    assert (
-        client.post(
-            "/api/conversations/direct", json={"user_id": aarav.id}, headers=aarav.headers
-        ).status_code
-        == 400
-    )
+
+
+def test_note_to_self(client, signup):
+    aarav = signup("Aarav")
+    note = direct(client, aarav, aarav)
+    assert note["title"] == "Note to Self"
+    assert note["member_count"] == 1
+    assert note["peer"]["id"] == aarav.id
+    assert direct(client, aarav, aarav)["id"] == note["id"]
+    message = send(client, aarav, note["id"], "remember the milk")
+    assert message["status"] == "sent"
+    assert summary(client, aarav, note["id"])["unread_count"] == 0
 
 
 def test_non_members_get_404(client, signup):

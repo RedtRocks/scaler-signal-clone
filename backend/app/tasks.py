@@ -9,6 +9,7 @@ from app.db import Database, utcnow
 from app.realtime.notifier import Notifier
 from app.services.attachments import purge_unclaimed
 from app.services.messages import expire_due_messages
+from app.services.stories import delete_expired
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ async def expire_messages_forever(
     unclaimed_ttl_seconds: float,
 ) -> None:
     """Every few seconds, delete messages whose disappearing timer ran out (and their files),
-    tell members, and drop uploads that no message ever claimed."""
+    tell members, drop uploads that no message ever claimed, and delete expired stories."""
     while True:
         await asyncio.sleep(interval_seconds)
         try:
@@ -30,5 +31,6 @@ async def expire_messages_forever(
                 for message in expire_due_messages(session, now, media_dir):
                     await notifier.message_updated(session, message)
                 purge_unclaimed(session, media_dir, now, unclaimed_ttl_seconds)
+                delete_expired(session)
         except Exception:  # Keep the loop alive; one bad run must not stop future expiries.
             logger.exception("Expiring disappearing messages failed")

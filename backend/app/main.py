@@ -18,7 +18,17 @@ from app.errors import DomainError
 from app.realtime import websocket
 from app.realtime.connections import ConnectionManager
 from app.realtime.notifier import Notifier
-from app.routers import attachments, auth, contacts, conversations, me, messages, search, users
+from app.routers import (
+    attachments,
+    auth,
+    contacts,
+    conversations,
+    me,
+    messages,
+    search,
+    stories,
+    users,
+)
 from app.tasks import expire_messages_forever
 
 
@@ -59,7 +69,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def domain_error_handler(_request: Request, error: DomainError) -> JSONResponse:
         return JSONResponse({"detail": error.detail}, status_code=error.status_code)
 
-    for module in (auth, me, attachments, users, contacts, conversations, messages, search, websocket):
+    routers = (auth, me, attachments, users, contacts, conversations, messages, search, stories)
+    for module in (*routers, websocket):
         app.include_router(module.router)
 
     @app.get("/api/health", tags=["health"])

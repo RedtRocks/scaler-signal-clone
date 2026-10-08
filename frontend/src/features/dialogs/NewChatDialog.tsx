@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useDeferredValue, useMemo, useState } from "react";
 import { Modal, SearchField, Spinner } from "@/components/ui";
 import { ApiError, api } from "@/lib/api";
-import { useContactStore, useConversationStore } from "@/store";
+import { useAuthStore, useContactStore, useConversationStore } from "@/store";
 import { useDialogStore } from "./dialogStore";
 import { ActionRow, ContactRow } from "./PersonRow";
 import { looksLikePhone, normalizePhone } from "./phone";
@@ -16,6 +16,7 @@ export function NewChatDialog() {
   const { close, show } = useDialogStore();
   const contacts = useContactStore((s) => s.contacts);
   const openDirect = useConversationStore((s) => s.openDirect);
+  const meId = useAuthStore((s) => s.me?.id);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -77,6 +78,9 @@ export function NewChatDialog() {
         <ul className={styles.list}>
           {!needle ? <ActionRow icon="add-member" label="New group" onClick={() => show("newGroup")} /> : null}
           {!needle ? <ActionRow icon="user" label="Contacts" sub="View and add contacts" onClick={() => show("contacts")} /> : null}
+          {meId !== undefined && "note to self".includes(needle) ? (
+            <ActionRow icon="note" label="Note to Self" sub="Send yourself notes and files" disabled={busy} onClick={() => void start(meId)} />
+          ) : null}
           {phone ? (
             <ActionRow icon="chat" label={`Message ${phone}`} sub="Start a chat by phone number" disabled={busy} onClick={() => void startByPhone(phone)}>
               {busy ? <Spinner size={18} /> : null}

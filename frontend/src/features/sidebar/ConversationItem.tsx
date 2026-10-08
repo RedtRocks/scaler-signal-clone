@@ -1,4 +1,5 @@
 "use client";
+import { avatarKind } from "@/lib/conversationKind";
 
 import { useRef, type MouseEvent, type TouchEvent } from "react";
 import { ContextMenu, ConversationRow, useContextMenu, type MenuEntry } from "@/components/ui";
@@ -84,7 +85,7 @@ export function ConversationItem({
       <ConversationRow
         name={conversation.title}
         avatarSrc={mediaUrl(conversation.avatar_url ?? conversation.peer?.avatar_url ?? null) ?? undefined}
-        kind={conversation.kind === "group" ? "group" : undefined}
+        kind={avatarKind(conversation)}
         time={conversation.last_message_at ? formatListTime(conversation.last_message_at) : ""}
         preview={preview.text}
         sender={preview.sender}

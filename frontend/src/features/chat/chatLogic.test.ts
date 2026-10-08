@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Message } from "@/lib/types";
+import { formatTimer } from "@/lib/format";
 import {
   canDeleteForEveryone,
   findMatches,
@@ -95,5 +96,13 @@ describe("misc", () => {
   it("makes the same safety number for either direction", () => {
     expect(safetyNumber(1, 2)).toEqual(safetyNumber(2, 1));
     expect(safetyNumber(1, 2)).toHaveLength(12);
+  });
+});
+
+describe("headerSubtitle for Note to Self", () => {
+  it("has no presence line, only the timer when set", () => {
+    const base = { isGroup: false, memberCount: 1, left: false, online: false, lastSeenAt: null, typing: undefined, note: true };
+    expect(headerSubtitle({ ...base, timerSeconds: null })).toBe("");
+    expect(headerSubtitle({ ...base, timerSeconds: 3600 })).toBe(formatTimer(3600));
   });
 });

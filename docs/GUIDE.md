@@ -145,7 +145,9 @@ Everything needed is in [`RUNNING.md`](./RUNNING.md): backend and frontend comma
 
 - OTP is fixed at `123456`. There's no SMS.
 - No real end-to-end encryption. Messages are stored in plain text on the server. The UI shows Signal's encryption notice as decoration.
-- Calls, Stories and Linked devices show "Coming soon".
+- **Stories** are built (text stories only): `GET/POST /api/stories`, `POST /api/stories/{id}/view`, `DELETE /api/stories/{id}`. A story lives 24 hours and is shown to everyone you share an active conversation with (the clone's stand-in for Signal's "My Story" audience, since there are no privacy lists). The tab lists My Stories, then unviewed and viewed stories; the viewer plays an author's stories oldest first with progress bars (arrow keys step, Space pauses, Esc closes) and continues into the next person's; your own stories show who viewed them. The expiry loop in `app/tasks.py` deletes expired rows. Photo/video stories and replies are not built.
+- **Note to Self** is a direct conversation whose only member is you (`direct_key` "id:id"). Start it from New chat. The presenter titles it "Note to Self", and the UI uses the note avatar and no presence line.
+- Calls and Linked devices show "Coming soon".
 - Message actions added later: **Forward** (text only, up to 5 chats, sent as a normal message to each), **Edit** (own text messages within 24 hours, `PATCH /api/messages/{id}`, shown as "Edited" by the time) and **Delete for me** (`POST /api/messages/{id}/hide`, a `hidden_messages` row that filters your history only). New nullable columns are added to an existing SQLite file at startup by `Database._add_missing_columns`, so no migration tool is needed.
 - Not built, because the API contract has no endpoint for it: group avatars, voice notes, emoji picker and stickers. The buttons for the last three, and the camera, show a "coming soon" toast. Attachments *are* built (bonus), see 4.1 and 5.1; audio and video are sent as plain downloadable files with no inline player.
 - One account per phone number. A "Session" is one browser login, and logout ends only that one.
