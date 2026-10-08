@@ -1,0 +1,26 @@
+.group {
+  margin: 0 0 var(--space-6);
+}
+
+.title {
+  margin: 0 0 var(--space-2) 8px;
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.card {
+  --sg-icon-knock: var(--ios-card);
+  border-radius: var(--radius-card);
+  background: var(--ios-card);
+  overflow: hidden;
+}
+
+.footer {
+  margin: var(--space-2) var(--space-4) 0;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+}

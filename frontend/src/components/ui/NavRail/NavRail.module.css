@@ -1,0 +1,69 @@
+.rail {
+  --sg-icon-knock: var(--surface-sidebar);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: var(--rail-width);
+  height: 100%;
+  padding: var(--space-3) 0;
+  background: var(--surface-sidebar);
+  border-right: 1px solid var(--divider);
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: none;
+  color: var(--icon);
+  cursor: pointer;
+}
+.item:hover {
+  background: var(--surface-hover);
+}
+.active,
+.active:hover {
+  --sg-icon-knock: var(--surface-selected);
+  background: var(--surface-selected);
+}
+.item:focus-visible,
+.self:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+
+.badge {
+  position: absolute;
+  top: 0;
+  right: 4px;
+}
+
+.foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.self {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  cursor: pointer;
+}

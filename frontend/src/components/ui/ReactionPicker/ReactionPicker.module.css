@@ -1,0 +1,45 @@
+.picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-popover), 0 0 0 0.5px var(--divider);
+}
+
+.emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+.emoji:hover {
+  transform: scale(1.18);
+}
+.emoji:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: -2px;
+}
+.selected {
+  background: var(--surface-selected);
+}
+.more {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-field);
+  color: var(--icon);
+}
+.more:hover {
+  transform: none;
+  background: var(--surface-selected);
+}

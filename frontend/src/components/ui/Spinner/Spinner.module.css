@@ -1,0 +1,20 @@
+.spinner {
+  display: inline-block;
+  flex: none;
+  color: var(--ultramarine);
+  animation: spin 0.8s linear infinite;
+}
+.inherit {
+  color: currentColor;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

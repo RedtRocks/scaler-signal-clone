@@ -1,0 +1,124 @@
+.composer {
+  --sg-icon-knock: var(--surface-pane);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-pane);
+}
+
+.quote {
+  margin: 0 44px 0 44px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 18px;
+  background: var(--surface-composer);
+}
+.field:focus-within {
+  box-shadow: 0 0 0 2px var(--ultramarine);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  height: 36px;
+  max-height: 160px;
+  padding: 8px var(--space-4);
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink);
+  outline: none;
+  resize: none;
+  overflow-y: auto;
+}
+.input::placeholder {
+  color: var(--ink-secondary);
+}
+
+.send {
+  --sg-icon-knock: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--bubble-outgoing);
+  color: var(--bubble-outgoing);
+  cursor: pointer;
+}
+.send:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+.send:disabled {
+  opacity: 0.45;
+}
+
+/* Phone (Figma): + · [Message ☺] · camera · mic; 38px field, 18px text */
+.mobile {
+  padding: var(--space-2) var(--space-3);
+  background: var(--ios-navbar);
+  --sg-icon-knock: var(--ios-navbar);
+}
+.mobile .row {
+  gap: 6px;
+}
+.mobile .field {
+  padding-right: 4px;
+  border-radius: 19px;
+  background: var(--ios-field);
+}
+.mobile .field:focus-within {
+  box-shadow: none;
+}
+.mobile .input {
+  height: var(--ios-field-height);
+  padding: 8px 12px;
+  font-size: 18px;
+  line-height: 22px;
+  letter-spacing: -0.04em;
+}
+.mobile .input::placeholder {
+  color: var(--ios-placeholder);
+}
+.mobile .inner {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 4px;
+}
+.mobile .send {
+  width: 32px;
+  height: 32px;
+  margin: 3px 2px;
+}
+.mobile .quote {
+  margin: 0 40px;
+}
+
+@media (max-width: 599px) {
+  .input {
+    font-size: 18px;
+    letter-spacing: -0.04em;
+  }
+}

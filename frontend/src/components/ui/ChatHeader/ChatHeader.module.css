@@ -1,0 +1,126 @@
+.header {
+  --avatar-ring: var(--surface-pane);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: none;
+  height: var(--header-height);
+  padding: 0 var(--space-4);
+  background: var(--surface-pane);
+  border-bottom: 1px solid var(--divider);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.titleBtn {
+  margin: 0 0 0 -6px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  flex: 0 1 auto;
+}
+.titleBtn:hover {
+  background: var(--surface-hover);
+}
+.titleBtn:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+.nameText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verified {
+  color: var(--ink-secondary);
+}
+
+.sub {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+/* Phone (Figma): 52px, back chevron, 38px avatar, 18px name, no divider */
+:global(.sg-mobile) .header {
+  height: 52px;
+  padding: 0 8px;
+  gap: 7px;
+  border-bottom: 0;
+  background: var(--ios-navbar);
+}
+:global(.sg-mobile) .title {
+  gap: 7px;
+}
+:global(.sg-mobile) .header :global(.sg-avatar) {
+  width: var(--ios-avatar-header) !important;
+  height: var(--ios-avatar-header) !important;
+  font-size: 16px !important;
+}
+:global(.sg-mobile) .name {
+  font-size: 18px;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+@media (max-width: 599px) {
+  .header {
+    height: 52px;
+    padding: 0 8px;
+    gap: 7px;
+    border-bottom: 0;
+    background: var(--ios-navbar);
+  }
+  .title {
+    gap: 7px;
+  }
+  .header :global(.sg-avatar) {
+    width: var(--ios-avatar-header) !important;
+    height: var(--ios-avatar-header) !important;
+    font-size: 16px !important;
+  }
+  .name {
+    font-size: 18px;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+}

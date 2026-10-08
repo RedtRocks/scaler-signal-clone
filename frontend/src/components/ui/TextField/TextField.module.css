@@ -1,0 +1,107 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.label {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--surface-pane);
+  box-shadow: inset 0 0 0 1px var(--divider);
+  transition: box-shadow 120ms ease;
+}
+.field:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ultramarine);
+}
+.invalid,
+.invalid:focus-within {
+  box-shadow: inset 0 0 0 2px var(--alert);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+}
+.input::placeholder {
+  color: var(--ink-tertiary);
+}
+.input:disabled {
+  opacity: 0.6;
+}
+
+.trailing {
+  flex: none;
+  padding-right: var(--space-3);
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+.hint {
+  color: var(--ink-secondary);
+}
+.error {
+  color: var(--alert);
+}
+
+/* Phone: iOS field fill, 44px, 17px text */
+:global(.sg-mobile) .field {
+  min-height: 44px;
+  border-radius: var(--radius-field);
+  background: var(--ios-field);
+  box-shadow: none;
+}
+:global(.sg-mobile) .field:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ultramarine);
+}
+:global(.sg-mobile) .invalid {
+  box-shadow: inset 0 0 0 2px var(--alert);
+}
+:global(.sg-mobile) .input {
+  height: 44px;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+@media (max-width: 599px) {
+  .field {
+    min-height: 44px;
+    border-radius: var(--radius-field);
+    background: var(--ios-field);
+    box-shadow: none;
+  }
+  .field:focus-within {
+    box-shadow: inset 0 0 0 2px var(--ultramarine);
+  }
+  .invalid {
+    box-shadow: inset 0 0 0 2px var(--alert);
+  }
+  .input {
+    height: 44px;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+  }
+}

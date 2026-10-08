@@ -10,3 +10,4 @@ backend/media/
 .env.local
 .pytest_cache/
 .DS_Store
+frontend/.screenshots/

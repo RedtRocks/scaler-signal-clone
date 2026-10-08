@@ -1,0 +1,14 @@
+.popover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  animation: pop 120ms ease-out;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
