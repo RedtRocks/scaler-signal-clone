@@ -74,13 +74,14 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --radius-bubble: 20px;
+  --radius-bubble: 18px;
   --radius-pill: 9999px;
   --radius-bubble-joined: 4px;
   --radius-field: 10px;
   --radius-card: 12px;
   --rail-width: 68px;
   --list-width: 320px;
+  --list-width-narrow: 84px;
   --header-height: 56px;
   --avatar-row: 48px;
   --avatar-header: 32px;
@@ -101,7 +102,7 @@
   color-scheme: dark;
   --surface-pane: #1a1a1a;
   --surface-pane-mobile: #000000;
-  --surface-sidebar: #262626;
+  --surface-sidebar: #2e2e2e;
   --surface-selected: #474747;
   --surface-hover: #363636;
   --surface-field: #363636;

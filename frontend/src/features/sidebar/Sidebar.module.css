@@ -149,3 +149,13 @@
     padding: 0 var(--ios-gutter);
   }
 }
+
+@media (min-width: 600px) and (max-width: 899px) {
+  :global([data-view="pane"]:not(.sg-mobile)) .search,
+  :global([data-view="pane"]:not(.sg-mobile)) .filters,
+  :global([data-view="pane"]:not(.sg-mobile)) .heading,
+  :global([data-view="pane"]:not(.sg-mobile)) .center,
+  :global([data-view="pane"]:not(.sg-mobile)) .phoneOnly {
+    display: none;
+  }
+}

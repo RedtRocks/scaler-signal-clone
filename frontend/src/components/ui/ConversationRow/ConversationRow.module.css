@@ -183,3 +183,13 @@
     --sg-status-bg: var(--surface-pane-mobile);
   }
 }
+
+@media (min-width: 600px) and (max-width: 899px) {
+  :global([data-view="pane"]:not(.sg-mobile)) .row {
+    justify-content: center;
+    padding-inline: 0;
+  }
+  :global([data-view="pane"]:not(.sg-mobile)) .main {
+    display: none;
+  }
+}

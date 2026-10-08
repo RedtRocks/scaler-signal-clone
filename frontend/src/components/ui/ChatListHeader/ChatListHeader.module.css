@@ -96,3 +96,13 @@
     margin-left: auto;
   }
 }
+
+@media (min-width: 600px) and (max-width: 899px) {
+  :global([data-view="pane"]:not(.sg-mobile)) .title,
+  :global([data-view="pane"]:not(.sg-mobile)) .actions > :last-child {
+    display: none;
+  }
+  :global([data-view="pane"]:not(.sg-mobile)) .header {
+    justify-content: center;
+  }
+}
