@@ -154,6 +154,12 @@ class Presenter:
             .where(Member.conversation_id == conversation.id, Member.left_at.is_(None))
             .order_by(Member.joined_at, Member.id)
         )
+        former = self.db.scalars(
+            select(Member)
+            .options(selectinload(Member.user))
+            .where(Member.conversation_id == conversation.id, Member.left_at.is_not(None))
+            .order_by(Member.id)
+        )
         return schemas.ConversationDetail(
             **self.summary(member).model_dump(),
             description=conversation.description,
@@ -162,6 +168,7 @@ class Presenter:
                 schemas.MemberOut(user=self.user(m.user), role=m.role, joined_at=m.joined_at)
                 for m in current
             ],
+            former_members=[self.user(m.user) for m in former],
         )
 
     # --- Batched lookups, each one query keyed by conversation id ------------------------

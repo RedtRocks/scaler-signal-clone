@@ -98,7 +98,7 @@ ConversationSummary = {
   last_message: Message|null, last_message_at, unread_count, muted, pinned, archived,
   left: bool, disappearing_seconds: number|null, my_role: 'admin'|'member'
 }
-ConversationDetail  = ConversationSummary & { description, created_at, members: Member[] }
+ConversationDetail  = ConversationSummary & { description, created_at, members: Member[], former_members: UserPublic[] }
 Member          = { user: UserPublic, role: 'admin'|'member', joined_at }
 Message = {
   id, conversation_id, client_id, sender_id|null, kind: 'text'|'system', body, system_event|null,

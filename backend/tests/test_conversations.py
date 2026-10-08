@@ -164,6 +164,17 @@ def test_last_admin_leaving_promotes_oldest_member(client, signup):
     assert events == [{"type": "admin_granted", "user_id": maya.id}, {"type": "member_left"}]
 
 
+def test_detail_lists_former_members_so_old_messages_keep_names(client, signup):
+    aarav, maya = signup("Aarav"), signup("Maya")
+    g = group(client, aarav, "Climbers", maya)
+    url = f"/api/conversations/{g['id']}"
+    client.delete(f"{url}/members/{maya.id}", headers=maya.headers)
+
+    detail = client.get(url, headers=aarav.headers).json()
+    assert [m["user"]["id"] for m in detail["members"]] == [aarav.id]
+    assert [u["id"] for u in detail["former_members"]] == [maya.id]
+
+
 def test_readding_a_member_clears_left(client, signup):
     aarav, maya = signup("Aarav"), signup("Maya")
     g = group(client, aarav, "Climbers", maya)

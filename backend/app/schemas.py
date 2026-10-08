@@ -192,6 +192,8 @@ class ConversationDetail(ConversationSummary):
     description: str | None
     created_at: UtcDateTime
     members: list[MemberOut]
+    # People who left or were removed. Old messages and system rows still need their names.
+    former_members: list[UserPublic] = []
 
 
 class DirectCreate(BaseModel):
