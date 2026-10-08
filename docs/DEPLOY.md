@@ -6,15 +6,17 @@ The backend image (`backend/Dockerfile`) keeps the database at `/data/signal.db`
 
 ## 1. Backend on Railway
 1. In Railway: **New Project > Deploy from GitHub repo**, pick `scaler-signal-clone`.
-2. Open the service's **Settings**: set **Root Directory** to `backend`. Railway then reads `backend/railway.json` and builds the Dockerfile.
-3. Right-click the service (or use **+ Create**) > **Volume**, attach it to the service with mount path **`/data`**.
-4. **Settings > Networking > Generate Domain**. Note the URL, e.g. `https://signal-clone-api.up.railway.app`. `/docs` on it shows the API.
+2. Service **Settings**: set **Root Directory** to `backend`. Railway builds `backend/Dockerfile` (it always uses a Dockerfile when it finds one). No config file is needed: Railway no longer lets new services use `railway.json`.
+3. Service **Variables**: add `PORT` = `8000`.
+4. Right-click the canvas > **Volume**, attach it to the service with mount path **`/data`**.
+5. Optional: **Settings > Deploy > Healthcheck Path** = `/docs`.
+6. **Settings > Networking > Generate Domain**, target port `8000`. Note the URL, e.g. `https://signal-clone-api.up.railway.app`. `/docs` on it shows the API.
 
 ## 1 (alternative). Backend on Fly.io
-From `backend/`, with the `fly` CLI logged in:
+From `backend/`, with the `fly` CLI logged in. First change `app` in `backend/fly.toml` to a unique name (region is `sin`, Singapore; Fly has no India region):
 ```bash
-fly launch --copy-config --no-deploy        # keeps backend/fly.toml; choose a unique app name
-fly volumes create signal_data --size 1     # same region as the app
+fly apps create <app-name>
+fly volumes create signal_data --size 1 --region sin -a <app-name>
 fly deploy
 ```
 The URL is `https://<app-name>.fly.dev`.

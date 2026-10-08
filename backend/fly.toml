@@ -1,6 +1,6 @@
 # Fly.io config for the backend (alternative to Railway). See docs/DEPLOY.md.
 app = "signal-clone-api"
-primary_region = "bom"
+primary_region = "sin"
 
 [build]
   dockerfile = "Dockerfile"
