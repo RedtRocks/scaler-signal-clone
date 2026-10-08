@@ -75,6 +75,17 @@ export function headerSubtitle(input: SubtitleInput, now: Date = new Date()): st
 export const TIMER_CHOICES: (number | null)[] = [null, 30, 300, 3_600, 28_800, 86_400, 604_800];
 
 /** Whether a message can still be deleted for everyone: mine, stored, not already deleted. */
+const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** My own stored text message with text, sent less than 24 hours ago (the server enforces the same). */
+export function canEdit(message: Message, meId: Id | undefined, now = Date.now()): boolean {
+  return (
+    canDeleteForEveryone(message, meId) &&
+    Boolean(message.body) &&
+    now - new Date(message.created_at).getTime() < EDIT_WINDOW_MS
+  );
+}
+
 export function canDeleteForEveryone(message: Message, meId: Id | undefined): boolean {
   return message.kind === "text" && message.sender_id === meId && message.id > 0 && !message.deleted;
 }

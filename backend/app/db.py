@@ -8,7 +8,7 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 
 from fastapi import Request
-from sqlalchemy import Engine, create_engine, event
+from sqlalchemy import Engine, create_engine, event, inspect, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 
@@ -35,6 +35,23 @@ class Database:
         from app import models  # noqa: F401
 
         Base.metadata.create_all(self.engine)
+        self._add_missing_columns()
+
+    def _add_missing_columns(self) -> None:
+        """create_all never alters an existing table. Add nullable columns introduced after a
+        database was first created, so an existing SQLite file keeps working without a migration."""
+        inspector = inspect(self.engine)
+        with self.engine.begin() as connection:
+            for table in Base.metadata.sorted_tables:
+                if not inspector.has_table(table.name):
+                    continue
+                present = {column["name"] for column in inspector.get_columns(table.name)}
+                for column in table.columns:
+                    if column.name not in present and column.nullable:
+                        kind = column.type.compile(dialect=self.engine.dialect)
+                        connection.execute(
+                            text(f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {kind}')
+                        )
 
     def drop_all(self) -> None:
         from app import models  # noqa: F401

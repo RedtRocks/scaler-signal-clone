@@ -186,4 +186,6 @@ export const api = {
   setReaction: (messageId: Id, emoji: string) => request<void>("PUT", `/messages/${messageId}/reaction`, { json: { emoji } }),
   removeReaction: (messageId: Id) => request<void>("DELETE", `/messages/${messageId}/reaction`),
   deleteMessage: (messageId: Id) => request<void>("DELETE", `/messages/${messageId}`),
+  editMessage: (messageId: Id, body: string) => request<Message>("PATCH", `/messages/${messageId}`, { json: { body } }),
+  hideMessage: (messageId: Id) => request<void>("POST", `/messages/${messageId}/hide`),
 };

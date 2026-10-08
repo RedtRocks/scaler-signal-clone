@@ -55,6 +55,11 @@ export function mergePage(list: Message[], newestFirst: Message[]): Message[] {
 }
 
 /** Applies message.updated (reactions, delete, expiry) and refreshes replies that quote it. */
+/** Drops one message (delete for me). */
+export function removeMessage(list: Message[], messageId: Id): Message[] {
+  return list.some((m) => m.id === messageId) ? list.filter((m) => m.id !== messageId) : list;
+}
+
 export function applyMessageUpdate(list: Message[], updated: Message): Message[] {
   if (!list.some((message) => message.id === updated.id)) return list;
   return upsertMessage(list, updated).map((message) =>

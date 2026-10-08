@@ -90,7 +90,7 @@ export const MessageRow = memo(function MessageRow({
       <MessageBubble
         direction={direction}
         position={position}
-        time={formatBubbleTime(message.created_at)}
+        time={message.edited && !message.deleted ? `Edited · ${formatBubbleTime(message.created_at)}` : formatBubbleTime(message.created_at)}
         status={message.status === "failed" || message.status === null ? "sending" : message.status}
         expires={message.expires_at !== null}
         deleted={message.deleted}

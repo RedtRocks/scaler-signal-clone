@@ -36,7 +36,9 @@ import {
   useToastStore,
 } from "@/store";
 import { ApiError } from "@/lib/api";
-import { firstUnreadMessageId, myReaction } from "./chatLogic";
+import { useDialogStore } from "@/features/dialogs/dialogStore";
+import { canDeleteForEveryone, firstUnreadMessageId, myReaction } from "./chatLogic";
+import { EditMessageModal } from "./EditMessageModal";
 import { useChatNames } from "./useChatNames";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { messageMenu, type MessageHandlers } from "./messageMenu";
@@ -90,6 +92,7 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
   const [menu, setMenu] = useState<{ message: Message; at: { x: number; y: number }; items: MenuEntry[] } | null>(null);
   const [reactionsOf, setReactionsOf] = useState<Message | null>(null);
   const [deleting, setDeleting] = useState<Message | null>(null);
+  const [editing, setEditing] = useState<Message | null>(null);
 
   // The unread divider is fixed when the first page arrives, so later messages do not move it.
   const [dividerId, setDividerId] = useState<Id | null | undefined>(undefined);
@@ -202,7 +205,9 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
           .then(() => push("Copied to clipboard"))
           .catch(() => push("Couldn't copy the text."));
       },
-      deleteForEveryone: setDeleting,
+      forward: (message) => useDialogStore.getState().forward(message),
+      edit: setEditing,
+      remove: setDeleting,
       retry: (message) => {
         if (message.client_id) void useMessageStore.getState().retry(id, message.client_id);
       },
@@ -216,15 +221,13 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
     return base;
   }, [id, meId, onReply, push, jumpTo]);
 
-  const confirmDelete = () => {
+  const confirmDelete = (everyone: boolean) => {
     const message = deleting;
     setDeleting(null);
-    if (message) {
-      useMessageStore
-        .getState()
-        .deleteForEveryone(message.id)
-        .catch((error) => push(errorText(error, "Couldn't delete the message.")));
-    }
+    if (!message) return;
+    const store = useMessageStore.getState();
+    const request = everyone ? store.deleteForEveryone(message.id) : store.deleteForMe(message);
+    request.catch((error) => push(errorText(error, "Couldn't delete the message.")));
   };
 
   const renderItem = (item: TimelineItem) => {
@@ -341,16 +344,25 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
             <Button variant="secondary" onClick={() => setDeleting(null)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete for everyone
+            <Button variant={deleting && canDeleteForEveryone(deleting, meId) ? "secondary" : "destructive"} onClick={() => confirmDelete(false)}>
+              Delete for me
             </Button>
+            {deleting && canDeleteForEveryone(deleting, meId) ? (
+              <Button variant="destructive" onClick={() => confirmDelete(true)}>
+                Delete for everyone
+              </Button>
+            ) : null}
           </>
         }
       >
         <p className={styles.confirmText}>
-          This message will be deleted for everyone in this chat. They will see that you deleted a message.
+          {deleting && canDeleteForEveryone(deleting, meId)
+            ? "Delete for me removes it from this device only. Delete for everyone removes it for everyone in this chat, and they will see that you deleted a message."
+            : "This message will be removed from your chat history. Others in the chat will still see it."}
         </p>
       </Modal>
+
+      {editing ? <EditMessageModal key={editing.id} message={editing} onClose={() => setEditing(null)} /> : null}
     </div>
   );
 }

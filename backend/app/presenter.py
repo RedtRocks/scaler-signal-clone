@@ -89,6 +89,7 @@ class Presenter:
             created_at=message.created_at,
             expires_at=message.expires_at,
             deleted=message.is_deleted,
+            edited=message.is_edited,
             status=status,
             reactions=[
                 schemas.ReactionOut(emoji=r.emoji, user_id=r.user_id) for r in message.reactions
