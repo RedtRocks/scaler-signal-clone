@@ -1,0 +1,350 @@
+{
+ "v": 3,
+ "assetGroups": {
+  "Logos": {
+   "files": {
+    "Signal-Lockup-Black.svg": {
+     "blob": "61564f57548a9cd100c12f6ffef5b271",
+     "name": "Signal-Lockup-Black.svg",
+     "size": 5206,
+     "type": "image/svg+xml"
+    },
+    "Signal-Lockup-Ultramarine.svg": {
+     "blob": "115f49c05976459a8af68e9ab1ddb5ae",
+     "name": "Signal-Lockup-Ultramarine.svg",
+     "size": 5209,
+     "type": "image/svg+xml"
+    },
+    "Signal-Lockup-White.svg": {
+     "blob": "b5dbac437c9b4fe2fd38ceda7fbf8394",
+     "name": "Signal-Lockup-White.svg",
+     "size": 5206,
+     "type": "image/svg+xml"
+    },
+    "Signal-Logo-Black.svg": {
+     "blob": "baa3d15fa8e54c98b8a44b6fab5e97c5",
+     "name": "Signal-Logo-Black.svg",
+     "size": 3124,
+     "type": "image/svg+xml"
+    },
+    "Signal-Logo-Ultramarine.svg": {
+     "blob": "f0bf03319ba4547a8b2948eee0ec18b9",
+     "name": "Signal-Logo-Ultramarine.svg",
+     "size": 3127,
+     "type": "image/svg+xml"
+    },
+    "Signal-Logo-White.svg": {
+     "blob": "d7ea66474c431688450329a7c286d9c8",
+     "name": "Signal-Logo-White.svg",
+     "size": 3124,
+     "type": "image/svg+xml"
+    },
+    "Signal-Logo-White_on_Ultramarine.svg": {
+     "blob": "5aeb29e17e05cdd44d87f270ba11484c",
+     "name": "Signal-Logo-White_on_Ultramarine.svg",
+     "size": 3153,
+     "type": "image/svg+xml"
+    }
+   },
+   "name": "Logos",
+   "order": [
+    "Signal-Lockup-Ultramarine.svg",
+    "Signal-Lockup-Black.svg",
+    "Signal-Lockup-White.svg",
+    "Signal-Logo-Ultramarine.svg",
+    "Signal-Logo-Black.svg",
+    "Signal-Logo-White.svg",
+    "Signal-Logo-White_on_Ultramarine.svg"
+   ],
+   "tile": "l"
+  },
+  "Illustrations": {
+   "name": "Illustrations",
+   "tile": "l",
+   "order": [
+    "get-started-appearance.svg",
+    "get-started-invite-friends.svg",
+    "get-started-new-group.svg",
+    "avatar-group-default.svg"
+   ],
+   "files": {
+    "get-started-appearance.svg": {
+     "name": "get-started-appearance.svg",
+     "blob": "d7d81284eb7696862f0d32ccd468a09d",
+     "size": 85006,
+     "type": "image/svg+xml"
+    },
+    "get-started-invite-friends.svg": {
+     "name": "get-started-invite-friends.svg",
+     "blob": "4f775c307e84dc12a03217ca86e68c91",
+     "size": 53560,
+     "type": "image/svg+xml"
+    },
+    "get-started-new-group.svg": {
+     "name": "get-started-new-group.svg",
+     "blob": "766e0d9d88192c2b75da57e76fcf836d",
+     "size": 123912,
+     "type": "image/svg+xml"
+    },
+    "avatar-group-default.svg": {
+     "name": "avatar-group-default.svg",
+     "blob": "754816557b42e3d39505833e57bba752",
+     "size": 3430,
+     "type": "image/svg+xml"
+    }
+   }
+  },
+  "Icons": {
+   "name": "Icons",
+   "tile": "s",
+   "order": [
+    "add-member.svg",
+    "back.svg",
+    "block.svg",
+    "camera-composer.svg",
+    "camera.svg",
+    "chat-color.svg",
+    "chevron-right.svg",
+    "compose.svg",
+    "contact.svg",
+    "disappearing.svg",
+    "dismiss.svg",
+    "mic.svg",
+    "muted.svg",
+    "permissions.svg",
+    "phone.svg",
+    "plus.svg",
+    "receipt-read-outgoing.svg",
+    "receipt-read.svg",
+    "requests.svg",
+    "safety-number.svg",
+    "search-action.svg",
+    "search.svg",
+    "send.svg",
+    "sounds.svg",
+    "sticker.svg",
+    "tab-chats.svg",
+    "tab-stories.svg",
+    "verified.svg",
+    "video-header.svg",
+    "video.svg"
+   ],
+   "files": {
+    "add-member.svg": {
+     "name": "add-member.svg",
+     "blob": "9ecc29f591e3a587f61413bf31e5405f",
+     "size": 289,
+     "type": "image/svg+xml"
+    },
+    "back.svg": {
+     "name": "back.svg",
+     "blob": "756f2d5bff0cafc000a1c80888fc426d",
+     "size": 720,
+     "type": "image/svg+xml"
+    },
+    "block.svg": {
+     "name": "block.svg",
+     "blob": "e387d6397d54654ac58c008bc532cacb",
+     "size": 5387,
+     "type": "image/svg+xml"
+    },
+    "camera-composer.svg": {
+     "name": "camera-composer.svg",
+     "blob": "415c7bce05fdca7a716ed48820edd2cb",
+     "size": 1365,
+     "type": "image/svg+xml"
+    },
+    "camera.svg": {
+     "name": "camera.svg",
+     "blob": "cf7b81e61e1a675511b8ae7db4a222ad",
+     "size": 1368,
+     "type": "image/svg+xml"
+    },
+    "chat-color.svg": {
+     "name": "chat-color.svg",
+     "blob": "34504eea7237c6a5b439f37e12d0b934",
+     "size": 2811,
+     "type": "image/svg+xml"
+    },
+    "chevron-right.svg": {
+     "name": "chevron-right.svg",
+     "blob": "9e7f19cd31b9ea27365264e8effb9d08",
+     "size": 665,
+     "type": "image/svg+xml"
+    },
+    "compose.svg": {
+     "name": "compose.svg",
+     "blob": "1d603d92c22876c8b4b55e45bbac5248",
+     "size": 2404,
+     "type": "image/svg+xml"
+    },
+    "contact.svg": {
+     "name": "contact.svg",
+     "blob": "22f73bdb345dc79ac26bb04d1b9d3641",
+     "size": 1774,
+     "type": "image/svg+xml"
+    },
+    "disappearing.svg": {
+     "name": "disappearing.svg",
+     "blob": "a2a7b2b318bd808cf4378b3a160e48e3",
+     "size": 2026,
+     "type": "image/svg+xml"
+    },
+    "dismiss.svg": {
+     "name": "dismiss.svg",
+     "blob": "ed63072f0ddc0d5207be480768565bd4",
+     "size": 1129,
+     "type": "image/svg+xml"
+    },
+    "mic.svg": {
+     "name": "mic.svg",
+     "blob": "6639e5f6a25ad55c7b6b46f3612fb6bc",
+     "size": 826,
+     "type": "image/svg+xml"
+    },
+    "muted.svg": {
+     "name": "muted.svg",
+     "blob": "b8d3da6032d103392bac3a47b63d9d75",
+     "size": 2015,
+     "type": "image/svg+xml"
+    },
+    "permissions.svg": {
+     "name": "permissions.svg",
+     "blob": "4eee0644954dc67e03e86c4d912eaf5e",
+     "size": 2041,
+     "type": "image/svg+xml"
+    },
+    "phone.svg": {
+     "name": "phone.svg",
+     "blob": "d3bace449331883583261aff73ccaf98",
+     "size": 1625,
+     "type": "image/svg+xml"
+    },
+    "plus.svg": {
+     "name": "plus.svg",
+     "blob": "8d11a8219fd9b8dadd14cb8df3858418",
+     "size": 618,
+     "type": "image/svg+xml"
+    },
+    "receipt-read-outgoing.svg": {
+     "name": "receipt-read-outgoing.svg",
+     "blob": "675c5de88701e387f2b52014dea96712",
+     "size": 1889,
+     "type": "image/svg+xml"
+    },
+    "receipt-read.svg": {
+     "name": "receipt-read.svg",
+     "blob": "35ecc119e333599261e560dd347ea99e",
+     "size": 1889,
+     "type": "image/svg+xml"
+    },
+    "requests.svg": {
+     "name": "requests.svg",
+     "blob": "f226011ef53004d56099d79b0495217b",
+     "size": 3335,
+     "type": "image/svg+xml"
+    },
+    "safety-number.svg": {
+     "name": "safety-number.svg",
+     "blob": "57aaf11ae27312f15c8c1d453d3ff873",
+     "size": 1847,
+     "type": "image/svg+xml"
+    },
+    "search-action.svg": {
+     "name": "search-action.svg",
+     "blob": "41f799154958968a721f07114d0c277d",
+     "size": 718,
+     "type": "image/svg+xml"
+    },
+    "search.svg": {
+     "name": "search.svg",
+     "blob": "73ff02a97192544e574241864aed9985",
+     "size": 775,
+     "type": "image/svg+xml"
+    },
+    "send.svg": {
+     "name": "send.svg",
+     "blob": "18e86d38ba0f81b826402682048be6b6",
+     "size": 1105,
+     "type": "image/svg+xml"
+    },
+    "sounds.svg": {
+     "name": "sounds.svg",
+     "blob": "15c3f157c213949dfbe6587ed17cc3ab",
+     "size": 1973,
+     "type": "image/svg+xml"
+    },
+    "sticker.svg": {
+     "name": "sticker.svg",
+     "blob": "a8c7d800f83f4fd8ed95edc0c452426d",
+     "size": 785,
+     "type": "image/svg+xml"
+    },
+    "tab-chats.svg": {
+     "name": "tab-chats.svg",
+     "blob": "4db7d51434ffed6010af846a745862c5",
+     "size": 533,
+     "type": "image/svg+xml"
+    },
+    "tab-stories.svg": {
+     "name": "tab-stories.svg",
+     "blob": "ceefab1c1328af84090dc51022d4e82a",
+     "size": 1815,
+     "type": "image/svg+xml"
+    },
+    "verified.svg": {
+     "name": "verified.svg",
+     "blob": "27bdbf476abb2e897edf406412aaeb62",
+     "size": 1781,
+     "type": "image/svg+xml"
+    },
+    "video-header.svg": {
+     "name": "video-header.svg",
+     "blob": "41993fb0b20d1dc989d56f2b12c8acf8",
+     "size": 930,
+     "type": "image/svg+xml"
+    },
+    "video.svg": {
+     "name": "video.svg",
+     "blob": "8262ca1f632469e5da98eac6b6085964",
+     "size": 1751,
+     "type": "image/svg+xml"
+    }
+   }
+  }
+ },
+ "blobs": {},
+ "createdOnFiles": {
+  "at": "2026-10-08T12:53:16Z",
+  "v": 1
+ },
+ "docs": {
+  "readme": "project/README.md",
+  "sections": []
+ },
+ "groups": [
+  "Logos",
+  "Icons",
+  "Illustrations"
+ ],
+ "lastChange": {
+  "by": "Aarav Dudeja",
+  "at": "2026-10-08T13:10:14Z",
+  "via": "Claude (cowork)",
+  "note": "Rebuilt against the Figma file: exact variables, SF Pro type scale, radii, Figma icon vectors, phone components"
+ },
+ "layout": "files",
+ "libraries": [
+  {
+   "name": "react",
+   "version": "18"
+  },
+  {
+   "name": "react-dom",
+   "version": "18"
+  }
+ ],
+ "namespace": "SignalUI",
+ "sections": {},
+ "title": "Signal"
+}

@@ -1,0 +1,14 @@
+<!-- @dsCard group="Chat" height=900 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>MessageBubble</title>
+<style>body{padding:16px;background:var(--surface-pane)} .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap} .col{display:flex;flex-direction:column;gap:6px} .lbl{font-size:12px;color:var(--ink-secondary);margin:0 0 6px} .phone{width:390px;background:var(--surface-pane-mobile)} .pair{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var S=window.SignalUI,h=React.createElement;
+function lbl(t){return h("p",{className:"lbl"},t)}
+ReactDOM.createRoot(document.getElementById("root")).render(h("div",{className:"pair"},h("div",{style:{width:520}},lbl("Desktop"),h(S.MessageBubble,{direction:"outgoing",time:"30m",status:"read"},"I’m on my way! What’s the address?"),h(S.MessageBubble,{direction:"incoming",time:"25m",expires:true},"We’re at 118 68th Ave."),h(S.MessageBubble,{direction:"outgoing",time:"20m",status:"delivered",expires:true},"Is there a buzzer? Don’t want to ruin the surprise"),h(S.MessageBubble,{direction:"incoming",time:"18m",reaction:"💯"},"Buzz 2F if you get here before 7pm otherwise text me and I’ll come down to get you"),h(S.MessageBubble,{direction:"outgoing",time:"12m",status:"sent",chatColor:"var(--chat-color-crimson)"},"Remind me, who was João?"),h(S.MessageBubble,{direction:"incoming",sender:"Mom",senderColor:"green",time:"7m",position:"first"},"Look at these old photos I found"),h(S.MessageBubble,{direction:"incoming",sender:"Mom",senderColor:"green",time:"7m",position:"last"},"From when we lived in Madrid"),h(S.MessageBubble,{direction:"incoming",sender:"Julian Rocha",senderColor:"indigo",time:"3m",quote:{author:"Mom",text:"Look at these old photos I found"}},"That’s Dad’s friend from LA!"),h(S.MessageBubble,{direction:"outgoing",time:"now",status:"sending"},"Thanks!")),h("div",{className:"phone sg-mobile",style:{padding:"12px 16px"}},lbl("Phone (Figma Output 2)"),h(S.MessageBubble,{direction:"outgoing",time:"3m",status:"read",position:"first"},"Hi Maya, thanks for the add! I will be reaching Rachel’s place in about 5 minutes, where are you at?"),h(S.MessageBubble,{direction:"outgoing",time:"2m",status:"read",position:"last"},"Can’t wait to meet everyone!"),h(S.MessageBubble,{direction:"incoming",time:"1m",position:"first"},"Front door is open"),h(S.MessageBubble,{direction:"incoming",time:"1m",position:"last"},"Come straight up 🎈"),h(S.TypingIndicator,null))));
+</script>
+</body>
+</html>

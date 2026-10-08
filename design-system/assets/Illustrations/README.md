@@ -1,0 +1,1 @@
+Art from the Figma 'Get started' cards (New group, Invite friends, Appearance) and the default group avatar, exported as SVG. Show the card art on `ios-illustration-bg` #f0f3fb with `object-fit: cover`. The blue in the art is drawn into the files.
