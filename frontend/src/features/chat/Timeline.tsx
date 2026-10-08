@@ -36,6 +36,7 @@ import {
   useToastStore,
 } from "@/store";
 import { ApiError } from "@/lib/api";
+import { useDialogStore } from "@/features/dialogs/dialogStore";
 import { firstUnreadMessageId, myReaction } from "./chatLogic";
 import { useChatNames } from "./useChatNames";
 import { MessageContextMenu } from "./MessageContextMenu";
@@ -202,6 +203,7 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
           .then(() => push("Copied to clipboard"))
           .catch(() => push("Couldn't copy the text."));
       },
+      forward: (message) => useDialogStore.getState().forward(message),
       deleteForEveryone: setDeleting,
       retry: (message) => {
         if (message.client_id) void useMessageStore.getState().retry(id, message.client_id);

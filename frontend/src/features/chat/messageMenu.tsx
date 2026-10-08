@@ -7,6 +7,7 @@ export interface MessageHandlers {
   reply: (message: Message) => void;
   react: (message: Message, emoji: string) => void;
   copy: (message: Message) => void;
+  forward: (message: Message) => void;
   deleteForEveryone: (message: Message) => void;
   retry: (message: Message) => void;
   showReactions: (message: Message) => void;
@@ -16,12 +17,15 @@ export interface MessageHandlers {
   openMenu: (message: Message, at: { x: number; y: number }) => void;
 }
 
-/** Reply, copy and delete: shared by the hover bar's ⋯ menu and the right-click / long-press menu. */
+/** Reply, copy, forward and delete: shared by the hover bar's ⋯ menu and the right-click / long-press menu. */
 export function messageMenu(message: Message, handlers: MessageHandlers, meId: number | undefined): MenuEntry[] {
   const items: MenuEntry[] = [
     { label: "Reply", icon: "reply", onSelect: () => handlers.reply(message) },
   ];
   if (message.body) items.push({ label: "Copy text", icon: "copy", onSelect: () => handlers.copy(message) });
+  if (message.body && !message.deleted && message.id > 0) {
+    items.push({ label: "Forward", icon: "forward", onSelect: () => handlers.forward(message) });
+  }
   if (canDeleteForEveryone(message, meId)) {
     items.push("separator", {
       label: "Delete for everyone",

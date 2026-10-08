@@ -2,6 +2,7 @@
 
 import { ContactsDialog } from "./ContactsDialog";
 import { useDialogStore } from "./dialogStore";
+import { ForwardDialog } from "./ForwardDialog";
 import { NewChatDialog } from "./NewChatDialog";
 import { NewGroupDialog } from "./NewGroupDialog";
 import { ShortcutsDialog } from "./ShortcutsDialog";
@@ -18,6 +19,8 @@ export function DialogHost() {
       return <ContactsDialog />;
     case "shortcuts":
       return <ShortcutsDialog />;
+    case "forward":
+      return <ForwardDialog />;
     default:
       return null;
   }
