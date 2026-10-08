@@ -30,13 +30,15 @@ export interface AppShellProps {
   tabBar?: ReactNode;
   /** Phone only: which single column is visible. Desktop always shows all three. */
   mobileView?: "list" | "pane";
+  /** Phone only: also show the TabBar under the pane (Calls, Stories), so the user can switch tabs back. */
+  tabBarInPane?: boolean;
   /** Force phone layout at any width (adds .sg-mobile). For previews. */
   forceMobile?: boolean;
   className?: string;
 }
 
 /** Desktop: rail 68 | list 320 | pane. Phone (<600px): list+TabBar or pane, switched by `mobileView`. */
-export function AppShell({ rail, list, pane, tabBar, mobileView = "list", forceMobile, className }: AppShellProps) {
+export function AppShell({ rail, list, pane, tabBar, mobileView = "list", tabBarInPane, forceMobile, className }: AppShellProps) {
   return (
     <div className={clsx(styles.shell, forceMobile && "sg-mobile", className)} data-view={mobileView}>
       {rail ? <div className={styles.rail}>{rail}</div> : null}
@@ -44,7 +46,10 @@ export function AppShell({ rail, list, pane, tabBar, mobileView = "list", forceM
         <div className={styles.listBody}>{list}</div>
         {tabBar ? <div className={styles.tabBar}>{tabBar}</div> : null}
       </section>
-      <main className={styles.pane}>{pane}</main>
+      <main className={styles.pane}>
+        {pane}
+        {tabBarInPane && tabBar ? <div className={styles.paneTabBar}>{tabBar}</div> : null}
+      </main>
     </div>
   );
 }
