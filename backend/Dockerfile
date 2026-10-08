@@ -8,12 +8,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 
-# SQLite file and uploaded avatars live in /data; mount a volume there to keep them.
+# SQLite file and uploads live in /data. Attach a volume there to keep them (Railway volume,
+# Fly mount, or the compose named volume). No VOLUME instruction: Railway rejects it.
 ENV DATABASE_URL=sqlite:////data/signal.db \
     MEDIA_DIR=/data/media \
     ALLOWED_ORIGINS=http://localhost:3000
 RUN mkdir -p /data/media
-VOLUME /data
 
 EXPOSE 8000
 # Seeds the demo data when the database file does not exist yet (first start on a new volume).
