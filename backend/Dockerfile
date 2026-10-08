@@ -16,5 +16,6 @@ RUN mkdir -p /data/media
 VOLUME /data
 
 EXPOSE 8000
-# SEED_ON_START=1 resets the database to the demo data before serving.
-CMD ["sh", "-c", "if [ \"$SEED_ON_START\" = \"1\" ]; then python -m app.seed; fi; exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Seeds the demo data when the database file does not exist yet (first start on a new volume).
+# SEED_ON_START=1 forces a reset to the demo data on every start.
+CMD ["sh", "-c", "if [ \"$SEED_ON_START\" = \"1\" ] || [ ! -f /data/signal.db ]; then python -m app.seed; fi; exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

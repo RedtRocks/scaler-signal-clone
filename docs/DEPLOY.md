@@ -1,21 +1,30 @@
 # Deploying the demo
 
-The backend (FastAPI, SQLite, WebSockets) runs on Render from `render.yaml`; the frontend (Next.js) runs on Vercel. Both have free plans.
+Frontend on **Vercel**. Backend on **Railway** (or Fly.io) with a **persistent volume** at `/data` for the SQLite file and uploads.
 
-## 1. Backend on Render
-1. In Render, choose **New > Blueprint** and pick this repository. Render reads `render.yaml` and builds `backend/Dockerfile`.
-2. Leave `ALLOWED_ORIGINS` empty for now; it is filled in step 3.
-3. When the service is live, note its URL, for example `https://signal-clone-api.onrender.com`. Opening `/docs` there shows the API.
+The backend image (`backend/Dockerfile`) keeps the database at `/data/signal.db` and files at `/data/media`, listens on `$PORT`, and seeds the demo data on its first start (when `/data/signal.db` does not exist yet). Set `SEED_ON_START=1` only if you want a reset to the demo data on every start.
 
-The free plan has no persistent disk, so `SEED_ON_START=1` resets to the demo data whenever the service restarts or wakes from sleep (the first request after 15 idle minutes takes about a minute). For data that survives restarts, use a paid plan with a disk mounted at `/data` and set `SEED_ON_START=0` after the first start.
+## 1. Backend on Railway
+1. In Railway: **New Project > Deploy from GitHub repo**, pick `scaler-signal-clone`.
+2. Open the service's **Settings**: set **Root Directory** to `backend`. Railway then reads `backend/railway.json` and builds the Dockerfile.
+3. Right-click the service (or use **+ Create**) > **Volume**, attach it to the service with mount path **`/data`**.
+4. **Settings > Networking > Generate Domain**. Note the URL, e.g. `https://signal-clone-api.up.railway.app`. `/docs` on it shows the API.
+
+## 1 (alternative). Backend on Fly.io
+From `backend/`, with the `fly` CLI logged in:
+```bash
+fly launch --copy-config --no-deploy        # keeps backend/fly.toml; choose a unique app name
+fly volumes create signal_data --size 1     # same region as the app
+fly deploy
+```
+The URL is `https://<app-name>.fly.dev`.
 
 ## 2. Frontend on Vercel
-1. **Add New > Project**, import this repository, and set **Root Directory** to `frontend`.
-2. Add the environment variable `NEXT_PUBLIC_API_URL` = the Render URL (no trailing slash). The WebSocket URL is derived from it (`https` becomes `wss`).
+1. **Add New > Project**, import this repository, set **Root Directory** to `frontend`.
+2. Add the environment variable `NEXT_PUBLIC_API_URL` = the backend URL (no trailing slash). The WebSocket URL is derived from it (`https` becomes `wss`).
 3. Deploy, and note the Vercel URL.
 
 ## 3. Connect them
-In Render, set `ALLOWED_ORIGINS` to the Vercel URL (comma-separate several) and redeploy. Then open the Vercel URL and sign in with `+15550000001` and OTP `123456`.
+Set `ALLOWED_ORIGINS` on the backend to the Vercel URL (Railway: service **Variables**; Fly: `fly secrets set ALLOWED_ORIGINS=https://…vercel.app`), and let it redeploy. Open the Vercel URL and sign in with `+15550000001`, OTP `123456`.
 
-## Alternatives
-Any host that runs a Docker container with WebSockets works for the backend (Railway, Fly.io); mount a volume at `/data` to keep the database. `docker compose up --build` runs both services on one machine.
+`docker compose up --build` runs both services on one machine instead.

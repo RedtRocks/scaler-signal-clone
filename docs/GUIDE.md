@@ -168,4 +168,4 @@ Everything needed is in [`RUNNING.md`](./RUNNING.md): backend and frontend comma
 
 ## Deployment
 
-The backend deploys to Render from `render.yaml` (Docker, `backend/Dockerfile`, honours `$PORT`), the frontend to Vercel with `NEXT_PUBLIC_API_URL` pointing at it, and the backend's `ALLOWED_ORIGINS` set to the Vercel URL for CORS. The free Render plan has no disk, so `SEED_ON_START=1` re-seeds on each start. Steps: `docs/DEPLOY.md`.
+The frontend deploys to Vercel with `NEXT_PUBLIC_API_URL` pointing at the backend. The backend deploys to Railway (`backend/railway.json`) or Fly.io (`backend/fly.toml`) as a Docker container with a persistent volume at `/data`, because SQLite is a file and must survive restarts and redeploys. The container listens on `$PORT`, seeds only when `/data/signal.db` is missing, and the backend's `ALLOWED_ORIGINS` is set to the Vercel URL for CORS. Steps: `docs/DEPLOY.md`.

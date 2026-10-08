@@ -117,7 +117,7 @@ npm ci
 npm run dev
 ```
 
-Or run both with one command: `scripts/dev.sh` (seeds the database first). With Docker: `docker compose up --build`. More detail in [`docs/RUNNING.md`](docs/RUNNING.md). Hosting the demo (Render + Vercel): [`docs/DEPLOY.md`](docs/DEPLOY.md).
+Or run both with one command: `scripts/dev.sh` (seeds the database first). With Docker: `docker compose up --build`. More detail in [`docs/RUNNING.md`](docs/RUNNING.md). Hosting the demo (Vercel + Railway or Fly.io): [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ### Demo accounts
 
