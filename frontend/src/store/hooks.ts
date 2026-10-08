@@ -58,8 +58,12 @@ export function useTimeline(id: Id): TimelineItem[] {
 export function useNameOf(conversationId: Id): (userId: Id) => string {
   const contacts = useContactStore((state) => state.contacts);
   const members = useConversationStore((state) => state.details[conversationId]?.members);
+  const former = useConversationStore((state) => state.details[conversationId]?.former_members);
   const peer = useConversationStore((state) => state.byId[conversationId]?.peer);
-  return useCallback((userId: Id) => resolveName(userId, { contacts, members, peer }), [contacts, members, peer]);
+  return useCallback(
+    (userId: Id) => resolveName(userId, { contacts, members, former, peer }),
+    [contacts, members, former, peer],
+  );
 }
 
 /** Names of the Members typing in a conversation right now. */

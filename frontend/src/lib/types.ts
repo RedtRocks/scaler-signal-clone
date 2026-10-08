@@ -110,6 +110,8 @@ export interface ConversationDetail extends ConversationSummary {
   description: string | null;
   created_at: IsoTime;
   members: Member[];
+  /** Left or removed; kept so their old messages still show a name. */
+  former_members: UserPublic[];
 }
 
 export interface MessageSearchHit {
