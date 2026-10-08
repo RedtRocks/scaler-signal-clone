@@ -186,6 +186,7 @@ class Message(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
+    edited_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     reply_to: Mapped["Message | None"] = relationship(remote_side=[id])
     receipts: Mapped[list["Receipt"]] = relationship(
@@ -201,6 +202,10 @@ class Message(Base):
     @property
     def is_deleted(self) -> bool:
         return self.deleted_at is not None
+
+    @property
+    def is_edited(self) -> bool:
+        return self.edited_at is not None
 
 
 class Receipt(Base):
@@ -263,3 +268,17 @@ class Attachment(Base):
     @property
     def url(self) -> str:
         return f"/media/attachments/{self.storage_name}"
+
+
+class HiddenMessage(Base):
+    """Delete for me: the Message stays for everyone else but is left out of this user's history."""
+
+    __tablename__ = "hidden_messages"
+
+    message_id: Mapped[int] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), primary_key=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

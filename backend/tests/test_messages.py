@@ -203,3 +203,69 @@ def test_disappearing_messages_expire(client, signup):
         f"/api/conversations/{conversation['id']}/messages", headers=aarav.headers
     ).json()[0]
     assert stored["deleted"] is True
+
+
+def test_sender_can_edit_within_a_day(client, signup):
+    aarav, maya = signup("Aarav"), signup("Maya")
+    conversation = direct(client, aarav, maya)
+    message = send(client, aarav, conversation["id"], "helo")
+
+    edited = client.patch(
+        f"/api/messages/{message['id']}", json={"body": "hello"}, headers=aarav.headers
+    )
+    assert edited.status_code == 200
+    assert edited.json()["body"] == "hello" and edited.json()["edited"] is True
+
+    history = client.get(
+        f"/api/conversations/{conversation['id']}/messages", headers=maya.headers
+    ).json()
+    assert history[0]["body"] == "hello" and history[0]["edited"] is True
+
+    other = client.patch(
+        f"/api/messages/{message['id']}", json={"body": "mine"}, headers=maya.headers
+    )
+    assert other.status_code == 403
+
+
+def test_edit_after_a_day_is_rejected(client, signup, monkeypatch):
+    from app.services import messages as message_service
+
+    aarav, maya = signup("Aarav"), signup("Maya")
+    conversation = direct(client, aarav, maya)
+    message = send(client, aarav, conversation["id"], "old")
+    later = utcnow() + timedelta(hours=25)
+    monkeypatch.setattr(message_service, "utcnow", lambda: later)
+    response = client.patch(
+        f"/api/messages/{message['id']}", json={"body": "new"}, headers=aarav.headers
+    )
+    assert response.status_code == 400
+
+
+def test_hide_removes_message_for_me_only(client, signup):
+    aarav, maya = signup("Aarav"), signup("Maya")
+    conversation = direct(client, aarav, maya)
+    message = send(client, aarav, conversation["id"], "hello")
+    url = f"/api/conversations/{conversation['id']}/messages"
+
+    assert (
+        client.post(f"/api/messages/{message['id']}/hide", headers=maya.headers).status_code == 204
+    )
+    assert (
+        client.post(f"/api/messages/{message['id']}/hide", headers=maya.headers).status_code == 204
+    )
+    assert client.get(url, headers=maya.headers).json() == []
+    assert len(client.get(url, headers=aarav.headers).json()) == 1
+
+
+def test_new_nullable_columns_are_added_to_an_old_database(tmp_path):
+    from sqlalchemy import inspect, text
+
+    from app.db import Database
+
+    database = Database(f"sqlite:///{tmp_path / 'old.db'}")
+    database.create_all()
+    with database.engine.begin() as connection:
+        connection.execute(text("ALTER TABLE messages DROP COLUMN edited_at"))
+    database.create_all()
+    columns = {c["name"] for c in inspect(database.engine).get_columns("messages")}
+    assert "edited_at" in columns

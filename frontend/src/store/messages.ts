@@ -8,6 +8,7 @@ import { useConversationStore } from "./conversations";
 import { useToastStore } from "./toasts";
 import {
   applyMessageUpdate,
+  removeMessage,
   applyReceipt,
   createOptimisticMessage,
   latestIncomingId,
@@ -58,6 +59,10 @@ interface MessagesState {
   removeReaction: (messageId: Id) => Promise<void>;
   /** Delete for everyone; the message.updated push updates the timeline. */
   deleteForEveryone: (messageId: Id) => Promise<void>;
+  /** Replace my message's text; the stored message comes back and is applied at once. */
+  edit: (messageId: Id, body: string) => Promise<void>;
+  /** Delete for me: drop it from this timeline now, and from my history on the server. */
+  deleteForMe: (message: Message) => Promise<void>;
   reset: () => void;
 }
 
@@ -251,6 +256,15 @@ export const useMessageStore = create<MessagesState>()((set, get) => {
     removeReaction: (messageId) => api.removeReaction(messageId),
 
     deleteForEveryone: (messageId) => api.deleteMessage(messageId),
+
+    edit: async (messageId, body) => {
+      get().applyUpdate(await api.editMessage(messageId, body));
+    },
+
+    deleteForMe: async (message) => {
+      await api.hideMessage(message.id);
+      updateMessages(message.conversation_id, (messages) => removeMessage(messages, message.id));
+    },
 
     reset: () => {
       pendingSends.forEach((job) => job.previewUrls.forEach((url) => URL.revokeObjectURL(url)));

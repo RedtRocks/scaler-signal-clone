@@ -91,6 +91,8 @@ export interface Message {
   created_at: IsoTime;
   expires_at: IsoTime | null;
   deleted: boolean;
+  /** True once the sender edited the text (shown as "Edited" by the time). */
+  edited?: boolean;
   /** Only on my own text messages. */
   status: MessageStatus | null;
   reactions: Reaction[];

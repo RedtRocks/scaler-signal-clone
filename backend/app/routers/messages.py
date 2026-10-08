@@ -112,3 +112,31 @@ async def delete_message(
     message = messages.delete_for_everyone(db, me, message_id, settings.media_dir)
     if message is not None:
         await notifier.message_updated(db, message)
+
+
+@router.patch("/messages/{message_id}")
+async def edit_message(
+    message_id: int,
+    body: schemas.MessageEdit,
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    presenter: Presenter = Depends(get_presenter),
+    notifier: Notifier = Depends(get_notifier),
+) -> schemas.Message:
+    """Edit your own text message within 24 hours. Everyone sees it via message.updated."""
+    message = messages.edit_message(db, me, message_id, body.body)
+    if message is None:
+        message, _ = messages.get_message_for_member(db, message_id, me)
+    else:
+        await notifier.message_updated(db, message)
+    return presenter.message(message)
+
+
+@router.post("/messages/{message_id}/hide", status_code=status.HTTP_204_NO_CONTENT)
+async def hide_message(
+    message_id: int,
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    """Delete for me: the message disappears from your history only."""
+    messages.hide_message(db, me, message_id)

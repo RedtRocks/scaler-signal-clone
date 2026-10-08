@@ -1,4 +1,4 @@
-"""Messages: sending (idempotent on client id), history, reactions, deletion and expiry."""
+"""Messages: sending (idempotent on client id), history, reactions, editing, deletion and expiry."""
 
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -13,6 +13,7 @@ from app.errors import BadRequest, Conflict, Forbidden, NotFound
 from app.models import (
     Attachment,
     Conversation,
+    HiddenMessage,
     Member,
     Message,
     MessageKind,
@@ -35,7 +36,10 @@ MESSAGE_LOAD_OPTIONS = (
 def list_messages(db: Session, member: Member, before_id: int | None, limit: int) -> list[Message]:
     """One page of history visible to `member`, newest first."""
     statement = only_visible_to(select(Message), member.user_id).where(
-        Message.conversation_id == member.conversation_id
+        Message.conversation_id == member.conversation_id,
+        ~Message.id.in_(
+            select(HiddenMessage.message_id).where(HiddenMessage.user_id == member.user_id)
+        ),
     )
     if before_id is not None:
         statement = statement.where(Message.id < before_id)
@@ -181,6 +185,35 @@ def delete_for_everyone(
     db.commit()
     attachment_service.remove_files(media_dir, names)
     return message
+
+
+EDIT_WINDOW = timedelta(hours=24)
+
+
+def edit_message(db: Session, user: User, message_id: int, body: str) -> Message | None:
+    """Sender-only edit of a text message's body within 24 hours of sending. Returns the
+    message if its text changed."""
+    message, _ = get_message_for_member(db, message_id, user)
+    if message.sender_id != user.id or message.kind != MessageKind.TEXT:
+        raise Forbidden("You can only edit your own messages")
+    if message.is_deleted:
+        raise BadRequest("This message was deleted")
+    if utcnow() - message.created_at > EDIT_WINDOW:
+        raise BadRequest("Messages can only be edited within 24 hours")
+    if body == message.body:
+        return None
+    message.body = body
+    message.edited_at = utcnow()
+    db.commit()
+    return message
+
+
+def hide_message(db: Session, user: User, message_id: int) -> None:
+    """Delete for me. Idempotent."""
+    message, _ = get_message_for_member(db, message_id, user)
+    if db.get(HiddenMessage, (message.id, user.id)) is None:
+        db.add(HiddenMessage(message_id=message.id, user_id=user.id))
+        db.commit()
 
 
 def expire_due_messages(db: Session, now: datetime, media_dir: Path) -> list[Message]:

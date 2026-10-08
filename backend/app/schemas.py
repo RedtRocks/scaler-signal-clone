@@ -156,9 +156,14 @@ class Message(BaseModel):
     created_at: UtcDateTime
     expires_at: UtcDateTime | None
     deleted: bool
+    edited: bool = False
     status: MessageStatus | None
     reactions: list[ReactionOut]
     attachments: list[Attachment] = []
+
+
+class MessageEdit(BaseModel):
+    body: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
 
 
 class MessageCreate(BaseModel):
