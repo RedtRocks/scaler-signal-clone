@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type Ref } from "react";
+import { usePreference } from "@/features/settings/preferences";
 import { Composer, QuoteBlock, useIsPhone } from "@/components/ui";
 import type { Id, Message } from "@/lib/types";
 import { notifyTyping, sendMessage, stopTyping, useToastStore } from "@/store";
@@ -20,6 +21,7 @@ interface ChatComposerProps {
 /** The message box for one conversation: draft per conversation, typing signals, reply strip. */
 export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, onCancelReply, inputRef }: ChatComposerProps) {
   const phone = useIsPhone();
+  const [enterSends] = usePreference("enterSends");
   const push = useToastStore((state) => state.push);
   const [text, setText] = useState(() => getDraft(conversationId));
 
@@ -37,6 +39,7 @@ export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, on
         onTyping={() => notifyTyping(conversationId)}
         inputRef={inputRef}
         autoFocus={!phone}
+        enterSends={enterSends}
         onSend={(body) => {
           const reply = replyTo;
           onCancelReply();

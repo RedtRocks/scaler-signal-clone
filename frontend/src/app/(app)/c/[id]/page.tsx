@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { ChatScreen } from "@/features/chat/ChatScreen";
 
+export const instant = false;
+
 export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id < 1) notFound();

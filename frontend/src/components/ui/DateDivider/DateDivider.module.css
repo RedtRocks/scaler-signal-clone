@@ -8,6 +8,6 @@
   border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 500;
-  background: color-mix(in srgb, var(--surface-pane) 88%, transparent);
+  background: var(--surface-pane);
   backdrop-filter: blur(8px);
 }

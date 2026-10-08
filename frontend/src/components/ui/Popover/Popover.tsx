@@ -59,7 +59,9 @@ export function Popover({
     const el = ref.current;
     if (!open || !el || !anchor) return;
     const a = anchorRect(anchor);
-    const { width: w, height: h } = el.getBoundingClientRect();
+    // Layout size: getBoundingClientRect() would include the entrance animation's scale.
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     let top = placement.startsWith("top") ? a.top - h - offset : a.bottom + offset;

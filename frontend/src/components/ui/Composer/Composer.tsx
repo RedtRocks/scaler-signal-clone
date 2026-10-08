@@ -28,6 +28,8 @@ export interface ComposerProps {
   onCamera?: () => void;
   disabled?: boolean;
   autoFocus?: boolean;
+  /** true (default): Enter sends, Shift+Enter breaks the line. false: Enter breaks the line, Ctrl/Cmd+Enter sends. */
+  enterSends?: boolean;
   inputRef?: Ref<HTMLTextAreaElement>;
 }
 
@@ -50,6 +52,7 @@ export function Composer({
   onCamera,
   disabled,
   autoFocus,
+  enterSends = true,
   inputRef,
 }: ComposerProps) {
   const [internal, setInternal] = useState(defaultValue);
@@ -78,7 +81,9 @@ export function Composer({
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+    if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+    const wantsSend = enterSends ? !e.shiftKey : e.ctrlKey || e.metaKey;
+    if (wantsSend) {
       e.preventDefault();
       send();
     }
