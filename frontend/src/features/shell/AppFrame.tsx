@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { AppShell, NavRail, TabBar, ToastViewport, type NavRailId } from "@/components/ui";
 import { mediaUrl } from "@/lib/config";
 import { DialogHost } from "@/features/dialogs/DialogHost";
+import { useShortcuts } from "./useShortcuts";
 import { Sidebar } from "@/features/sidebar/Sidebar";
 import { useAuthStore, useConversationStore, useToastStore } from "@/store";
 
@@ -17,6 +18,7 @@ function sectionOf(pathname: string): NavRailId | "settings" {
 
 /** Rail + list + pane for every signed-in route. `children` is the pane. */
 export function AppFrame({ children }: { children: ReactNode }) {
+  useShortcuts();
   const router = useRouter();
   const pathname = usePathname();
   const me = useAuthStore((s) => s.me);

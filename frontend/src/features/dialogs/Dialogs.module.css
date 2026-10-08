@@ -177,3 +177,43 @@
     color: var(--ios-placeholder);
   }
 }
+
+.shortcuts {
+  margin: 0;
+  padding: 0;
+}
+
+.shortcutRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.shortcutRow:last-child {
+  border-bottom: 0;
+}
+
+.shortcutRow dt {
+  color: var(--ink);
+}
+
+.shortcutRow dd {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+}
+
+.kbd {
+  min-width: 24px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--divider);
+  background: var(--surface-field);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+}

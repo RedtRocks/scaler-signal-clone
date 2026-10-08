@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatListHeader, SearchField, Spinner, type MenuEntry } from "@/components/ui";
 import { useDialogStore } from "@/features/dialogs/dialogStore";
+import { FOCUS_SEARCH_EVENT } from "@/features/shell/useShortcuts";
 import { mediaUrl } from "@/lib/config";
 import type { Contact, Id } from "@/lib/types";
 import {
@@ -51,6 +52,13 @@ export function Sidebar() {
   const openDirect = useConversationStore((s) => s.openDirect);
   const details = useConversationStore((s) => s.details);
   const selectedId = selectedIdOf(pathname);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const focus = () => searchRef.current?.focus();
+    window.addEventListener(FOCUS_SEARCH_EVENT, focus);
+    return () => window.removeEventListener(FOCUS_SEARCH_EVENT, focus);
+  }, []);
 
   const open = useCallback((id: Id) => router.push(`/c/${id}`), [router]);
 
@@ -75,6 +83,7 @@ export function Sidebar() {
     { label: "New group", onSelect: () => showDialog("newGroup") },
     { label: "Contacts", onSelect: () => showDialog("contacts") },
     { label: "Settings", icon: "settings", onSelect: () => router.push("/settings") },
+    { label: "Keyboard shortcuts", onSelect: () => showDialog("shortcuts") },
     "separator",
     {
       label: "Log out",
@@ -105,6 +114,7 @@ export function Sidebar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onClear={() => setQuery("")}
+          inputRef={searchRef}
         />
       </div>
       {!searching ? (

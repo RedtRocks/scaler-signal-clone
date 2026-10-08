@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type DialogName = "newChat" | "newGroup" | "contacts";
+export type DialogName = "newChat" | "newGroup" | "contacts" | "shortcuts";
 
 interface DialogState {
   open: DialogName | null;
