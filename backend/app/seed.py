@@ -30,6 +30,8 @@ from app.models import (
     MessageKind,
     Reaction,
     Receipt,
+    Story,
+    StoryView,
     User,
 )
 
@@ -492,6 +494,56 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
     )
     t.text("zoe", ago(hours=5, minutes=50), "Fine, but I'm swapping with Aarav next week")
     t.settle(unread={"aarav": 2})
+
+    # Note to Self: a direct conversation whose only member is Aarav.
+    note_at = ago(days=1, hours=3)
+    note = Conversation(
+        kind=ConversationKind.DIRECT,
+        direct_key=Conversation.direct_key_for(users["aarav"].id, users["aarav"].id),
+        created_by=users["aarav"].id,
+        created_at=note_at,
+        last_message_at=note_at,
+        members=[Member(user_id=users["aarav"].id, joined_at=note_at)],
+    )
+    db.add(note)
+    db.flush()
+    db.add(
+        Message(
+            conversation_id=note.id,
+            sender_id=users["aarav"].id,
+            body="Passport renewal: bring 2 photos and the old passport",
+            client_id=secrets.token_hex(8),
+            created_at=note_at,
+        )
+    )
+
+    # Stories, 24 hours each from when they were posted.
+    stories = [
+        ("maya", 3, "Sent my first 6c today 🧗‍♀️", "forest"),
+        ("kai", 1.5, "New espresso machine. Productivity is about to triple.", "ink"),
+        ("ishita", 7, "The monstera has a new leaf 🌱", "sunset"),
+        ("aarav", 2, "Shipping the Signal clone this week", "ultramarine"),
+    ]
+    for author, hours, body, background in stories:
+        posted = ago(hours=hours)
+        story = Story(
+            author_id=users[author].id,
+            body=body,
+            background=background,
+            created_at=posted,
+            expires_at=posted + timedelta(hours=24),
+        )
+        db.add(story)
+        db.flush()
+        if author == "aarav":
+            for viewer in ("maya", "kai"):
+                db.add(
+                    StoryView(
+                        story_id=story.id, viewer_id=users[viewer].id, viewed_at=ago(hours=1)
+                    )
+                )
+        elif author == "ishita":
+            db.add(StoryView(story_id=story.id, viewer_id=users["aarav"].id, viewed_at=ago(hours=6)))
 
     db.commit()
 

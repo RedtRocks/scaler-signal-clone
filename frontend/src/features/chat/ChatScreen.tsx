@@ -1,4 +1,5 @@
 "use client";
+import { avatarKind, isNoteToSelf } from "@/lib/conversationKind";
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
@@ -67,13 +68,15 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
 
   const isGroup = conversation.kind === "group";
   const peer = conversation.peer;
-  const online = presence?.online ?? peer?.online ?? false;
+  const note = isNoteToSelf(conversation);
+  const online = !note && (presence?.online ?? peer?.online ?? false);
   const typing = typingText(typingNames, isGroup);
   const subtitle = headerSubtitle({
     isGroup,
     memberCount: conversation.member_count,
     left: conversation.left,
     online,
+    note,
     lastSeenAt: presence?.last_seen_at ?? peer?.last_seen_at ?? null,
     typing,
     timerSeconds: conversation.disappearing_seconds,
@@ -160,7 +163,7 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
           timer={!phone && !typing && conversation.disappearing_seconds !== null}
           isGroup={isGroup}
           compact={phone}
-          kind={isGroup ? "group" : undefined}
+          kind={avatarKind(conversation)}
           avatarSrc={conversation.avatar_url ?? undefined}
           avatarSize={phone ? 38 : 32}
           online={!isGroup && online}

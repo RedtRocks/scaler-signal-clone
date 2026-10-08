@@ -1,4 +1,5 @@
 "use client";
+import { avatarKind } from "@/lib/conversationKind";
 
 import {
   useCallback,
@@ -277,7 +278,7 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
               name={title}
               subtitle={heroSubtitle}
               avatarSrc={conversation.avatar_url ?? undefined}
-              kind={isGroup ? "group" : undefined}
+              kind={avatarKind(conversation)}
             />
           ) : loading ? (
             <div className={styles.loadingOlder}>

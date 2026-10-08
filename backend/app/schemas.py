@@ -271,3 +271,28 @@ class SearchResults(BaseModel):
     conversations: list[ConversationSummary]
     contacts: list[Contact]
     messages: list[MessageSearchHit]
+
+
+StoryBackground = Literal["ultramarine", "crimson", "forest", "plum", "sunset", "ink"]
+
+
+class StoryCreate(BaseModel):
+    body: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=700)]
+    background: StoryBackground = "ultramarine"
+
+
+class StoryViewOut(BaseModel):
+    user: UserPublic
+    viewed_at: UtcDateTime
+
+
+class Story(BaseModel):
+    id: int
+    author: UserPublic
+    body: str
+    background: str
+    created_at: UtcDateTime
+    expires_at: UtcDateTime
+    viewed: bool
+    # Only on my own stories.
+    views: list[StoryViewOut] | None = None

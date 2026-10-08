@@ -10,6 +10,7 @@ import { useMessageStore } from "./messages";
 import { usePresenceStore } from "./presence";
 import { wireRealtime } from "./realtime";
 import { useSearchStore } from "./search";
+import { useStoryStore } from "./stories";
 import { useToastStore } from "./toasts";
 
 export const socket = new SignalSocket({ url: WS_URL, onUnauthorized: endSession });
@@ -56,6 +57,7 @@ export function endSession(): void {
   useContactStore.getState().reset();
   usePresenceStore.getState().reset();
   useSearchStore.getState().reset();
+  useStoryStore.getState().reset();
   useToastStore.getState().dismiss();
   useAuthStore.getState().reset();
 }

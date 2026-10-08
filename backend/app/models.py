@@ -282,3 +282,39 @@ class HiddenMessage(Base):
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class Story(Base):
+    """A text Story: visible for 24 hours to everyone the author shares a conversation with."""
+
+    __tablename__ = "stories"
+    __table_args__ = (Index("ix_stories_expires_at", "expires_at"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    body: Mapped[str] = mapped_column(String(700))
+    # One of the preset background names (see schemas.StoryBackground).
+    background: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+
+    author: Mapped[User] = relationship()
+    views: Mapped[list["StoryView"]] = relationship(
+        cascade="all, delete-orphan", passive_deletes=True, order_by="StoryView.viewed_at"
+    )
+
+
+class StoryView(Base):
+    """One viewer having seen one Story."""
+
+    __tablename__ = "story_views"
+
+    story_id: Mapped[int] = mapped_column(
+        ForeignKey("stories.id", ondelete="CASCADE"), primary_key=True
+    )
+    viewer_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    viewed_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+    viewer: Mapped[User] = relationship()

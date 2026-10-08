@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/ui";
+import { StoriesScreen } from "@/features/stories/StoriesScreen";
 
 export default function StoriesPage() {
-  return <ComingSoon icon="stories" title="Stories are coming soon" />;
+  return <StoriesScreen />;
 }

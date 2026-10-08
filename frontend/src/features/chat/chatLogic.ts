@@ -58,6 +58,8 @@ interface SubtitleInput {
   lastSeenAt: string | null;
   typing: string | undefined;
   timerSeconds: number | null;
+  /** Note to Self: no presence line. */
+  note?: boolean;
 }
 
 /** Desktop header subtitle: typing wins, then presence (direct) or member count (group), plus the timer. */
@@ -67,14 +69,16 @@ export function headerSubtitle(input: SubtitleInput, now: Date = new Date()): st
     ? input.left
       ? "You left this group"
       : `${input.memberCount} ${input.memberCount === 1 ? "member" : "members"}`
-    : formatLastSeen(input.online, input.lastSeenAt, now);
-  return input.timerSeconds ? `${base} · ${formatTimer(input.timerSeconds)}` : base;
+    : input.note
+      ? ""
+      : formatLastSeen(input.online, input.lastSeenAt, now);
+  if (!input.timerSeconds) return base;
+  return base ? `${base} · ${formatTimer(input.timerSeconds)}` : formatTimer(input.timerSeconds);
 }
 
 /** The choices of the disappearing-messages setting, in seconds (null = off). */
 export const TIMER_CHOICES: (number | null)[] = [null, 30, 300, 3_600, 28_800, 86_400, 604_800];
 
-/** Whether a message can still be deleted for everyone: mine, stored, not already deleted. */
 const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /** My own stored text message with text, sent less than 24 hours ago (the server enforces the same). */
@@ -86,6 +90,7 @@ export function canEdit(message: Message, meId: Id | undefined, now = Date.now()
   );
 }
 
+/** Whether a message can still be deleted for everyone: mine, stored, not already deleted. */
 export function canDeleteForEveryone(message: Message, meId: Id | undefined): boolean {
   return message.kind === "text" && message.sender_id === meId && message.id > 0 && !message.deleted;
 }

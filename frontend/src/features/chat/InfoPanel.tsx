@@ -1,4 +1,5 @@
 "use client";
+import { avatarKind } from "@/lib/conversationKind";
 
 import { useRef, useState } from "react";
 import {
@@ -113,7 +114,7 @@ export function InfoPanel({ conversation, detail, onClose, onSearch, initialDial
           name={conversation.title}
           subtitle={subtitle}
           avatarSrc={conversation.avatar_url ?? undefined}
-          kind={isGroup ? "group" : undefined}
+          kind={avatarKind(conversation)}
         >
           {presenceLine ? <div className={styles.presence}>{presenceLine}</div> : null}
           {isGroup && detail?.description ? <p className={styles.description}>{detail.description}</p> : null}
