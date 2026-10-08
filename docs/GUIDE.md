@@ -170,3 +170,5 @@ Everything needed is in [`RUNNING.md`](./RUNNING.md): backend and frontend comma
 ## Deployment
 
 The frontend deploys to Vercel with `NEXT_PUBLIC_API_URL` pointing at the backend. The backend deploys to Railway (Root Directory `backend`, which builds the Dockerfile) or Fly.io (`backend/fly.toml`) as a Docker container with a persistent volume at `/data`, because SQLite is a file and must survive restarts and redeploys. The container listens on `$PORT`, seeds only when `/data/signal.db` is missing, and the backend's `ALLOWED_ORIGINS` is set to the Vercel URL for CORS. Steps: `docs/DEPLOY.md`.
+
+New sign-ups are not left with an empty app: when `verify_otp` creates a brand-new user, `welcome()` in `backend/app/seed.py` adds four contacts, three direct chats and a group with the demo people, with unread messages, replies and reactions. It does nothing if the demo users are missing (so tests and empty databases are unaffected).

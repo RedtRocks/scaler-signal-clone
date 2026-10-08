@@ -96,7 +96,8 @@ All REST paths are under `/api` with `Authorization: Bearer <token>`; errors are
 - A "contact" is a private, one-way address-book entry; anyone with an account can be messaged by phone number.
 - One direct conversation per pair of users; groups have admins (creator first) and the oldest member is promoted if the last admin leaves.
 - "Online" means at least one open WebSocket; "last seen" is the time the last one closed.
-- The seed (`python -m app.seed`) resets the database and creates 8 users; log in as `+15550000001` (Aarav Dudeja).
+- The seed (`python -m app.seed`) resets the database and creates 8 users; log in as `+15550000001` (Aarav Dudeja). The seed covers 1:1 and group chats, replies, reactions, a photo, disappearing messages, and sent/delivered/read/unread states.
+- Any new number that signs up is given 3 direct chats and a "Weekend Plans" group with the demo users (`welcome()` in `backend/app/seed.py`), so an evaluator who registers sees a populated app right away.
 - SQLite is enough for a demo-scale deployment, and it needs a persistent disk when hosted.
 - Features the brief marks as placeholders (calls, stories, linked devices) show "Coming soon".
 

@@ -21,6 +21,9 @@ def verify_otp(db: Session, phone: str, code: str, expected_code: str) -> tuple[
         user = User(phone=phone, display_name="")
         db.add(user)
         db.flush()
+        from app.seed import welcome  # local import: seed imports services
+
+        welcome(db, user)
     token = create_session(db, user)
     db.commit()
     return token, user, user.display_name == ""

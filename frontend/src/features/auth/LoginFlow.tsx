@@ -169,7 +169,23 @@ function SignInSteps() {
           {busy ? <Spinner size={16} inherit /> : null}
           Next
         </Button>
-        <p className={styles.footnote}>Demo account: +1 555 000 0001</p>
+        <p className={styles.footnote}>
+          Demo account: +1 555 000 0001, code 123456.{" "}
+          <Button
+            variant="link"
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setCountry("US");
+              setNational("5550000001");
+            }}
+            style={{ height: "auto", padding: 0 }}
+          >
+            Use demo account
+          </Button>
+          <br />
+          New numbers start with a few sample chats.
+        </p>
       </form>
     </>
   );
