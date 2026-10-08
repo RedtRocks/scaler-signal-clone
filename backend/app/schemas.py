@@ -10,6 +10,7 @@ from pydantic import (
     Field,
     PlainSerializer,
     StringConstraints,
+    model_validator,
 )
 
 from app.models import ConversationKind, MemberRole, MessageKind
@@ -119,11 +120,23 @@ class ContactUpdate(BaseModel):
 # --- Messages ----------------------------------------------------------------------------
 
 
+class Attachment(BaseModel):
+    id: int
+    url: str
+    file_name: str
+    content_type: str
+    size: int
+    width: int | None
+    height: int | None
+
+
 class ReplyPreview(BaseModel):
     id: int
     sender_id: int | None
     body: str
     deleted: bool
+    # The first attachment of the quoted message, for the thumbnail / file name in the quote.
+    attachment: Attachment | None = None
 
 
 class ReactionOut(BaseModel):
@@ -145,12 +158,22 @@ class Message(BaseModel):
     deleted: bool
     status: MessageStatus | None
     reactions: list[ReactionOut]
+    attachments: list[Attachment] = []
 
 
 class MessageCreate(BaseModel):
-    body: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
+    """A caption and/or attachments (uploaded first, see docs/CONTRACT.md → Attachments)."""
+
+    body: Annotated[str, StringConstraints(strip_whitespace=True, max_length=4000)] = ""
     client_id: Annotated[str, StringConstraints(min_length=1, max_length=64)]
     reply_to_id: int | None = None
+    attachment_ids: list[int] = Field(default_factory=list, max_length=100)
+
+    @model_validator(mode="after")
+    def _needs_content(self) -> "MessageCreate":
+        if not self.body and not self.attachment_ids:
+            raise ValueError("A message needs text or an attachment")
+        return self
 
 
 class ReadUpdate(BaseModel):

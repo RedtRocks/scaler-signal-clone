@@ -18,7 +18,7 @@ from app.errors import DomainError
 from app.realtime import websocket
 from app.realtime.connections import ConnectionManager
 from app.realtime.notifier import Notifier
-from app.routers import auth, contacts, conversations, me, messages, search, users
+from app.routers import attachments, auth, contacts, conversations, me, messages, search, users
 from app.tasks import expire_messages_forever
 
 
@@ -31,7 +31,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         db.create_all()
         expiry = asyncio.create_task(
-            expire_messages_forever(db, notifier, settings.expiry_interval_seconds)
+            expire_messages_forever(
+                db,
+                notifier,
+                settings.expiry_interval_seconds,
+                settings.media_dir,
+                settings.unclaimed_attachment_ttl_seconds,
+            )
         )
         yield
         expiry.cancel()
@@ -53,7 +59,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def domain_error_handler(_request: Request, error: DomainError) -> JSONResponse:
         return JSONResponse({"detail": error.detail}, status_code=error.status_code)
 
-    for module in (auth, me, users, contacts, conversations, messages, search, websocket):
+    for module in (auth, me, attachments, users, contacts, conversations, messages, search, websocket):
         app.include_router(module.router)
 
     @app.get("/api/health", tags=["health"])

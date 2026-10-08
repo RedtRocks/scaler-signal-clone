@@ -1,19 +1,35 @@
 """Messages: sending (idempotent on client id), history, reactions, deletion and expiry."""
 
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.db import utcnow
 from app.errors import BadRequest, Conflict, Forbidden, NotFound
-from app.models import Conversation, Member, Message, MessageKind, Reaction, Receipt, User
+from app.models import (
+    Attachment,
+    Conversation,
+    Member,
+    Message,
+    MessageKind,
+    Reaction,
+    Receipt,
+    User,
+)
+from app.services import attachments as attachment_service
 from app.services.access import get_membership, only_visible_to, require_active
 
 # Load what serialising a Message needs in the same round trips as the messages themselves.
-MESSAGE_LOAD_OPTIONS = (selectinload(Message.reactions), selectinload(Message.reply_to))
+# A quote shows the first attachment of the message it points at, so load that too.
+MESSAGE_LOAD_OPTIONS = (
+    selectinload(Message.reactions),
+    selectinload(Message.attachments),
+    selectinload(Message.reply_to).selectinload(Message.attachments),
+)
 
 
 def list_messages(db: Session, member: Member, before_id: int | None, limit: int) -> list[Message]:
@@ -28,9 +44,15 @@ def list_messages(db: Session, member: Member, before_id: int | None, limit: int
 
 
 def send_message(
-    db: Session, member: Member, body: str, client_id: str, reply_to_id: int | None
+    db: Session,
+    member: Member,
+    body: str,
+    client_id: str,
+    reply_to_id: int | None,
+    attachment_ids: list[int] | None = None,
+    max_attachments: int = 10,
 ) -> tuple[Message, bool]:
-    """Store a text message with one Receipt per current recipient.
+    """Store a text message (caption and attachments optional) with one Receipt per recipient.
 
     Idempotent: resending the same `client_id` returns the stored message. The second value
     is True only when the message was created by this call.
@@ -61,6 +83,11 @@ def send_message(
     )
     db.add(message)
     db.flush()
+    try:
+        attachment_service.claim(db, member, attachment_ids or [], message, max_attachments)
+    except BadRequest:
+        db.rollback()
+        raise
     db.add_all(
         Receipt(message_id=message.id, user_id=recipient.user_id)
         for recipient in conversation.active_members
@@ -140,20 +167,24 @@ def remove_reaction(db: Session, user: User, message_id: int) -> Message | None:
     return message
 
 
-def delete_for_everyone(db: Session, user: User, message_id: int) -> Message | None:
-    """Sender-only soft delete. Returns the message if it was deleted by this call."""
+def delete_for_everyone(
+    db: Session, user: User, message_id: int, media_dir: Path
+) -> Message | None:
+    """Sender-only soft delete; its files are removed from disk. Returns the message if it
+    was deleted by this call."""
     message, _ = get_message_for_member(db, message_id, user)
     if message.sender_id != user.id or message.kind != MessageKind.TEXT:
         raise Forbidden("You can only delete your own messages")
     if message.is_deleted:
         return None
-    _soft_delete(message, utcnow())
+    names = _soft_delete(message, utcnow())
     db.commit()
+    attachment_service.remove_files(media_dir, names)
     return message
 
 
-def expire_due_messages(db: Session, now: datetime) -> list[Message]:
-    """Soft-delete every message whose disappearing timer has run out."""
+def expire_due_messages(db: Session, now: datetime, media_dir: Path) -> list[Message]:
+    """Soft-delete every message whose disappearing timer has run out, files included."""
     due = list(
         db.scalars(
             select(Message)
@@ -161,9 +192,9 @@ def expire_due_messages(db: Session, now: datetime) -> list[Message]:
             .where(Message.expires_at <= now, Message.deleted_at.is_(None))
         )
     )
-    for message in due:
-        _soft_delete(message, now)
+    names = [name for message in due for name in _soft_delete(message, now)]
     db.commit()
+    attachment_service.remove_files(media_dir, names)
     return due
 
 
@@ -172,7 +203,10 @@ def search_messages(db: Session, viewer_id: int, query: str, limit: int = 50) ->
     statement = only_visible_to(select(Message), viewer_id).where(
         Message.kind == MessageKind.TEXT,
         Message.deleted_at.is_(None),
-        Message.body.icontains(query, autoescape=True),
+        or_(
+            Message.body.icontains(query, autoescape=True),
+            Message.attachments.any(Attachment.file_name.icontains(query, autoescape=True)),
+        ),
     )
     statement = statement.options(*MESSAGE_LOAD_OPTIONS).order_by(Message.id.desc()).limit(limit)
     return list(db.scalars(statement))
@@ -192,9 +226,13 @@ def _expiry(conversation: Conversation, sent_at: datetime) -> datetime | None:
     return sent_at + timedelta(seconds=conversation.disappearing_seconds)
 
 
-def _soft_delete(message: Message, now: datetime) -> None:
+def _soft_delete(message: Message, now: datetime) -> list[str]:
     """Delete for everyone: keep the row (so the timeline shows "This message was deleted")
-    but drop its content and reactions."""
+    but drop its content, reactions and attachments. Returns the stored file names, which the
+    caller deletes from disk after committing."""
     message.deleted_at = now
     message.body = ""
     message.reactions.clear()
+    names = [a.storage_name for a in message.attachments]
+    message.attachments.clear()
+    return names

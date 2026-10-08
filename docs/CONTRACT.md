@@ -34,6 +34,11 @@ messages              id PK, conversation_id FK CASCADE, sender_id FK→users NU
                       client_id NULL, reply_to_id FK→messages SET NULL NULL,
                       created_at, expires_at NULL, deleted_at NULL,
                       INDEX(conversation_id, id), UNIQUE(sender_id, client_id)
+attachments           id PK, conversation_id FK→conversations CASCADE, uploader_id FK→users CASCADE,
+                      message_id FK→messages CASCADE NULL (NULL until a message claims it),
+                      position INT (order inside the message), file_name, content_type, size,
+                      width NULL, height NULL (images only), storage_name UNIQUE (random, on disk),
+                      created_at, INDEX(message_id)
 message_receipts      message_id FK CASCADE, user_id FK CASCADE, delivered_at NULL, read_at NULL,
                       PK(message_id, user_id)   -- one row per recipient (not the sender)
 message_reactions     message_id FK CASCADE, user_id FK CASCADE, emoji, created_at,
@@ -44,6 +49,7 @@ Derived rules:
 - **Message status** for the sender = `read` if every receipt has `read_at`, `delivered` if every receipt has `delivered_at`, otherwise `sent`. A message with no receipts (a group where everyone else left) is `sent`.
 - **Unread count** = messages with `id > last_read_message_id`, `sender_id ≠ me`, `kind='text'`, not deleted, and `created_at ≥ joined_at` (and `≤ left_at` if set).
 - Reading a conversation (`POST /read`) moves `last_read_message_id` forward and stamps `read_at` (plus `delivered_at` if missing) on my receipts up to that id.
+- **Attachment rules.** A message carries 0 to 10 attachments, with an optional caption (`body`). A message needs a non-blank `body` or at least one attachment. Each file is at most 10 MB. An unclaimed attachment (`message_id` NULL) is private to its uploader and is deleted, row and file, an hour after upload if no message claims it. Deleting a message for everyone, or its expiry, deletes the attachment rows and the files on disk.
 - Leaving or being removed sets `left_at`. Re-adding clears it and sets a new `joined_at`.
 - `system_event` shapes: `{"type":"group_created"}`, `{"type":"members_added","user_ids":[..]}`, `{"type":"member_removed","user_id":..}`, `{"type":"member_left"}`, `{"type":"admin_granted","user_id":..}`, `{"type":"renamed","name":".."}`, `{"type":"timer_changed","seconds":..|null}`. `sender_id` on a system row is the *actor*. The client renders the sentence ("You added Kai.").
 
@@ -82,7 +88,9 @@ Derived rules:
 | DELETE | `/api/conversations/{id}/members/{user_id}` | Admin only (remove), or yourself (leave). If the last admin leaves, the oldest member becomes admin. |
 | PATCH | `/api/conversations/{id}/members/{user_id}` | `{role}`, admin only |
 | GET | `/api/conversations/{id}/messages?before_id=&limit=` | → `Message[]` (newest first). Side effect: marks my undelivered receipts in this conversation as delivered. |
-| POST | `/api/conversations/{id}/messages` | `{body, client_id, reply_to_id?}` → `Message` (201). Idempotent on `client_id`. |
+| POST | `/api/conversations/{id}/attachments` | multipart `file` → `Attachment` (201). Active members only. Uploads one file, not yet part of any message. See *Attachments*. |
+| GET | `/api/attachments/{id}` | → `Attachment`. Members who can see its message (the uploader, until it is claimed). Others get 404. |
+| POST | `/api/conversations/{id}/messages` | `{body?, client_id, reply_to_id?, attachment_ids?}` → `Message` (201). Idempotent on `client_id`. `body` defaults to `""` but body and `attachment_ids` cannot both be empty (422). |
 | POST | `/api/conversations/{id}/read` | `{up_to_message_id}` → 204 |
 | PUT | `/api/messages/{id}/reaction` | `{emoji}` → 204. `DELETE` removes my reaction. |
 | DELETE | `/api/messages/{id}` | Sender only, "delete for everyone" → 204 (soft delete) |
@@ -102,13 +110,39 @@ ConversationDetail  = ConversationSummary & { description, created_at, members: 
 Member          = { user: UserPublic, role: 'admin'|'member', joined_at }
 Message = {
   id, conversation_id, client_id, sender_id|null, kind: 'text'|'system', body, system_event|null,
-  reply_to: { id, sender_id, body, deleted: bool }|null,
+  reply_to: { id, sender_id, body, deleted: bool, attachment: Attachment|null /* the first one, for the quote thumbnail */ }|null,
   created_at, expires_at|null, deleted: bool /* body becomes "" */,
   status: 'sent'|'delivered'|'read'|null /* only on my own text messages */,
-  reactions: { emoji, user_id }[]
+  reactions: { emoji, user_id }[],
+  attachments: Attachment[] /* in send order; [] when deleted or none */
 }
+Attachment = { id, url /* "/media/attachments/<random>.<ext>" */, file_name, content_type, size /* bytes */,
+               width: number|null, height: number|null /* images only, measured by the server */ }
 MessageSearchHit = { message: Message, conversation_id, conversation_title }
 ```
+
+### Attachments
+
+**Two steps: upload each file, then send a message that references the ids.** `POST /api/conversations/{id}/attachments` takes one multipart `file` and returns an `Attachment` that belongs to no message yet. The client then sends the normal JSON `POST …/messages` with `attachment_ids` (in display order), `client_id` and the caption in `body`. Why not one multipart message POST:
+- the browser reports upload progress per file, and a failed file can be retried alone without resending the others;
+- the message POST stays small JSON, so `client_id` idempotency, the optimistic bubble and the 201/200 behaviour are unchanged;
+- a resend of the message POST with the same `client_id` returns the stored message and ignores `attachment_ids` (the files are already attached), so a retry can never attach twice.
+
+Claiming rules: every id must be an unclaimed attachment uploaded by me in this same conversation, at most 10, no duplicates; otherwise 400. Claiming happens in the same transaction as the message insert.
+
+Limits and errors (all `{"detail": "…"}`):
+- over 10 MB → **413**; empty file → 400;
+- content type not in the allowlist → **400**. Allowed: `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `application/pdf`, `text/plain`, `application/zip`, `audio/mpeg`, `audio/ogg`, `audio/wav`, `audio/mp4`, `audio/webm`, `video/mp4`, `video/webm`, `video/quicktime`. SVG and HTML are refused on purpose (they run script when opened). Audio and video are plain downloadable files, with no player;
+- an image whose bytes don't parse as its declared type → 400. The server reads `width` and `height` from the PNG/GIF/JPEG/WebP header itself (no Pillow dependency, and a client cannot lie about it);
+- not an active member of the conversation → 404 or 403, as for sending a message.
+
+Storage: `MEDIA_DIR/attachments/<32 hex random>.<ext>`. The extension comes from the allowlisted content type, never from the user's file name, so the static server always answers with a safe `Content-Type`. The original name is kept only in the database (`file_name`, path parts stripped, max 255 chars) and returned as data.
+
+**Known limitation: files are served by `/media/…` without authentication.** Access control is the 128-bit random name, which cannot be guessed, and the name is only ever sent to members. Anyone who obtains the URL can fetch the file. Metadata (`GET /api/attachments/{id}`) is membership-checked. A production system would use signed, expiring URLs or an authenticated download endpoint.
+
+Cleanup: deleting for everyone and disappearing-message expiry remove the rows and the files. A background pass (same 5 s task) removes unclaimed uploads older than one hour.
+
+Previews (built on the client from `body` and `attachments`, for the chat list, search hits and quotes): the caption if there is one, else `📷 Photo` (one image) / `📷 N photos` (only images), `📎 <file name>` (one other file) or `📎 N files` (anything else).
 
 ## WebSocket `/ws?token=…`
 
@@ -142,4 +176,4 @@ Disappearing: a background task runs every 5 s, soft-deletes messages past `expi
 ## Seed (idempotent, `python -m app.seed`)
 
 There are 8 users with phones `+15550000001` to `+15550000008`. `+15550000001` is the demo login (**"Aarav Dudeja"**), OTP `123456`.
-The seed has about 6 direct chats and 3 groups (e.g. "Family", "Rock climbers", "Roommates") with realistic messages spread over the last 7 days, a mix of receipt states, some unread counts, a reply, reactions, one conversation with a disappearing timer, and system events in the groups.
+The seed has about 6 direct chats and 3 groups (e.g. "Family", "Rock climbers", "Roommates") with realistic messages spread over the last 7 days, a mix of receipt states, one image attachment (a generated PNG) in one direct conversation, some unread counts, a reply, reactions, one conversation with a disappearing timer, and system events in the groups.

@@ -194,6 +194,9 @@ class Message(Base):
     reactions: Mapped[list["Reaction"]] = relationship(
         cascade="all, delete-orphan", passive_deletes=True, order_by="Reaction.created_at"
     )
+    attachments: Mapped[list["Attachment"]] = relationship(
+        cascade="all, delete-orphan", passive_deletes=True, order_by="Attachment.position"
+    )
 
     @property
     def is_deleted(self) -> bool:
@@ -234,3 +237,29 @@ class Reaction(Base):
     )
     emoji: Mapped[str] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class Attachment(Base):
+    """One uploaded file. `message_id` stays NULL until a message claims it (see docs/CONTRACT.md)."""
+
+    __tablename__ = "attachments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id", ondelete="CASCADE"))
+    uploader_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    message_id: Mapped[int | None] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    file_name: Mapped[str] = mapped_column(String(255))
+    content_type: Mapped[str] = mapped_column(String(64))
+    size: Mapped[int] = mapped_column(Integer)
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    # Random file name under MEDIA_DIR/attachments/. The URL is derived from it.
+    storage_name: Mapped[str] = mapped_column(String(64), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+    @property
+    def url(self) -> str:
+        return f"/media/attachments/{self.storage_name}"

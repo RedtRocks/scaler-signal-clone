@@ -131,6 +131,7 @@ def test_reply_shows_quoted_message(client, signup):
         "sender_id": maya.id,
         "body": "pizza tonight?",
         "deleted": False,
+        "attachment": None,
     }
 
 
@@ -192,9 +193,10 @@ def test_disappearing_messages_expire(client, signup):
     message = send(client, aarav, conversation["id"], "self-destructs")
 
     db = client.app.state.db
+    media_dir = client.app.state.settings.media_dir
     with db.session() as session:
-        assert expire_due_messages(session, utcnow()) == []
-        expired = expire_due_messages(session, utcnow() + timedelta(seconds=31))
+        assert expire_due_messages(session, utcnow(), media_dir) == []
+        expired = expire_due_messages(session, utcnow() + timedelta(seconds=31), media_dir)
         assert [m.id for m in expired] == [message["id"]]
 
     stored = client.get(

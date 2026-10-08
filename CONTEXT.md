@@ -26,6 +26,7 @@ The words this project uses, and what each one means. Code, API and UI use these
 - **Message**: something posted to a Conversation. Its **kind** is:
   - **Text**: written by a Member (the **sender**).
   - **System**: an event the app writes in the timeline, e.g. "Maya added Kai.", "You set disappearing message time to 1 hour." It has no sender status and is never counted as unread.
+- **Attachment**: one file (image, PDF, text, zip, audio or video) belonging to exactly one Message, with an original **file name**, a content type, a size in bytes and, for images, a width and height. A Message carries up to 10 Attachments and an optional caption (its body). An Attachment is uploaded first and is private to its uploader until a Message claims it; it is deleted from disk together with its Message.
 - **Client id**: an id the sending client generates before the server knows about the Message. It lets the client match its optimistic bubble to the stored Message and makes resending safe.
 - **Reply**: a Message that quotes an earlier Message in the same Conversation.
 - **Reaction**: one emoji a User puts on a Message. At most one per User per Message; choosing another emoji replaces it.

@@ -23,7 +23,8 @@ The seed is **idempotent by reset**: every run drops and recreates all tables, t
 | Variable | Default | Meaning |
 |---|---|---|
 | `DATABASE_URL` | `sqlite:///./signal.db` | SQLAlchemy URL |
-| `MEDIA_DIR` | `./media` | where uploaded avatars are stored, served at `/media/...` |
+| `MEDIA_DIR` | `./media` | where uploaded avatars (`avatars/`) and message attachments (`attachments/`) are stored, served at `/media/...` |
+| `MAX_ATTACHMENT_BYTES` | `10485760` | size limit per attachment (413 above it) |
 | `ALLOWED_ORIGINS` | `http://localhost:3000` | comma-separated CORS origins |
 | `FIXED_OTP` | `123456` | the mocked verification code |
 
@@ -45,6 +46,8 @@ app/
     access.py        membership lookups, admin checks, message visibility (joined_at..left_at)
     conversations.py direct get-or-create, groups, admin rules, last-admin succession
     messages.py      send (idempotent on client_id), history, reactions, delete, expiry, search
+    attachments.py   validated uploads (allowlist, 10 MB), claiming files for a message, file removal, purge of unclaimed uploads
+    imageinfo.py     PNG/GIF/JPEG/WebP size from the header (no Pillow)
     receipts.py      status aggregation, delivered/read stamping, read pointer
     users.py, contacts.py, accounts.py
   realtime/

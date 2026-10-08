@@ -79,6 +79,9 @@ class Presenter:
                     sender_id=quoted.sender_id,
                     body=quoted.body,
                     deleted=quoted.is_deleted,
+                    attachment=(
+                        self.attachment(quoted.attachments[0]) if quoted.attachments else None
+                    ),
                 )
                 if quoted is not None
                 else None
@@ -90,6 +93,19 @@ class Presenter:
             reactions=[
                 schemas.ReactionOut(emoji=r.emoji, user_id=r.user_id) for r in message.reactions
             ],
+            attachments=[self.attachment(a) for a in message.attachments],
+        )
+
+    @staticmethod
+    def attachment(attachment: models.Attachment) -> schemas.Attachment:
+        return schemas.Attachment(
+            id=attachment.id,
+            url=attachment.url,
+            file_name=attachment.file_name,
+            content_type=attachment.content_type,
+            size=attachment.size,
+            width=attachment.width,
+            height=attachment.height,
         )
 
     # --- Conversations -------------------------------------------------------------------

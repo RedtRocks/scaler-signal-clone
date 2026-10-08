@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:3000"
     fixed_otp: str = "123456"
     max_avatar_bytes: int = 2 * 1024 * 1024
+    max_attachment_bytes: int = 10 * 1024 * 1024
+    max_attachments_per_message: int = 10
+    # Uploads no message claimed within this time are deleted by the background task.
+    unclaimed_attachment_ttl_seconds: float = 3600.0
     expiry_interval_seconds: float = 5.0
 
     @property

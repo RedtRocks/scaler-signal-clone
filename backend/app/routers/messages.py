@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 
 from app import schemas
 from app.auth import current_user
+from app.config import Settings
 from app.db import get_db
-from app.deps import get_notifier, get_presenter
+from app.deps import get_notifier, get_presenter, get_settings
 from app.models import User
 from app.presenter import Presenter
 from app.realtime.notifier import Notifier
@@ -41,11 +42,18 @@ async def send_message(
     db: Session = Depends(get_db),
     presenter: Presenter = Depends(get_presenter),
     notifier: Notifier = Depends(get_notifier),
+    settings: Settings = Depends(get_settings),
 ) -> schemas.Message:
     """201 with the new message, or 200 with the stored one when `client_id` is a resend."""
     member = get_membership(db, conversation_id, me.id)
     message, created = messages.send_message(
-        db, member, body.body, body.client_id, body.reply_to_id
+        db,
+        member,
+        body.body,
+        body.client_id,
+        body.reply_to_id,
+        body.attachment_ids,
+        settings.max_attachments_per_message,
     )
     if created:
         await notifier.messages_created(db, [message])
@@ -98,8 +106,9 @@ async def delete_message(
     me: User = Depends(current_user),
     db: Session = Depends(get_db),
     notifier: Notifier = Depends(get_notifier),
+    settings: Settings = Depends(get_settings),
 ) -> None:
-    """Delete for everyone (sender only)."""
-    message = messages.delete_for_everyone(db, me, message_id)
+    """Delete for everyone (sender only). Its attachment files are removed from disk."""
+    message = messages.delete_for_everyone(db, me, message_id, settings.media_dir)
     if message is not None:
         await notifier.message_updated(db, message)

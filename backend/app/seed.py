@@ -7,14 +7,20 @@ everyone out, because sessions are dropped with the rest.
 Sign in as +15550000001 ("Aarav Dudeja") with OTP 123456.
 """
 
+import secrets
+import shutil
+import struct
+import zlib
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.db import Database, utcnow
 from app.models import (
+    Attachment,
     Contact,
     Conversation,
     ConversationKind,
@@ -68,6 +74,31 @@ CONTACTS = {
 }
 
 
+def demo_png(width: int = 640, height: int = 420) -> bytes:
+    """A small sunset-over-mountains picture, drawn pixel by pixel (no image library, no
+    download), so the demo has a real image attachment."""
+    rows = bytearray()
+    for y in range(height):
+        rows.append(0)  # filter type: none
+        t = y / height
+        for x in range(width):
+            ridge = height * (0.55 + 0.15 * abs((x / 70) % 2 - 1))  # triangle-wave peaks
+            if y > ridge:  # mountains, darker towards the bottom
+                shade = int(60 - 40 * (y - ridge) / height)
+                rows += bytes((shade, shade + 8, shade + 24))
+            else:  # sky: deep blue at the top, orange at the horizon
+                rows += bytes((int(40 + 215 * t**1.5), int(60 + 120 * t), int(150 - 90 * t)))
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        body = kind + data
+        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(bytes(rows), 9))
+        + chunk(b"IEND", b"")
+    )
+
+
 @dataclass
 class Timeline:
     """Writes one conversation's messages in order and settles its receipts at the end."""
@@ -106,6 +137,32 @@ class Timeline:
                     created_at=at + timedelta(minutes=3),
                 )
             )
+        return message
+
+    def photo(
+        self, sender: str, at: datetime, caption: str, media_dir: Path, file_name: str
+    ) -> Message:
+        """A message with one generated PNG attached."""
+        message = self.text(sender, at, caption)
+        data = demo_png()
+        folder = media_dir / "attachments"
+        folder.mkdir(parents=True, exist_ok=True)
+        storage_name = f"{secrets.token_hex(16)}.png"
+        (folder / storage_name).write_bytes(data)
+        self.db.add(
+            Attachment(
+                conversation_id=self.conversation.id,
+                uploader_id=self.users[sender].id,
+                message_id=message.id,
+                file_name=file_name,
+                content_type="image/png",
+                size=len(data),
+                width=640,
+                height=420,
+                storage_name=storage_name,
+                created_at=at,
+            )
+        )
         return message
 
     def system(self, actor: str | None, at: datetime, event: dict) -> Message:
@@ -161,7 +218,7 @@ def _last(messages: list[Message], count: int) -> list[Message]:
     return messages[len(messages) - count :] if count else []
 
 
-def seed(db: Session) -> None:
+def seed(db: Session, media_dir: Path | None = None) -> None:
     users = {
         key: User(
             phone=phone,
@@ -249,6 +306,8 @@ def seed(db: Session) -> None:
         "Leaving at 8 sharp, don't be late this time 😄",
         reactions={"aarav": "😂"},
     )
+    if media_dir is not None:
+        t.photo("maya", ago(hours=2, minutes=58), "Sunrise from last time", media_dir, "crag-sunrise.png")
     t.text("aarav", ago(hours=2, minutes=55), "No promises")
     t.settle()
 
@@ -438,11 +497,14 @@ def seed(db: Session) -> None:
 
 
 def main() -> None:
-    database = Database(Settings().database_url)
+    settings = Settings()
+    database = Database(settings.database_url)
     database.drop_all()
     database.create_all()
+    # Files of the previous demo world would be orphans now.
+    shutil.rmtree(settings.media_dir / "attachments", ignore_errors=True)
     with database.session() as session:
-        seed(session)
+        seed(session, settings.media_dir)
     print("Seeded demo data. Sign in as +15550000001 with code 123456.")
 
 
