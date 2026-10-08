@@ -78,3 +78,11 @@
     display: none;
   }
 }
+
+/* Narrow desktop (600-899px) with a chat open: the list collapses to an avatar strip,
+   like Signal Desktop's narrow left pane, so the chat keeps a usable width. */
+@media (min-width: 600px) and (max-width: 899px) {
+  .shell:not(:global(.sg-mobile))[data-view="pane"] .list {
+    width: var(--list-width-narrow);
+  }
+}
