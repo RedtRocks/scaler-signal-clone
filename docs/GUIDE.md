@@ -87,6 +87,8 @@ If your friend is offline at step 6, their receipts stay "sent" until they next 
 - **Disappearing messages**: when a chat has a timer, each new message gets `expires_at`. A background task on the server deletes expired messages every 5 s and pushes the update.
 - **Reconnects**: the socket reconnects with exponential backoff (1 s, 2 s, 4 s… up to 10 s, plus a little randomness so all clients don't reconnect at once) and pings every 25 s to keep the connection alive.
 
+- **Keyboard shortcuts** (`features/shell/shortcuts.ts`, `useShortcuts.ts`): one window `keydown` listener, a pure `matchShortcut` function (unit tested) and a help dialog opened with `?`. Bare keys such as `?` and Esc never fire while you type in a field, and Esc never fires while a dialog or menu is open. The "new chat / new group / settings" shortcuts use Alt because browsers keep Ctrl/Cmd+N for themselves; Signal Desktop uses Ctrl/Cmd there, so this is a deliberate web difference.
+
 ## 7. Frontend structure
 
 - `src/components/ui/`: the design system ported to React. Each component is *presentational*: it receives data through props and reports clicks through callbacks, and never fetches anything. That makes the components reusable and easy to reason about.

@@ -19,6 +19,7 @@ Checked against the glossary in `CONTEXT.md`. Backend rules are covered by `pyte
 - [x] Disappearing-message timer per conversation, with system messages in the timeline
 - [x] Search across conversations, contacts and messages
 - [x] Settings: profile (name, about, photo upload), appearance (System / Light / Dark), chats, notifications, privacy, about, log out
+- [x] Keyboard shortcuts (press `?` in the app): Ctrl/Cmd+K search, Alt+N new chat, Alt+G new group, Alt+S settings, Alt+Up/Down switch chat, Esc close chat
 - [x] Light and dark themes; responsive layouts (desktop three-column, phone single-column with tab bar)
 - [ ] Calls, Stories, Linked devices, Help and Donate: "Coming soon" placeholders, as intended
 - [ ] Note to Self (bonus, not built)
