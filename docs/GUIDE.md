@@ -64,6 +64,14 @@ Key design decisions (be ready to defend these):
 8. **Soft delete (`deleted_at`)** for "delete for everyone" and disappearing messages. The row stays so replies pointing at it don't break; the body is hidden.
 9. **`last_message_at` is denormalised** onto conversations so the chat list can sort with an index instead of scanning every message.
 
+### 4.1 Attachments (schema)
+
+10. **A separate `attachments` table, not a column on `messages`.** A message may carry up to 10 files, so it is a one-to-many relationship. Each row stores the original `file_name` (shown to people), `content_type`, `size`, and for images `width`/`height`, so the browser can reserve the right amount of space *before* the picture loads and the timeline does not jump.
+11. **Upload first, then send a message that references the ids (two steps).** `POST /conversations/{id}/attachments` stores one file and returns an Attachment with no message yet (`message_id` NULL). The normal JSON `POST /messages` then lists `attachment_ids`. Why: the browser can show *per-file upload progress* (XHR) and retry just the failed file; the message POST stays small JSON, so the `client_id` idempotency from 4.6 works unchanged (a retry returns the stored message and attaches nothing twice); and the server claims the files and creates the message in one transaction.
+12. **Files live on disk under a random name, the database keeps the metadata.** The name is 128 random bits plus an extension taken from the *allowlisted content type*, never from the user's file name. That blocks path tricks (`../../x`) and means the static server can only ever answer with a safe type. SVG and HTML are refused because they run script when opened. The **known limitation**: `/media/…` is not authenticated, so access control is "the URL is unguessable and only members receive it". Metadata (`GET /attachments/{id}`) *is* membership-checked. Real systems use signed, expiring URLs.
+13. **The server measures image size itself** from the PNG/GIF/JPEG/WebP header (about 60 lines, no Pillow). A client cannot lie about it, and a file that claims `image/png` but isn't one is rejected with 400.
+14. **Limits answer in the usual `{"detail": …}` shape:** more than 10 MB gives 413, a type that is not allowed gives 400, an 11th attachment gives 400. The upload reads at most 10 MB + 1 byte, so a huge upload is never held in memory.
+
 ## 5. Message lifecycle (the ✓ / ✓✓ story)
 
 ```
@@ -79,6 +87,21 @@ You type "hi" and press Enter
  9. Server: stamps read_at, moves their read pointer → pushes "receipt" {status:"read"} → two filled circles
 ```
 If your friend is offline at step 6, their receipts stay "sent" until they next load the chat. Fetching messages marks them delivered.
+
+### 5.1 Attachment lifecycle
+
+```
+You pick, paste or drop files, type an optional caption and press Send
+ 1. Browser: files wait in a strip above the input (thumbnails, remove buttons); nothing is uploaded yet
+ 2. Browser: shows a "sending" bubble at once with local previews (blob: URLs) and a progress ring per file
+ 3. Browser → POST /conversations/7/attachments (one request per file, in parallel, with progress)
+ 4. Browser → POST /messages {body: caption, client_id, attachment_ids:[…]}   (same client_id idempotency as text)
+ 5. Server: claims the files for the message, saves, pushes message.new (with attachments) to every member
+ 6. Both browsers swap the optimistic bubble for the stored one; the chat list reads "📷 Photo" or "📎 name"
+ If a step fails: the bubble shows "Not sent. Tap to retry"; a retry skips files that already uploaded.
+ Delete for everyone, or the disappearing timer: the rows and the files on disk are removed in the same pass.
+ Files uploaded but never sent (user closed the tab) are deleted by the 5 s background task after one hour.
+```
 
 ## 6. Real-time features
 
@@ -123,7 +146,7 @@ Everything needed is in [`RUNNING.md`](./RUNNING.md): backend and frontend comma
 - OTP is fixed at `123456`. There's no SMS.
 - No real end-to-end encryption. Messages are stored in plain text on the server. The UI shows Signal's encryption notice as decoration.
 - Calls, Stories and Linked devices show "Coming soon".
-- Not built, because the API contract has no endpoint for it: editing a sent message, delete for me, forwarding, group avatars, attachments, voice notes, emoji picker and stickers. The buttons for the last four show a "coming soon" toast.
+- Not built, because the API contract has no endpoint for it: editing a sent message, delete for me, forwarding, group avatars, voice notes, emoji picker and stickers. The buttons for the last three, and the camera, show a "coming soon" toast. Attachments *are* built (bonus), see 4.1 and 5.1; audio and video are sent as plain downloadable files with no inline player.
 - One account per phone number. A "Session" is one browser login, and logout ends only that one.
 
 ## 12. Likely interview questions (and short answers)
@@ -138,5 +161,7 @@ Everything needed is in [`RUNNING.md`](./RUNNING.md): backend and frontend comma
 - *How do you keep two tabs of one user in sync?* The server pushes every change to all of that user's open sockets, including the sender's other tabs, and the store reconciles by `client_id` and message id.
 - *What happens to messages from someone who left a group?* The conversation detail returns `former_members`, so old messages and "X left" lines still show their name.
 - *How is auth done?* Phone plus mocked OTP gives a random session token. Only its sha256 is stored, so a database leak does not leak live tokens. REST sends it as `Authorization: Bearer`, the socket as `?token=`.
-- *What would you do next with more time?* Real SMS, end-to-end encryption, attachments, message editing, and replacing the polling expiry task with a scheduler or queue.
-- *What is deliberately not built?* See section 11 and the README's known limitations: editing messages, delete-for-me, forwarding, group avatars, calls, stories, attachments.
+- *What would you do next with more time?* Real SMS, end-to-end encryption, message editing, signed URLs for attachments, thumbnails and image compression, and replacing the polling expiry task with a scheduler or queue.
+- *What is deliberately not built?* See section 11 and the README's known limitations: editing messages, delete-for-me, forwarding, group avatars, calls, stories, voice notes.
+- *Why upload attachments separately instead of one multipart message request?* Per-file progress and retry in the browser, the message request stays small JSON so `client_id` idempotency and the optimistic bubble work exactly as for text, and a resend can never attach a file twice (4.1, point 11). The cost is orphan uploads when a user abandons a draft; a background task deletes unclaimed files after an hour.
+- *Is it safe that anyone with the file URL can download it?* No, and the README lists it. The name is 128 random bits and is only sent to conversation members, and the metadata endpoint checks membership, but the static `/media` route has no auth. The fix is signed expiring URLs or a download endpoint that checks membership (it would need cookies or a short-lived token, since `<img>` cannot send an Authorization header). The upload side is hardened: allowlist, size limit, extension from the content type, image headers verified, no SVG or HTML.

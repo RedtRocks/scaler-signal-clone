@@ -19,7 +19,7 @@ python3.13 -m venv .venv
 
 - `python -m app.seed` drops and recreates every table, so it also signs everyone out. Run it again whenever you want a fresh demo.
 - The tables are also created on startup, so the server runs without seeding (you then register users through the OTP flow).
-- Uploaded avatars go to `MEDIA_DIR` (default `backend/media`) and are served at `/media/...`.
+- Uploaded avatars and message attachments go to `MEDIA_DIR` (default `backend/media`, under `avatars/` and `attachments/`) and are served at `/media/...`. `python -m app.seed` also writes one demo image there and removes the attachment files of the previous demo. `MAX_ATTACHMENT_BYTES` (default 10 MB) changes the per-file limit.
 - CORS: the browser origin must appear in `ALLOWED_ORIGINS`. Several origins are comma-separated, e.g. `ALLOWED_ORIGINS=http://localhost:3000,https://signal.example.com`.
 
 ## Frontend

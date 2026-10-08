@@ -17,6 +17,7 @@ Checked against the glossary in `CONTEXT.md`. Backend rules are covered by `pyte
 - [x] Message status: sending, sent, delivered, read (the weakest across recipients in a group)
 - [x] Typing indicators and online / last seen presence
 - [x] Disappearing-message timer per conversation, with system messages in the timeline
+- [x] Attachments (bonus): up to 10 images, PDFs, text, zip, audio or video files (10 MB each) per message with a caption; file picker, paste and drag-and-drop; upload progress, retry, Signal-style image grid, lightbox, download, quotes with a thumbnail; files are deleted with the message
 - [x] Search across conversations, contacts and messages
 - [x] Settings: profile (name, about, photo upload), appearance (System / Light / Dark), chats, notifications, privacy, about, log out
 - [x] Keyboard shortcuts (press `?` in the app): Ctrl/Cmd+K search, Alt+N new chat, Alt+G new group, Alt+S settings, Alt+Up/Down switch chat, Esc close chat
@@ -103,7 +104,8 @@ Settings: [`docs/screenshots/desktop-settings-light.png`](docs/screenshots/deskt
 
 - The OTP is mocked, and "end-to-end encryption" and safety numbers are interface text only. Messages are stored in plain text.
 - SQLite with synchronous SQLAlchemy sessions inside async endpoints: fine for a demo, not for heavy load (see `backend/README.md`).
-- Text messages only: no attachments, voice notes, calls, stories or linked devices.
+- No voice notes, camera capture, calls, stories or linked devices. Audio and video attachments are downloadable files, with no inline player.
+- Attachment files are served from `/media/attachments/<random name>` without authentication: the 128-bit random name is the only protection (metadata endpoints do check membership). A real deployment would use signed, expiring URLs. Uploads are limited to 10 MB each and an allowlist of types (no SVG or HTML on purpose).
 - Settings for chats and notifications are stored in the browser (`localStorage`), per device. The notification switches do not send push notifications yet.
 - Disappearing-message timers are set per conversation; there is no account-wide default.
 - Running the seed resets the database and signs everyone out.

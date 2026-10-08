@@ -13,6 +13,12 @@ const PHONE_A = process.env.A ?? "+15550000001";
 const PHONE_B = process.env.B ?? "+15550000002";
 const OTP = "123456";
 
+// 10x10 PNG
+const TINY_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8z8BQz0AEYBxVSF+FABJADveWkH6oAAAAAElFTkSuQmCC",
+  "base64",
+);
+
 const step = (msg) => console.log(`- ${msg}`);
 
 async function api(path, { token, method = "GET", body } = {}) {
@@ -81,6 +87,13 @@ async function main() {
 
     step("user B sees it arrive without reloading");
     await pageB.getByLabel("Messages", { exact: true }).getByText(text).waitFor({ timeout: 10_000 });
+    step("user A attaches a small PNG with a caption; user B sees the picture and the caption live");
+    const caption = `photo ${Date.now()}`;
+    await pageA.getByTestId("file-input").setInputFiles({ name: "smoke.png", mimeType: "image/png", buffer: TINY_PNG });
+    await composer.fill(caption);
+    await composer.press("Enter");
+    await pageB.getByLabel("Messages", { exact: true }).getByText(caption).waitFor({ timeout: 10_000 });
+    await pageB.getByRole("button", { name: "Open smoke.png" }).last().waitFor({ timeout: 10_000 });
     console.log("PASS");
   } catch (error) {
     console.error("FAIL:", error.message);
