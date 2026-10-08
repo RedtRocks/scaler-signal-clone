@@ -25,6 +25,81 @@ Checked against the glossary in `CONTEXT.md`. Backend rules are covered by `pyte
 - [ ] Calls, Stories, Linked devices, Help and Donate: "Coming soon" placeholders, as intended
 - [ ] Note to Self (bonus, not built)
 
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, CSS Modules with design tokens, zustand for state, vitest |
+| Backend | Python 3.13, FastAPI, SQLAlchemy 2, Pydantic, native WebSockets, pytest |
+| Database | SQLite (one file, created and seeded by the backend) |
+| Real-time | A single WebSocket per tab (`/ws?token=`) for pushes, typing and presence; REST for every change |
+| Tooling | Playwright smoke test, GitHub Actions CI, Dockerfiles and compose |
+
+## Architecture overview
+
+```
+ Browser (Next.js, zustand store)
+   │  REST  /api/*   (sends, edits, settings: JSON, Bearer token)
+   │  WS    /ws      (server pushes: message.new, receipt, typing, presence...)
+   ▼
+ FastAPI ── routers (HTTP/WS only) ── services (rules, transactions) ── SQLAlchemy ── SQLite
+                                         │                                 └─ MEDIA_DIR (avatars, attachments)
+                                         └─ presenter (rows → API shapes), WebSocket hub (user → sockets)
+```
+
+- **Changes go through REST, pushes go through the WebSocket.** A message is a `POST`; the server stores it, then the hub pushes `message.new` to every member's open sockets, including the sender's other tabs. This keeps every write validated, idempotent (`client_id`) and testable without a socket.
+- **Optimistic UI.** The client shows a `sending` bubble at once, and reconciles it by `client_id` when the response or push arrives.
+- **Receipts** are one row per recipient; a message's status is the weakest across recipients. Unread counts come from a per-member read pointer instead of per-message flags.
+- **Frontend layers:** `components/ui` (presentational Signal design system), `features/*` (screens), `store` (zustand), `lib` (API client, socket, formatting). Desktop is rail | list | pane; below 600px it collapses to the phone layout.
+- Full detail and the reasoning behind each choice: [`docs/GUIDE.md`](docs/GUIDE.md).
+
+## Database schema
+
+Nine tables, all with foreign keys and indexes defined in `backend/app/models.py` (exact columns in [`docs/CONTRACT.md`](docs/CONTRACT.md#database-schema-sqlite-via-sqlalchemy-2)).
+
+| Table | Purpose | Key constraints |
+|---|---|---|
+| `users` | Accounts | `phone` unique |
+| `sessions` | Login sessions (sha256 of the token, never the token) | `token_hash` unique |
+| `contacts` | Private one-way address book with nickname | unique `(owner, contact)`, no self-contact |
+| `conversations` | Direct or group; `last_message_at` for list order; `disappearing_seconds` | `direct_key` unique (`"minId:maxId"`) allows one direct chat per pair |
+| `conversation_members` | Membership, role, per-member pin/mute/archive, `last_read_message_id`, `joined_at`/`left_at` | unique `(conversation, user)` |
+| `messages` | Text or system messages, reply link, `client_id`, `expires_at`, soft delete | unique `(sender, client_id)`; index `(conversation, id)` |
+| `attachments` | Uploaded files, ordered within a message | `storage_name` unique (random) |
+| `message_receipts` | Per-recipient `delivered_at` / `read_at` | PK `(message, user)` |
+| `message_reactions` | One emoji per user per message | PK `(message, user)` |
+
+```
+users ─< contacts >─ users
+users ─< conversation_members >─ conversations ─< messages ─< message_receipts
+                                                      │  └─< message_reactions
+                                                      └─< attachments
+```
+
+## API overview
+
+All REST paths are under `/api` with `Authorization: Bearer <token>`; errors are `{"detail": "..."}`. Interactive docs are at `/docs` when the backend runs. Full request/response shapes: [`docs/CONTRACT.md`](docs/CONTRACT.md).
+
+| Area | Endpoints |
+|---|---|
+| Auth | `POST /auth/request-otp`, `POST /auth/verify-otp`, `POST /auth/logout`, `GET/PATCH /me`, `POST /me/avatar` |
+| Contacts & search | `GET /users/lookup`, `GET/POST /contacts`, `PATCH/DELETE /contacts/{user_id}`, `GET /search?q=` |
+| Conversations | `GET /conversations`, `POST /conversations/direct`, `POST /conversations/group`, `GET/PATCH /conversations/{id}`, `PATCH /conversations/{id}/settings` |
+| Group admin | `POST /conversations/{id}/members`, `PATCH/DELETE /conversations/{id}/members/{user_id}` |
+| Messages | `GET/POST /conversations/{id}/messages`, `POST /conversations/{id}/read`, `DELETE /messages/{id}`, `PUT/DELETE /messages/{id}/reaction` |
+| Attachments | `POST /conversations/{id}/attachments`, `GET /attachments/{id}` |
+| WebSocket | `/ws?token=`: client sends `typing`, `delivered`, `ping`; server pushes `message.new`, `message.updated`, `receipt`, `conversation.updated`, `conversation.removed`, `read`, `typing`, `presence` |
+
+## Assumptions
+
+- Identity is a phone number; the OTP is mocked and always `123456`. Encryption is simulated (interface text only), as the brief allows.
+- A "contact" is a private, one-way address-book entry; anyone with an account can be messaged by phone number.
+- One direct conversation per pair of users; groups have admins (creator first) and the oldest member is promoted if the last admin leaves.
+- "Online" means at least one open WebSocket; "last seen" is the time the last one closed.
+- The seed (`python -m app.seed`) resets the database and creates 8 users; log in as `+15550000001` (Aarav Dudeja).
+- SQLite is enough for a demo-scale deployment, and it needs a persistent disk when hosted.
+- Features the brief marks as placeholders (calls, stories, linked devices) show "Coming soon".
+
 ## Quickstart
 
 Needs Python 3.13 and Node 22.
@@ -42,7 +117,7 @@ npm ci
 npm run dev
 ```
 
-Or run both with one command: `scripts/dev.sh` (seeds the database first). With Docker: `docker compose up --build`. More detail in [`docs/RUNNING.md`](docs/RUNNING.md).
+Or run both with one command: `scripts/dev.sh` (seeds the database first). With Docker: `docker compose up --build`. More detail in [`docs/RUNNING.md`](docs/RUNNING.md). Hosting the demo (Render + Vercel): [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ### Demo accounts
 

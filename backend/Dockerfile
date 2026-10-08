@@ -17,4 +17,4 @@ VOLUME /data
 
 EXPOSE 8000
 # SEED_ON_START=1 resets the database to the demo data before serving.
-CMD ["sh", "-c", "if [ \"$SEED_ON_START\" = \"1\" ]; then python -m app.seed; fi; exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "if [ \"$SEED_ON_START\" = \"1\" ]; then python -m app.seed; fi; exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
