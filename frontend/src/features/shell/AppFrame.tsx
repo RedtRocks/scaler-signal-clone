@@ -53,6 +53,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
           />
         }
         mobileView={pathname === "/" ? "list" : "pane"}
+        tabBarInPane={section === "calls" || section === "stories"}
       />
       <ToastViewport
         toast={toast && { id: toast.id, message: toast.message, action: toast.action?.label, onAction: toast.action?.run }}
