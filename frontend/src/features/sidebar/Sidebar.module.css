@@ -1,0 +1,151 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.search {
+  flex: none;
+  padding: 0 var(--space-3) var(--space-2);
+}
+
+.filters {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 0 var(--space-3) var(--space-2);
+}
+.filter {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-field);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.filter:hover {
+  background: var(--surface-selected);
+}
+.filter[aria-pressed="true"] {
+  background: var(--ultramarine);
+  color: var(--on-ultramarine);
+}
+.filter:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+
+.banner {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 6px var(--space-3);
+  background: var(--surface-field);
+  color: var(--ink-secondary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--space-2) var(--space-2);
+}
+
+.heading {
+  margin: 0;
+  padding: var(--space-3) var(--space-3) 4px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+}
+.centerTitle {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.centerCopy {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+
+.started {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-3) var(--space-4);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.started::-webkit-scrollbar {
+  display: none;
+}
+.startedTitle {
+  margin: var(--space-4) 0 0;
+  padding: 0 var(--space-3);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.phoneOnly {
+  display: none;
+}
+
+@media (max-width: 599px) {
+  .search {
+    padding: 0 var(--ios-gutter) 10px;
+  }
+  .filters {
+    padding: 0 var(--ios-gutter) 8px;
+  }
+  .filter {
+    height: 32px;
+    font-size: 15px;
+    background: var(--ios-field);
+  }
+  .scroll {
+    padding: 0;
+  }
+  .heading {
+    padding: 12px var(--ios-gutter) 4px;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    color: var(--ios-placeholder);
+  }
+  .phoneOnly {
+    display: block;
+  }
+  .started {
+    padding: var(--space-4) var(--ios-gutter) var(--space-6);
+  }
+  .startedTitle {
+    padding: 0 var(--ios-gutter);
+  }
+}

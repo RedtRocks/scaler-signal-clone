@@ -22,6 +22,8 @@ interface ConversationsState {
   /** Loaded on open: description and Members. */
   details: Record<Id, ConversationDetail>;
   selectedId: Id | null;
+  /** True once the first loadAll has finished (so screens can tell "loading" from "no chats"). */
+  loaded: boolean;
 
   loadAll: () => Promise<void>;
   loadDetail: (id: Id) => Promise<void>;
@@ -84,12 +86,13 @@ export const useConversationStore = create<ConversationsState>()((set, get) => {
     order: [],
     details: {},
     selectedId: null,
+    loaded: false,
 
     loadAll: async () => {
       const summaries = await api.listConversations();
       rememberUsers(peersOf(summaries));
       const byId = Object.fromEntries(summaries.map((summary) => [summary.id, summary]));
-      set({ byId, order: sortedIds(byId) });
+      set({ byId, order: sortedIds(byId), loaded: true });
     },
 
     loadDetail: async (id) => setDetail(await api.getConversation(id)),
@@ -157,6 +160,6 @@ export const useConversationStore = create<ConversationsState>()((set, get) => {
       get().markLeft(id);
     },
 
-    reset: () => set({ byId: {}, order: [], details: {}, selectedId: null }),
+    reset: () => set({ byId: {}, order: [], details: {}, selectedId: null, loaded: false }),
   };
 });

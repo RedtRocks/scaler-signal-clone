@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useRef, type ClipboardEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, type ClipboardEvent, type KeyboardEvent } from "react";
 import styles from "./OtpInput.module.css";
 
 export interface OtpInputProps {
@@ -17,10 +17,16 @@ export interface OtpInputProps {
 
 export function OtpInput({ value, onChange, onComplete, length = 6, error, disabled, autoFocus }: OtpInputProps) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
+  // The value we just committed. `value` is stale until the parent re-renders, but focus moves first.
+  const committed = useRef(value);
+  useEffect(() => {
+    committed.current = value;
+  }, [value]);
   const digits = Array.from({ length }, (_, i) => value[i] ?? "");
 
   const commit = (next: string, focusIndex: number) => {
     const clean = next.replace(/\D/g, "").slice(0, length);
+    committed.current = clean;
     onChange(clean);
     refs.current[Math.min(focusIndex, length - 1)]?.focus();
     if (clean.length === length) onComplete?.(clean);
@@ -72,7 +78,7 @@ export function OtpInput({ value, onChange, onComplete, length = 6, error, disab
             autoFocus={autoFocus && i === 0}
             onFocus={(e) => {
               // Keep digits contiguous: jump to the first empty box.
-              if (i > value.length) refs.current[value.length]?.focus();
+              if (i > committed.current.length) refs.current[committed.current.length]?.focus();
               else e.currentTarget.select();
             }}
             onKeyDown={onKeyDown(i)}

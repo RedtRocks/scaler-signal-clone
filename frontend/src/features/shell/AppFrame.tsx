@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppShell, NavRail, TabBar, ToastViewport, type NavRailId } from "@/components/ui";
+import { mediaUrl } from "@/lib/config";
 import { DialogHost } from "@/features/dialogs/DialogHost";
 import { Sidebar } from "@/features/sidebar/Sidebar";
 import { useAuthStore, useConversationStore, useToastStore } from "@/store";
@@ -33,7 +34,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
             active={section === "settings" ? undefined : section}
             badges={{ chats: unread }}
             selfName={me?.display_name}
-            selfAvatar={me?.avatar_url ?? undefined}
+            selfAvatar={mediaUrl(me?.avatar_url ?? null) ?? undefined}
             onSelect={go}
             onSettings={() => router.push("/settings")}
             onProfile={() => router.push("/settings/profile")}

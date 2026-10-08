@@ -1,6 +1,21 @@
 "use client";
 
-/** Renders whichever app-wide dialog is open (new chat, new group, contacts...). Owned by the auth/sidebar worker. */
+import { ContactsDialog } from "./ContactsDialog";
+import { useDialogStore } from "./dialogStore";
+import { NewChatDialog } from "./NewChatDialog";
+import { NewGroupDialog } from "./NewGroupDialog";
+
+/** Renders whichever app-wide dialog is open (new chat, new group, contacts). */
 export function DialogHost() {
-  return null;
+  const open = useDialogStore((s) => s.open);
+  switch (open) {
+    case "newChat":
+      return <NewChatDialog />;
+    case "newGroup":
+      return <NewGroupDialog />;
+    case "contacts":
+      return <ContactsDialog />;
+    default:
+      return null;
+  }
 }

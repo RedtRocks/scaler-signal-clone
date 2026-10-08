@@ -1,0 +1,171 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  background: var(--surface-sidebar);
+  color: var(--ink);
+}
+
+.card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 48px 40px 40px;
+  border-radius: 20px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-popover);
+}
+
+.logo {
+  display: block;
+  width: 200px;
+  height: auto;
+}
+.logoDark {
+  display: none;
+}
+:global([data-theme="dark"]) .logoLight {
+  display: none;
+}
+:global([data-theme="dark"]) .logoDark {
+  display: block;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+}
+.title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hint {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--brand-wash);
+  color: var(--brand-ultramarine);
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+}
+:global([data-theme="dark"]) .hint {
+  background: var(--surface-field);
+  color: var(--ink-secondary);
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.avatarButton {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  cursor: pointer;
+}
+.avatarButton:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 3px;
+}
+.avatarBadge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-field);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px var(--surface-raised);
+}
+.fileInput {
+  display: none;
+}
+
+.footnote {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-tertiary);
+  text-align: center;
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--alert);
+}
+
+/* Phone (iOS registration): no card, white page, large tap targets */
+@media (max-width: 599px) {
+  .page {
+    align-items: flex-start;
+    padding: 0;
+    background: var(--surface-pane-mobile);
+  }
+  .card {
+    max-width: none;
+    min-height: 100dvh;
+    padding: 56px var(--ios-gutter) 24px;
+    border-radius: 0;
+    background: var(--surface-pane-mobile);
+    box-shadow: none;
+    gap: var(--space-6);
+  }
+  .logo {
+    width: 160px;
+  }
+  .title {
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 16px;
+    line-height: 22px;
+  }
+  .form {
+    gap: var(--space-6);
+  }
+}
