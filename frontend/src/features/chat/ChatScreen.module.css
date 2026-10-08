@@ -1,0 +1,109 @@
+.screen {
+  position: relative;
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  background: var(--surface-pane);
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.side {
+  flex: none;
+  width: 380px;
+  border-left: 1px solid var(--divider);
+}
+
+/* Narrow panes: the drawer covers the conversation instead of squeezing it. */
+@media (max-width: 1199px) {
+  .side {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: auto;
+    border-left: 0;
+  }
+}
+
+.left {
+  flex: none;
+  margin: 0;
+  padding: var(--space-4);
+  border-top: 1px solid var(--divider);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: var(--ink-secondary);
+}
+
+/* Loading skeleton */
+.skelHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: none;
+  height: var(--header-height);
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--divider);
+}
+
+.skelAvatar,
+.skelLine,
+.skelBubbleIn,
+.skelBubbleOut {
+  display: block;
+  background: var(--surface-hover);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skelAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+}
+
+.skelLine {
+  height: 14px;
+  border-radius: var(--radius-sm);
+}
+
+.skelBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+}
+
+.skelBubbleIn,
+.skelBubbleOut {
+  height: 38px;
+  border-radius: var(--radius-bubble);
+}
+
+.skelBubbleOut {
+  align-self: flex-end;
+}
+
+@keyframes shimmer {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skelAvatar,
+  .skelLine,
+  .skelBubbleIn,
+  .skelBubbleOut {
+    animation: none;
+  }
+}

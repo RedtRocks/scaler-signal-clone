@@ -1,0 +1,59 @@
+.wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.scroller {
+  height: 100%;
+  overflow-y: auto;
+  overflow-anchor: none; /* the layout effect keeps the reading position itself */
+  overscroll-behavior: contain;
+  padding: var(--space-2) var(--space-4) var(--space-4);
+}
+
+.loadingOlder {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) 0;
+  color: var(--ultramarine);
+}
+
+.toBottom {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-3);
+}
+
+.reactionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reactionItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+}
+
+.reactionName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reactionEmoji {
+  font-size: 20px;
+}
+
+.confirmText {
+  margin: 0;
+  color: var(--ink-secondary);
+}
