@@ -9,6 +9,7 @@
 }
 
 .main {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -106,4 +107,21 @@
   .skelBubbleOut {
     animation: none;
   }
+}
+
+/* Shown while files are dragged over the chat */
+.dropZone {
+  position: absolute;
+  inset: 8px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--ultramarine);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-pane) 80%, transparent);
+  color: var(--ultramarine);
+  font-size: 17px;
+  font-weight: 600;
+  pointer-events: none;
 }

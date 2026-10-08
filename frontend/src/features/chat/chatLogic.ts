@@ -84,7 +84,13 @@ export function findMatches(messages: readonly Message[], query: string): Id[] {
   const needle = query.trim().toLowerCase();
   if (!needle) return [];
   return messages
-    .filter((message) => message.kind === "text" && !message.deleted && message.body.toLowerCase().includes(needle))
+    .filter(
+      (message) =>
+        message.kind === "text" &&
+        !message.deleted &&
+        (message.body.toLowerCase().includes(needle) ||
+          message.attachments.some((attachment) => attachment.file_name.toLowerCase().includes(needle))),
+    )
     .map((message) => message.id);
 }
 

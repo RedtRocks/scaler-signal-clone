@@ -127,6 +127,56 @@
   z-index: 1;
 }
 
+/* Attachments */
+.quoteBox {
+  display: contents;
+}
+.media {
+  margin: 2px 0 4px;
+}
+.filesOnly .media {
+  margin-bottom: 0;
+}
+.filesOnly .meta {
+  float: none;
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 -2px;
+}
+.bubble.bleed {
+  padding: 0;
+  overflow: hidden;
+}
+.bleed .media {
+  margin: 0;
+}
+.bleed .sender {
+  padding: 7px var(--space-3) 0;
+}
+.bleed .quoteBox {
+  display: block;
+  padding: 6px var(--space-3) 0;
+}
+.bleed .quoteBox > * {
+  margin-bottom: 4px;
+}
+.bleed .caption {
+  padding: 6px var(--space-3) 6px;
+}
+/* An image-only message carries its time on a pill over the picture */
+.mediaOnly .meta {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  float: none;
+  margin: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: #38383c;
+  --sg-meta: #fff;
+  --sg-status-bg: #38383c;
+}
+
 /* Desktop hover toolbar */
 .actions {
   align-self: center;
@@ -143,6 +193,9 @@
   opacity: 1;
 }
 @media (hover: none) {
+  .bubble.bleed {
+    padding: 0;
+  }
   .actions {
     display: none;
   }
@@ -181,6 +234,9 @@
   font-size: 13px;
   letter-spacing: -0.02em;
 }
+:global(.sg-mobile) .bubble.bleed {
+  padding: 0;
+}
 :global(.sg-mobile) .actions {
   display: none;
 }
@@ -203,6 +259,9 @@
   .meta {
     font-size: 13px;
     letter-spacing: -0.02em;
+  }
+  .bubble.bleed {
+    padding: 0;
   }
   .actions {
     display: none;

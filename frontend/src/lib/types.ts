@@ -48,11 +48,27 @@ export type SystemEvent =
   | { type: "renamed"; name: string }
   | { type: "timer_changed"; seconds: number | null };
 
+/** One file of a message. Local (optimistic) ones have a negative id and a blob: url. */
+export interface Attachment {
+  id: Id;
+  /** Server-relative ("/media/attachments/…"); pass through mediaUrl() before use. */
+  url: string;
+  file_name: string;
+  content_type: string;
+  /** Bytes. */
+  size: number;
+  /** Images only. */
+  width: number | null;
+  height: number | null;
+}
+
 export interface ReplyPreview {
   id: Id;
   sender_id: Id | null;
   body: string;
   deleted: boolean;
+  /** The first attachment of the quoted message. */
+  attachment: Attachment | null;
 }
 
 export interface Reaction {
@@ -78,6 +94,8 @@ export interface Message {
   /** Only on my own text messages. */
   status: MessageStatus | null;
   reactions: Reaction[];
+  /** In send order. [] when deleted or none. */
+  attachments: Attachment[];
 }
 
 export interface ConversationSummary {
@@ -159,9 +177,11 @@ export interface ConversationSettingsPatch {
 }
 
 export interface SendMessageBody {
+  /** The caption when there are attachments; may then be "". */
   body: string;
   client_id: string;
   reply_to_id?: Id;
+  attachment_ids?: Id[];
 }
 
 // ---- WebSocket frames: {"type": "...", "data": {...}} ----

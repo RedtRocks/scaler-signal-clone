@@ -1,10 +1,16 @@
 "use client";
 
 import { memo, useRef, type TouchEvent } from "react";
-import { MessageActions, MessageBubble } from "@/components/ui";
+import { MessageActions, MessageAttachments, MessageBubble } from "@/components/ui";
+import { quoteSummary } from "@/lib/attachments";
+import { mediaUrl } from "@/lib/config";
 import { formatBubbleTime } from "@/lib/format";
 import type { BubbleItem } from "@/lib/timeline";
 import type { Id, UserPublic } from "@/lib/types";
+import { useMessageStore } from "@/store";
+import { downloadAttachment } from "./download";
+import { mediaView } from "./attachmentView";
+import { useLightboxStore } from "./lightbox";
 import { myReaction, senderColor, summarizeReactions } from "./chatLogic";
 import styles from "./MessageRow.module.css";
 import { messageMenu, type MessageHandlers } from "./messageMenu";
@@ -36,6 +42,10 @@ export const MessageRow = memo(function MessageRow({
   const outgoing = direction === "outgoing";
   const stored = message.id > 0;
   const failed = message.status === "failed";
+  const uploadProgress = useMessageStore((state) =>
+    message.id < 0 && message.client_id ? state.uploads[message.client_id] : undefined,
+  );
+  const media = message.deleted || message.attachments.length === 0 ? null : mediaView(message.attachments, failed ? undefined : uploadProgress);
   const press = useRef<{ timer: ReturnType<typeof setTimeout>; x: number; y: number } | null>(null);
 
   const cancelPress = () => {
@@ -57,7 +67,11 @@ export const MessageRow = memo(function MessageRow({
   const quote = message.reply_to
     ? {
         author: message.reply_to.sender_id === meId ? "You" : nameOf(message.reply_to.sender_id ?? 0),
-        text: message.reply_to.deleted ? "This message was deleted." : message.reply_to.body,
+        text: message.reply_to.deleted ? "This message was deleted." : quoteSummary(message.reply_to),
+        thumbnail:
+          !message.reply_to.deleted && message.reply_to.attachment?.content_type.startsWith("image/")
+            ? (mediaUrl(message.reply_to.attachment.url) ?? undefined)
+            : undefined,
         color: isGroup ? senderColor(message.reply_to.sender_id) : undefined,
       }
     : undefined;
@@ -84,6 +98,21 @@ export const MessageRow = memo(function MessageRow({
         senderColor={senderColor(sender)}
         senderAvatar={senderUser?.avatar_url ?? undefined}
         quote={quote}
+        media={
+          media ? (
+            <MessageAttachments
+              images={media.images}
+              layout={media.layout}
+              extra={media.extra}
+              files={media.files}
+              onImageClick={(index) => useLightboxStore.getState().open(media.imageAttachments, index)}
+              onFileClick={(index) =>
+                downloadAttachment(media.fileAttachments[index]).catch(() => handlers.notify("Couldn't download the file."))
+              }
+            />
+          ) : undefined
+        }
+        mediaBleed={(media?.images.length ?? 0) > 0}
         onQuoteClick={message.reply_to ? () => handlers.jumpTo(message.reply_to!.id) : undefined}
         reactions={summarizeReactions(message.reactions, meId)}
         onReactionsClick={() => handlers.showReactions(message)}

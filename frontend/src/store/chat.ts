@@ -40,7 +40,12 @@ export function closeConversation(): void {
   select(null);
 }
 
-export function sendMessage(conversationId: Id, body: string, replyTo: Message | null = null): Promise<void> {
+export function sendMessage(
+  conversationId: Id,
+  body: string,
+  replyTo: Message | null = null,
+  files: File[] = [],
+): Promise<void> {
   stopTyping(conversationId);
-  return useMessageStore.getState().send(conversationId, body, replyTo);
+  return useMessageStore.getState().send(conversationId, body, replyTo, files);
 }

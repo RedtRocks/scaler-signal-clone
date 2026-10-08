@@ -1,5 +1,6 @@
 import { API_URL } from "./config";
 import type {
+  Attachment,
   Contact,
   ConversationDetail,
   ConversationPatch,
@@ -92,6 +93,42 @@ async function request<T>(method: string, path: string, options: RequestOptions 
   if (!response.ok) throw new ApiError(response.status, await readDetail(response));
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+/**
+ * Uploads one file with progress (fetch cannot report upload progress, XHR can).
+ * Resolves with the stored Attachment; rejects with an ApiError like every other call.
+ */
+export function uploadAttachment(
+  conversationId: Id,
+  file: File,
+  onProgress?: (fraction: number) => void,
+): Promise<Attachment> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", buildUrl(`/conversations/${conversationId}/attachments`));
+    const token = auth.getToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) onProgress(event.loaded / event.total);
+    };
+    xhr.onerror = () => reject(new ApiError(NETWORK_ERROR_STATUS, "Can't reach the server. Check your connection."));
+    xhr.onload = () => {
+      if (xhr.status === 401) auth.onUnauthorized();
+      let payload: unknown = null;
+      try {
+        payload = JSON.parse(xhr.responseText);
+      } catch {
+        // Not JSON; the status text below is used.
+      }
+      if (xhr.status >= 200 && xhr.status < 300) return resolve(payload as Attachment);
+      const detail = (payload as { detail?: unknown } | null)?.detail;
+      reject(new ApiError(xhr.status, typeof detail === "string" ? detail : xhr.statusText || `Upload failed (${xhr.status})`));
+    };
+    const form = new FormData();
+    form.append("file", file, file.name);
+    xhr.send(form);
+  });
 }
 
 export const api = {

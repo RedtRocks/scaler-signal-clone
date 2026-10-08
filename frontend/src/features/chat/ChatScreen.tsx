@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, ChatHeader, EmptyChatPane, useIsPhone, type MenuEntry } from "@/components/ui";
+import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
+import { Button, ChatHeader, EmptyChatPane, Lightbox, useIsPhone, type MenuEntry } from "@/components/ui";
+import { mediaUrl } from "@/lib/config";
 import { ApiError } from "@/lib/api";
 import type { Id, Message } from "@/lib/types";
 import {
@@ -21,6 +22,9 @@ import { useChatNames } from "./useChatNames";
 import { ChatComposer } from "./ChatComposer";
 import { headerSubtitle, typingText } from "./chatLogic";
 import { ChatSearch } from "./ChatSearch";
+import { downloadAttachment } from "./download";
+import { useLightboxStore } from "./lightbox";
+import { useStagingStore } from "./staging";
 import { InfoPanel, type Dialog } from "./InfoPanel";
 import { Timeline, type TimelineHandle } from "./Timeline";
 
@@ -57,6 +61,9 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
   const [searching, setSearching] = useState(false);
   const [hit, setHit] = useState<Id | null>(null);
   const [info, setInfo] = useState<{ nonce: number; dialog: Dialog } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  // dragenter/leave also fire for every child element, so count them instead of toggling.
+  const dragDepth = useRef(0);
 
   const isGroup = conversation.kind === "group";
   const peer = conversation.peer;
@@ -111,9 +118,42 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
       : []),
   ];
 
+  const canDrop = !conversation.left;
+  const carriesFiles = (event: DragEvent<HTMLElement>) => Array.from(event.dataTransfer.types).includes("Files");
+  const dropHandlers = canDrop
+    ? {
+        onDragEnter: (event: DragEvent<HTMLElement>) => {
+          if (!carriesFiles(event)) return;
+          dragDepth.current += 1;
+          setDragging(true);
+        },
+        onDragOver: (event: DragEvent<HTMLElement>) => {
+          if (carriesFiles(event)) event.preventDefault(); // required for drop to fire
+        },
+        onDragLeave: (event: DragEvent<HTMLElement>) => {
+          if (!carriesFiles(event)) return;
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setDragging(false);
+        },
+        onDrop: (event: DragEvent<HTMLElement>) => {
+          if (!carriesFiles(event)) return;
+          event.preventDefault();
+          dragDepth.current = 0;
+          setDragging(false);
+          useStagingStore.getState().add(id, Array.from(event.dataTransfer.files));
+          input.current?.focus();
+        },
+      }
+    : {};
+
   return (
     <div className={styles.screen}>
-      <div className={styles.main}>
+      <div className={styles.main} {...dropHandlers}>
+        {dragging ? (
+          <div className={styles.dropZone} aria-hidden="true">
+            <span>Drop files to attach them</span>
+          </div>
+        ) : null}
         <ChatHeader
           name={conversation.title}
           subtitle={phone ? typing : subtitle}
@@ -152,6 +192,7 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
           />
         )}
       </div>
+      <LightboxHost onError={() => push("Couldn't download the file.")} />
       {info ? (
         <div className={styles.side}>
           <InfoPanel
@@ -165,6 +206,29 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** The image viewer, shown whenever a bubble has opened it. */
+function LightboxHost({ onError }: { onError: () => void }) {
+  const { items, index, setIndex, close } = useLightboxStore();
+  useEffect(() => close, [close]); // leaving the conversation closes it
+  if (items.length === 0) return null;
+  return (
+    <Lightbox
+      items={items.map((attachment) => ({
+        key: attachment.id,
+        src: mediaUrl(attachment.url) ?? attachment.url,
+        name: attachment.file_name,
+      }))}
+      index={index}
+      onIndexChange={setIndex}
+      onClose={close}
+      onDownload={(item) => {
+        const attachment = items.find((candidate) => candidate.id === item.key);
+        if (attachment) downloadAttachment(attachment).catch(onError);
+      }}
+    />
   );
 }
 

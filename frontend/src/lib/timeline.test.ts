@@ -21,6 +21,7 @@ function message(senderId: number | null, time: string, overrides: Partial<Messa
     deleted: false,
     status: null,
     reactions: [],
+    attachments: [],
     ...overrides,
   };
 }

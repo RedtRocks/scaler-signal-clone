@@ -30,6 +30,10 @@ const LINE_ICONS = {
   react: "M20.6 12.5a8.6 8.6 0 1 1-8.1-9.1M8.5 14.5c1.8 2 5.2 2 7 0M9 9.5h.01M15 9.5h.01M19 2.5v5.5M16.25 5.25h5.5",
   edit: "M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4",
   user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20a7.5 7.5 0 0 1 15 0",
+  file: "M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM14 3v5h5",
+  download: "M12 4v11M7 11l5 5 5-5M5 20h14",
+  "chevron-left": "M15 5l-7 7 7 7",
+  "chevron-forward": "M9 5l7 7-7 7",
   warning: "M12 3.5l9 16H3zM12 10v4.5M12 17h.01",
 } as const;
 

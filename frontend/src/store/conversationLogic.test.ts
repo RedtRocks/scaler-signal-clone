@@ -40,6 +40,7 @@ function message(id: number, senderId: number, overrides: Partial<Message> = {})
     deleted: false,
     status: null,
     reactions: [],
+    attachments: [],
     ...overrides,
   };
 }

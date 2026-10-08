@@ -49,6 +49,14 @@ export { MessageActions, type MessageActionsProps } from "./MessageActions/Messa
 export { ReactionPicker, DEFAULT_REACTIONS, type ReactionPickerProps } from "./ReactionPicker/ReactionPicker";
 export { ReactionChips, type ReactionChipsProps, type ReactionSummary } from "./ReactionChips/ReactionChips";
 export { QuoteBlock, type QuoteBlockProps } from "./QuoteBlock/QuoteBlock";
+export {
+  MessageAttachments,
+  type MessageAttachmentsProps,
+  type MediaImage,
+  type MediaFile,
+} from "./MessageAttachments/MessageAttachments";
+export { StagedAttachments, type StagedAttachmentsProps, type StagedItem } from "./StagedAttachments/StagedAttachments";
+export { Lightbox, type LightboxProps, type LightboxItem } from "./Lightbox/Lightbox";
 export { DateDivider, formatDayLabel, type DateDividerProps } from "./DateDivider/DateDivider";
 export { ScrollToBottom, type ScrollToBottomProps } from "./ScrollToBottom/ScrollToBottom";
 export { EmptyChatPane, type EmptyChatPaneProps } from "./EmptyChatPane/EmptyChatPane";

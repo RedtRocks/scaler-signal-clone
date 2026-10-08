@@ -1,9 +1,11 @@
 import { create } from "zustand";
-import { api } from "@/lib/api";
+import { api, ApiError, uploadAttachment } from "@/lib/api";
+import { contentTypeOf, isImageType, measureImage } from "@/lib/attachments";
 import { newClientId } from "@/lib/clientId";
-import type { Id, Message, ReceiptEvent } from "@/lib/types";
+import type { Attachment, Id, Message, ReceiptEvent } from "@/lib/types";
 import { useAuthStore } from "./auth";
 import { useConversationStore } from "./conversations";
+import { useToastStore } from "./toasts";
 import {
   applyMessageUpdate,
   applyReceipt,
@@ -36,10 +38,15 @@ export const EMPTY_THREAD: Thread = { messages: [], hasMore: true, loading: fals
 
 interface MessagesState {
   threads: Record<Id, Thread>;
+  /** client_id of a message being sent → upload progress (0..1) of each of its files. */
+  uploads: Record<string, number[]>;
   loadLatest: (conversationId: Id) => Promise<void>;
   loadOlder: (conversationId: Id) => Promise<void>;
-  /** Optimistic send: the bubble shows at once as "sending", then becomes the stored Message or "failed". */
-  send: (conversationId: Id, body: string, replyTo?: Message | null) => Promise<void>;
+  /**
+   * Optimistic send: the bubble shows at once as "sending" (with local previews of `files`),
+   * then becomes the stored Message or "failed". Files upload first, then the message is posted.
+   */
+  send: (conversationId: Id, body: string, replyTo?: Message | null, files?: File[]) => Promise<void>;
   retry: (conversationId: Id, clientId: string) => Promise<void>;
   /** A stored Message from the POST response or a message.new push. Safe to call twice. */
   receive: (message: Message) => void;
@@ -52,6 +59,33 @@ interface MessagesState {
   /** Delete for everyone; the message.updated push updates the timeline. */
   deleteForEveryone: (messageId: Id) => Promise<void>;
   reset: () => void;
+}
+
+/** Files of a message still being sent: kept outside the store (File isn't serialisable state). */
+interface PendingSend {
+  files: File[];
+  /** The stored Attachment of each file once its upload finished; a retry skips those. */
+  uploaded: (Attachment | null)[];
+  /** blob: urls to release once the stored message has replaced the optimistic one. */
+  previewUrls: string[];
+}
+const pendingSends = new Map<string, PendingSend>();
+const RELEASE_PREVIEW_MS = 10_000;
+
+/** A local stand-in for a file being sent: blob: preview url and, for images, its measured size. */
+async function localAttachment(file: File): Promise<Attachment> {
+  const url = URL.createObjectURL(file);
+  const contentType = contentTypeOf(file) ?? file.type;
+  const size = isImageType(contentType) ? await measureImage(url) : null;
+  return {
+    id: nextLocalId--,
+    url,
+    file_name: file.name,
+    content_type: contentType,
+    size: file.size,
+    width: size?.width ?? null,
+    height: size?.height ?? null,
+  };
 }
 
 /** Optimistic messages count down from -1 so they never collide with stored ids. */
@@ -85,22 +119,60 @@ export const useMessageStore = create<MessagesState>()((set, get) => {
     }
   };
 
-  /** POSTs an optimistic message; client_id makes a resend safe. */
+  const setProgress = (clientId: string, change: (fractions: number[]) => number[]) =>
+    set((state) => ({ uploads: { ...state.uploads, [clientId]: change(state.uploads[clientId] ?? []) } }));
+
+  /** Uploads every file that isn't stored yet, in parallel. Throws the first failure after all settle. */
+  const uploadFiles = async (conversationId: Id, clientId: string, job: PendingSend) => {
+    const results = await Promise.allSettled(
+      job.files.map(async (file, index) => {
+        if (job.uploaded[index]) return;
+        const type = contentTypeOf(file) ?? file.type;
+        const upload = file.type === type ? file : new File([file], file.name, { type });
+        job.uploaded[index] = await uploadAttachment(conversationId, upload, (fraction) =>
+          setProgress(clientId, (all) => all.map((value, i) => (i === index ? fraction : value))),
+        );
+        setProgress(clientId, (all) => all.map((value, i) => (i === index ? 1 : value)));
+      }),
+    );
+    const failure = results.find((result) => result.status === "rejected");
+    if (failure) throw (failure as PromiseRejectedResult).reason;
+  };
+
+  const finishSend = (clientId: string) => {
+    const job = pendingSends.get(clientId);
+    pendingSends.delete(clientId);
+    set((state) => ({
+      uploads: Object.fromEntries(Object.entries(state.uploads).filter(([key]) => key !== clientId)),
+    }));
+    if (job) setTimeout(() => job.previewUrls.forEach((url) => URL.revokeObjectURL(url)), RELEASE_PREVIEW_MS);
+  };
+
+  /** Uploads the files, then POSTs the optimistic message; client_id makes a resend safe. */
   const deliver = async (pending: PendingMessage) => {
+    const job = pendingSends.get(pending.client_id);
     try {
+      if (job) await uploadFiles(pending.conversation_id, pending.client_id, job);
       const stored = await api.sendMessage(pending.conversation_id, {
         body: pending.body,
         client_id: pending.client_id,
         reply_to_id: pending.reply_to?.id,
+        attachment_ids: job ? job.uploaded.map((attachment) => attachment!.id) : undefined,
       });
       get().receive(stored);
-    } catch {
+      finishSend(pending.client_id);
+    } catch (error) {
       updateMessages(pending.conversation_id, (messages) => setPendingStatus(messages, pending.client_id, "failed"));
+      // A file the server refuses will be refused again, so say why instead of only offering retry.
+      if (error instanceof ApiError && (error.status === 400 || error.status === 413)) {
+        useToastStore.getState().push(error.detail);
+      }
     }
   };
 
   return {
     threads: {},
+    uploads: {},
 
     loadLatest: (conversationId) => loadPage(conversationId),
 
@@ -110,18 +182,29 @@ export const useMessageStore = create<MessagesState>()((set, get) => {
       if (hasMore && beforeId !== undefined) await loadPage(conversationId, beforeId);
     },
 
-    send: async (conversationId, body, replyTo = null) => {
+    send: async (conversationId, body, replyTo = null, files = []) => {
       const me = useAuthStore.getState().me;
       const text = body.trim();
-      if (!me || !text) return;
+      if (!me || (!text && files.length === 0)) return;
+      const clientId = newClientId();
+      const previews = await Promise.all(files.map(localAttachment));
+      if (files.length > 0) {
+        pendingSends.set(clientId, {
+          files,
+          uploaded: files.map(() => null),
+          previewUrls: previews.map((preview) => preview.url),
+        });
+        set((state) => ({ uploads: { ...state.uploads, [clientId]: files.map(() => 0) } }));
+      }
       const pending = createOptimisticMessage({
         localId: nextLocalId--,
         conversationId,
         senderId: me.id,
-        clientId: newClientId(),
+        clientId,
         body: text,
         replyTo,
         now: new Date().toISOString(),
+        attachments: previews,
       });
       updateMessages(conversationId, (messages) => upsertMessage(messages, pending));
       useConversationStore.getState().noteMessage(pending);
@@ -169,6 +252,10 @@ export const useMessageStore = create<MessagesState>()((set, get) => {
 
     deleteForEveryone: (messageId) => api.deleteMessage(messageId),
 
-    reset: () => set({ threads: {} }),
+    reset: () => {
+      pendingSends.forEach((job) => job.previewUrls.forEach((url) => URL.revokeObjectURL(url)));
+      pendingSends.clear();
+      set({ threads: {}, uploads: {} });
+    },
   };
 });

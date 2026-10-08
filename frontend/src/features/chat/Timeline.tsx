@@ -206,6 +206,7 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
       retry: (message) => {
         if (message.client_id) void useMessageStore.getState().retry(id, message.client_id);
       },
+      notify: push,
       showReactions: setReactionsOf,
       jumpTo: (messageId) => {
         if (!jumpTo(messageId)) push("That message isn't loaded yet.");

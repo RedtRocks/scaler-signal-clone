@@ -26,6 +26,7 @@ function msg(id: number, sender: number | null, extra: Partial<Message> = {}): M
     deleted: false,
     status: null,
     reactions: [],
+    attachments: [],
     ...extra,
   };
 }

@@ -1,6 +1,6 @@
 // Pure list operations behind the messages store. Lists are oldest-first:
 // stored messages in id order, then optimistic ones (negative ids) in send order.
-import type { Id, IsoTime, Message, MessageStatus, ServerMessageStatus } from "@/lib/types";
+import type { Attachment, Id, IsoTime, Message, MessageStatus, ServerMessageStatus } from "@/lib/types";
 
 const STATUS_RANK: Record<MessageStatus, number> = { failed: 0, sending: 0, sent: 1, delivered: 2, read: 3 };
 
@@ -59,7 +59,15 @@ export function applyMessageUpdate(list: Message[], updated: Message): Message[]
   if (!list.some((message) => message.id === updated.id)) return list;
   return upsertMessage(list, updated).map((message) =>
     message.reply_to?.id === updated.id
-      ? { ...message, reply_to: { ...message.reply_to, body: updated.body, deleted: updated.deleted } }
+      ? {
+          ...message,
+          reply_to: {
+            ...message.reply_to,
+            body: updated.body,
+            deleted: updated.deleted,
+            attachment: updated.deleted ? null : message.reply_to.attachment,
+          },
+        }
       : message,
   );
 }
@@ -85,6 +93,8 @@ interface OptimisticDraft {
   body: string;
   replyTo: Message | null;
   now: IsoTime;
+  /** Local previews of the files being uploaded (blob: urls, negative ids). */
+  attachments?: Attachment[];
 }
 
 export function createOptimisticMessage(draft: OptimisticDraft): PendingMessage {
@@ -98,13 +108,20 @@ export function createOptimisticMessage(draft: OptimisticDraft): PendingMessage 
     body: draft.body,
     system_event: null,
     reply_to: replyTo
-      ? { id: replyTo.id, sender_id: replyTo.sender_id, body: replyTo.body, deleted: replyTo.deleted }
+      ? {
+          id: replyTo.id,
+          sender_id: replyTo.sender_id,
+          body: replyTo.body,
+          deleted: replyTo.deleted,
+          attachment: replyTo.attachments?.[0] ?? null,
+        }
       : null,
     created_at: draft.now,
     expires_at: null,
     deleted: false,
     status: "sending",
     reactions: [],
+    attachments: draft.attachments ?? [],
   };
 }
 

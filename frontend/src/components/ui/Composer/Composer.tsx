@@ -1,7 +1,16 @@
 "use client";
 
 import clsx from "clsx";
-import { useImperativeHandle, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode, type Ref } from "react";
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ClipboardEvent,
+  type KeyboardEvent,
+  type ReactNode,
+  type Ref,
+} from "react";
 import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";
 import styles from "./Composer.module.css";
@@ -21,6 +30,12 @@ export interface ComposerProps {
   typingThrottleMs?: number;
   /** Slot above the input row: the QuoteBlock "Replying to" bar. */
   quote?: ReactNode;
+  /** Slot above the quote and the input row: files waiting to be sent (StagedAttachments). */
+  staged?: ReactNode;
+  /** Sending is allowed with an empty text box (there is something staged). */
+  canSendEmpty?: boolean;
+  /** Paste into the input; the host can take files out of `event.clipboardData`. */
+  onPaste?: (event: ClipboardEvent<HTMLTextAreaElement>) => void;
   onAttach?: () => void;
   onEmoji?: () => void;
   onSticker?: () => void;
@@ -45,6 +60,9 @@ export function Composer({
   onTyping,
   typingThrottleMs = 2000,
   quote,
+  staged,
+  canSendEmpty,
+  onPaste,
   onAttach,
   onEmoji,
   onSticker,
@@ -75,7 +93,7 @@ export function Composer({
 
   const send = () => {
     const text = value.trim();
-    if (!text || disabled) return;
+    if ((!text && !canSendEmpty) || disabled) return;
     onSend?.(text);
     setValue("");
   };
@@ -102,6 +120,7 @@ export function Composer({
       disabled={disabled}
       autoFocus={autoFocus}
       onKeyDown={onKeyDown}
+      onPaste={onPaste}
       onChange={(e) => {
         setValue(e.target.value);
         const now = Date.now();
@@ -113,7 +132,7 @@ export function Composer({
     />
   );
 
-  const hasText = value.trim().length > 0;
+  const hasText = value.trim().length > 0 || Boolean(canSendEmpty);
   const sendBtn = (
     <button type="button" className={styles.send} aria-label="Send" onClick={send} disabled={disabled}>
       <Icon name="send" size={layout === "mobile" ? 32 : 36} />
@@ -122,6 +141,7 @@ export function Composer({
 
   return (
     <div className={clsx(styles.composer, layout === "mobile" && styles.mobile)}>
+      {staged}
       {quote ? <div className={styles.quote}>{quote}</div> : null}
       {layout === "mobile" ? (
         <div className={styles.row}>

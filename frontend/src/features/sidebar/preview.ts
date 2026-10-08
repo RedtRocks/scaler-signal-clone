@@ -1,3 +1,4 @@
+import { messageSummary } from "@/lib/attachments";
 import { systemEventText } from "@/lib/format";
 import type { ConversationSummary, Id, Message } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export function rowPreview(
   }
   const mine = last.sender_id === meId;
   const status = mine && last.status && last.status !== "failed" ? last.status : undefined;
-  const text = last.deleted ? (mine ? "You deleted this message" : "This message was deleted") : last.body;
+  const text = last.deleted ? (mine ? "You deleted this message" : "This message was deleted") : messageSummary(last);
   let sender: string | undefined;
   if (conversation.kind === "group" && !last.deleted) {
     sender = mine ? "You" : last.sender_id === null ? undefined : nameOf(last.sender_id) || undefined;

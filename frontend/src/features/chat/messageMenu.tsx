@@ -11,6 +11,8 @@ export interface MessageHandlers {
   retry: (message: Message) => void;
   showReactions: (message: Message) => void;
   jumpTo: (messageId: number) => void;
+  /** A short toast. */
+  notify: (text: string) => void;
   openMenu: (message: Message, at: { x: number; y: number }) => void;
 }
 
@@ -18,8 +20,8 @@ export interface MessageHandlers {
 export function messageMenu(message: Message, handlers: MessageHandlers, meId: number | undefined): MenuEntry[] {
   const items: MenuEntry[] = [
     { label: "Reply", icon: "reply", onSelect: () => handlers.reply(message) },
-    { label: "Copy text", icon: "copy", onSelect: () => handlers.copy(message) },
   ];
+  if (message.body) items.push({ label: "Copy text", icon: "copy", onSelect: () => handlers.copy(message) });
   if (canDeleteForEveryone(message, meId)) {
     items.push("separator", {
       label: "Delete for everyone",

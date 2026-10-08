@@ -95,3 +95,13 @@ button.body:focus-visible {
   outline: 2px solid var(--ultramarine);
   outline-offset: -2px;
 }
+
+.thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  align-self: center;
+  margin: 4px 4px 4px 0;
+  border-radius: 6px;
+  object-fit: cover;
+}

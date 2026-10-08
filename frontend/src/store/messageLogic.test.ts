@@ -29,6 +29,7 @@ function stored(id: number, overrides: Partial<Message> = {}): Message {
     deleted: false,
     status: null,
     reactions: [],
+    attachments: [],
     ...overrides,
   };
 }
@@ -84,6 +85,7 @@ describe("optimistic send reconciliation", () => {
       sender_id: PEER,
       body: "original",
       deleted: false,
+      attachment: null,
     });
   });
 });
@@ -126,10 +128,12 @@ describe("receipts and updates", () => {
   });
 
   it("applies message.updated and refreshes replies that quote it", () => {
-    const reply = stored(2, { reply_to: { id: 1, sender_id: PEER, body: "message 1", deleted: false } });
+    const reply = stored(2, {
+      reply_to: { id: 1, sender_id: PEER, body: "message 1", deleted: false, attachment: null },
+    });
     const list = applyMessageUpdate([stored(1), reply], stored(1, { body: "", deleted: true }));
     expect(list[0].deleted).toBe(true);
-    expect(list[1].reply_to).toEqual({ id: 1, sender_id: PEER, body: "", deleted: true });
+    expect(list[1].reply_to).toEqual({ id: 1, sender_id: PEER, body: "", deleted: true, attachment: null });
   });
 
   it("ignores updates for messages that are not loaded", () => {
@@ -149,5 +153,47 @@ describe("cursors", () => {
   it("finds the newest incoming text message to mark read", () => {
     expect(latestIncomingId(list, ME)).toBe(4);
     expect(latestIncomingId([stored(6, { kind: "system" })], ME)).toBeUndefined();
+  });
+});
+
+describe("attachments", () => {
+  const photo = {
+    id: 7,
+    url: "/media/attachments/a.png",
+    file_name: "a.png",
+    content_type: "image/png",
+    size: 100,
+    width: 4,
+    height: 3,
+  };
+
+  it("an optimistic message shows its local previews, then the stored attachments win", () => {
+    const local = { ...photo, id: -5, url: "blob:http://localhost/x" };
+    const pending = createOptimisticMessage({
+      localId: -1,
+      conversationId: 10,
+      senderId: ME,
+      clientId: "img",
+      body: "",
+      replyTo: null,
+      now: "2026-10-08T10:05:00Z",
+      attachments: [local],
+    });
+    expect(pending.attachments).toEqual([local]);
+
+    const reconciled = upsertMessage([pending], stored(3, { client_id: "img", sender_id: ME, attachments: [photo] }));
+    expect(reconciled).toHaveLength(1);
+    expect(reconciled[0].attachments).toEqual([photo]);
+  });
+
+  it("quotes the first attachment of the replied-to message", () => {
+    const quoted = stored(1, { attachments: [photo] });
+    expect(optimistic(-2, "r", quoted).reply_to?.attachment).toEqual(photo);
+  });
+
+  it("deleting a message clears the attachment in replies that quote it", () => {
+    const reply = stored(2, { reply_to: { id: 1, sender_id: PEER, body: "", deleted: false, attachment: photo } });
+    const list = applyMessageUpdate([stored(1, { attachments: [photo] }), reply], stored(1, { deleted: true, attachments: [] }));
+    expect(list[1].reply_to?.attachment).toBeNull();
   });
 });

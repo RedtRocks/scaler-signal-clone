@@ -22,7 +22,7 @@ export interface MessageBubbleProps {
   sender?: string;
   senderColor?: SenderColor;
   senderAvatar?: string;
-  quote?: { author: string; text: string; color?: SenderColor };
+  quote?: { author: string; text: string; color?: SenderColor; thumbnail?: string };
   onQuoteClick?: () => void;
   /** Single emoji (index.d.ts). Prefer `reactions` for counts. */
   reaction?: string;
@@ -31,6 +31,10 @@ export interface MessageBubbleProps {
   chatColor?: string;
   /** Renders "This message was deleted." */
   deleted?: boolean;
+  /** Attachments (MessageAttachments), drawn above the text. */
+  media?: ReactNode;
+  /** The media is images: they fill the bubble edge to edge (Signal style) instead of sitting in the padding. */
+  mediaBleed?: boolean;
   /** Desktop hover toolbar (MessageActions), placed beside the bubble. */
   actions?: ReactNode;
   /** Briefly flash (jumped to from a quote). */
@@ -56,6 +60,8 @@ export function MessageBubble({
   onReactionsClick,
   chatColor,
   deleted,
+  media,
+  mediaBleed,
   actions,
   highlighted,
   id,
@@ -68,6 +74,16 @@ export function MessageBubble({
   const hasReactions = !!summary?.some((r) => r.count > 0);
   const showAvatar = !out && sender && (position === "single" || position === "last");
   const showName = !out && sender && (position === "single" || position === "first");
+  const hasText = Boolean(children) && !deleted;
+  const hasMedia = Boolean(media) && !deleted;
+  const bleed = hasMedia && Boolean(mediaBleed);
+  const meta = (
+    <span className={styles.meta}>
+      {time}
+      {expires ? <Icon name="timer" size={13} strokeWidth={1.8} label="Disappearing" /> : null}
+      {out && !deleted ? <DeliveryStatus status={status} /> : null}
+    </span>
+  );
 
   return (
     <div
@@ -89,28 +105,48 @@ export function MessageBubble({
         )
       ) : null}
       <div className={styles.stack}>
-        <div className={clsx(styles.bubble, deleted && styles.deleted)} onContextMenu={onContextMenu}>
+        <div
+          className={clsx(
+            styles.bubble,
+            deleted && styles.deleted,
+            bleed && styles.bleed,
+            bleed && !hasText && styles.mediaOnly,
+            hasMedia && !bleed && !hasText && styles.filesOnly,
+          )}
+          onContextMenu={onContextMenu}
+        >
           {showName ? (
             <div className={styles.sender} style={{ color: `var(--sender-${senderColor})` }}>
               {sender}
             </div>
           ) : null}
           {quote && !deleted ? (
-            <QuoteBlock
-              variant="bubble"
-              author={quote.author}
-              text={quote.text}
-              color={out ? undefined : quote.color}
-              onOutgoing={out}
-              onClick={onQuoteClick}
-            />
+            <div className={styles.quoteBox}>
+              <QuoteBlock
+                variant="bubble"
+                author={quote.author}
+                text={quote.text}
+                thumbnail={quote.thumbnail}
+                color={out ? undefined : quote.color}
+                onOutgoing={out}
+                onClick={onQuoteClick}
+              />
+            </div>
           ) : null}
-          <span className={styles.text}>{deleted ? "This message was deleted." : children}</span>
-          <span className={styles.meta}>
-            {time}
-            {expires ? <Icon name="timer" size={13} strokeWidth={1.8} label="Disappearing" /> : null}
-            {out && !deleted ? <DeliveryStatus status={status} /> : null}
-          </span>
+          {hasMedia ? <div className={styles.media}>{media}</div> : null}
+          {bleed && hasText ? (
+            <div className={styles.caption}>
+              <span className={styles.text}>{children}</span>
+              {meta}
+            </div>
+          ) : (
+            <>
+              {hasText || deleted ? (
+                <span className={styles.text}>{deleted ? "This message was deleted." : children}</span>
+              ) : null}
+              {meta}
+            </>
+          )}
         </div>
         {hasReactions && summary ? (
           <ReactionChips reactions={summary} onClick={onReactionsClick} className={styles.reactions} />

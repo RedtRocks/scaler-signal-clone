@@ -16,6 +16,7 @@ const msg = (patch: Partial<Message>): Message => ({
   deleted: false,
   status: null,
   reactions: [],
+    attachments: [],
   ...patch,
 });
 const nameOf = (id: number) => (id === 2 ? "Kai" : "");
@@ -38,5 +39,12 @@ describe("rowPreview", () => {
   it("hides failed status and handles no message", () => {
     expect(rowPreview({ kind: "direct" }, msg({ sender_id: 1, status: "failed" }), 1, nameOf).status).toBeUndefined();
     expect(rowPreview({ kind: "direct" }, null, 1, nameOf).text).toBe("");
+  });
+  it("reads like Signal for attachments", () => {
+    const photo = { id: 9, url: "/media/attachments/a.png", file_name: "a.png", content_type: "image/png", size: 5, width: 1, height: 1 };
+    const pdf = { ...photo, file_name: "Invoice.pdf", content_type: "application/pdf" };
+    expect(rowPreview({ kind: "direct" }, msg({ body: "", attachments: [photo] }), 1, nameOf).text).toBe("📷 Photo");
+    expect(rowPreview({ kind: "direct" }, msg({ body: "", attachments: [pdf] }), 1, nameOf).text).toBe("📎 Invoice.pdf");
+    expect(rowPreview({ kind: "direct" }, msg({ body: "look!", attachments: [photo] }), 1, nameOf).text).toBe("look!");
   });
 });

@@ -2,6 +2,7 @@
 
 import { ConversationRow, Spinner } from "@/components/ui";
 import { mediaUrl } from "@/lib/config";
+import { messageSummary } from "@/lib/attachments";
 import { formatListTime } from "@/lib/format";
 import type { Contact, Id, SearchResults as Results } from "@/lib/types";
 import styles from "./Sidebar.module.css";
@@ -64,7 +65,7 @@ export function SearchSections({
                 <ConversationRow
                   name={hit.conversation_title}
                   time={formatListTime(hit.message.created_at)}
-                  preview={hit.message.body}
+                  preview={messageSummary(hit.message)}
                   onClick={() => onOpenMessage(hit.conversation_id)}
                 />
               </li>
