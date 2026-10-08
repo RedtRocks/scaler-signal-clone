@@ -1,0 +1,12 @@
+# Render Blueprint for the backend (free plan). The frontend deploys to Vercel; see docs/DEPLOY.md.
+services:
+  - type: web
+    name: signal-clone-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /docs
+    envVars:
+      - key: ALLOWED_ORIGINS
+        sync: false # set to the Vercel URL, e.g. https://signal-clone.vercel.app
