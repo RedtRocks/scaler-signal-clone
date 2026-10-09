@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Icon } from "../Icon/Icon";
 import styles from "./Avatar.module.css";
 
@@ -31,14 +31,16 @@ export function initials(name: string) {
 }
 
 export function Avatar({ name, src, size = 48, kind, online, className }: AvatarProps) {
+  // A photo that fails to load falls back to initials instead of a broken-image box.
+  const [failed, setFailed] = useState<string>();
   let variant: string | undefined;
   let inner: ReactNode;
   if (kind === "note") {
     variant = styles.note;
     inner = <Icon name="note" size={Math.round(size * 0.5)} />;
-  } else if (src) {
+  } else if (src && failed !== src) {
     // eslint-disable-next-line @next/next/no-img-element -- avatars are arbitrary user URLs / blobs
-    inner = <img src={src} alt="" className={styles.img} />;
+    inner = <img src={src} alt="" className={styles.img} onError={() => setFailed(src)} />;
   } else if (kind === "group") {
     variant = styles.group;
     inner = (
