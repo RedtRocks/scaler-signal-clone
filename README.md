@@ -13,17 +13,18 @@ Checked against the glossary in `CONTEXT.md`. Backend rules are covered by `pyte
 - [x] Group admin rules: rename, add and remove members, make admins, leave (the oldest member becomes admin if the last admin leaves)
 - [x] Contacts as private, one-way address-book entries with optional nicknames
 - [x] Conversation list sorted by last activity, with unread counts, pin, mute and archive
-- [x] Text messages with optimistic sending (client id), replies, emoji reactions, delete for everyone
+- [x] Text messages with optimistic sending (client id), replies (bonus), emoji reactions (bonus), forward, edit within 24 hours, delete for me and delete for everyone
 - [x] Message status: sending, sent, delivered, read (the weakest across recipients in a group)
 - [x] Typing indicators and online / last seen presence
-- [x] Disappearing-message timer per conversation, with system messages in the timeline
+- [x] Disappearing messages (bonus): timer per conversation, expired messages removed by a background task, with system messages in the timeline
 - [x] Attachments (bonus): up to 10 images, PDFs, text, zip, audio or video files (10 MB each) per message with a caption; file picker, paste and drag-and-drop; upload progress, retry, Signal-style image grid, lightbox, download, quotes with a thumbnail; files are deleted with the message
 - [x] Search across conversations, contacts and messages
 - [x] Settings: profile (name, about, photo upload), appearance (System / Light / Dark), chats, notifications, privacy, about, log out
-- [x] Keyboard shortcuts (press `?` in the app): Ctrl/Cmd+K search, Alt+N new chat, Alt+G new group, Alt+S settings, Alt+Up/Down switch chat, Esc close chat
-- [x] Light and dark themes; responsive layouts (desktop three-column, phone single-column with tab bar)
-- [ ] Calls, Stories, Linked devices, Help and Donate: "Coming soon" placeholders, as intended
-- [ ] Note to Self (bonus, not built)
+- [x] Keyboard shortcuts (bonus, press `?` in the app): Ctrl/Cmd+K search, Alt+N new chat, Alt+G new group, Alt+S settings, Alt+Up/Down switch chat, Esc close chat
+- [x] Dark mode (bonus) and responsive design (bonus): desktop three-column, tablet avatar strip, phone single-column with tab bar
+- [x] Stories: text stories that last 24 hours, with a full-screen viewer and view tracking
+- [x] Note to Self (bonus): a chat with yourself, started from New chat
+- [ ] Calls, Linked devices, Help and Donate: "Coming soon" placeholders, as intended
 
 ## Tech stack
 
