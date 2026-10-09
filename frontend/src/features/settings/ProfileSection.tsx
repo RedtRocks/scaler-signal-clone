@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { Avatar, Button, Icon, SettingsGroup, TextField } from "@/components/ui";
+import { Avatar, AvatarCropper, Button, Icon, SettingsGroup, TextField } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { mediaUrl } from "@/lib/config";
 import { useAuthStore, useToastStore, useSession } from "@/store";
@@ -20,6 +20,8 @@ export function ProfileSection() {
   const [about, setAbout] = useState(me?.about ?? "");
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  /** The picture just chosen, waiting in the crop dialog. */
+  const [toCrop, setToCrop] = useState<File | null>(null);
 
   if (!me) return null;
   const trimmed = name.trim();
@@ -30,10 +32,16 @@ export function ProfileSection() {
     event.target.value = "";
     if (!file) return;
     if (!file.type.startsWith("image/")) return toast("Choose an image file.");
-    if (file.size > MAX_AVATAR_BYTES) return toast("Photos can be up to 2 MB.");
+    setToCrop(file);
+  }
+
+  /** The cropped square comes back from the dialog and is uploaded. */
+  async function uploadCropped(cropped: File) {
+    setToCrop(null);
+    if (cropped.size > MAX_AVATAR_BYTES) return toast("Photos can be up to 2 MB.");
     setBusy(true);
     try {
-      setMe(await api.uploadAvatar(file));
+      setMe(await api.uploadAvatar(cropped));
       toast("Photo updated");
     } catch (e) {
       toast(e instanceof ApiError ? e.detail : "Couldn't upload the photo.");
@@ -91,6 +99,7 @@ export function ProfileSection() {
           Save
         </Button>
       </div>
+      {toCrop ? <AvatarCropper file={toCrop} onCancel={() => setToCrop(null)} onDone={(f) => void uploadCropped(f)} /> : null}
     </form>
   );
 }

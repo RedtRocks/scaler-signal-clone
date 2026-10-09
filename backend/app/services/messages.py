@@ -70,8 +70,14 @@ def send_message(
     require_active(member)
     conversation = member.conversation
     if reply_to_id is not None:
-        quoted = db.get(Message, reply_to_id)
-        if quoted is None or quoted.conversation_id != conversation.id:
+        # Only a message the sender can see may be quoted, so a member who joined later
+        # can't pull out the text of messages from before they joined.
+        quoted = db.scalar(
+            only_visible_to(select(Message), member.user_id).where(
+                Message.id == reply_to_id, Message.conversation_id == conversation.id
+            )
+        )
+        if quoted is None:
             raise BadRequest("You can only reply to a message in this conversation")
 
     now = utcnow()

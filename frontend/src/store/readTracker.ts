@@ -17,8 +17,8 @@ function markOpenConversationRead(): void {
   const upTo = useMessageStore.getState().advanceReadPointer(conversationId);
   if (upTo === undefined) return;
   useConversationStore.getState().clearUnread(conversationId);
-  // Best effort: a failed POST leaves the server count high until the next read.
-  api.markRead(conversationId, upTo).catch(() => {});
+  // If the POST fails, move the pointer back so the next focus or new message tries again.
+  api.markRead(conversationId, upTo).catch(() => useMessageStore.getState().rewindReadPointer(conversationId, upTo));
 }
 
 /**

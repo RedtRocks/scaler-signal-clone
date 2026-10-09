@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Avatar, Button, COUNTRIES, Icon, OtpInput, PhoneInput, Spinner, TextField, toE164 } from "@/components/ui";
+import { Avatar, AvatarCropper, Button, COUNTRIES, Icon, OtpInput, PhoneInput, Spinner, TextField, toE164 } from "@/components/ui";
 import { ApiError } from "@/lib/api";
 import { Splash } from "@/features/shell/Splash";
 import { bootstrap, useAuthStore, useSession } from "@/store";
@@ -14,7 +14,6 @@ type Step = "phone" | "otp";
 const NAME_MAX = 50;
 const ABOUT_MAX = 140;
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 
 function messageOf(error: unknown, fallback: string): string {
   if (error instanceof ApiError) return error.status === 0 ? "Can't reach the server. Check your connection." : error.detail;
@@ -203,12 +202,14 @@ function ProfileStep() {
   const preview = useMemo(() => (avatar ? URL.createObjectURL(avatar) : null), [avatar]);
   useEffect(() => () => (preview ? URL.revokeObjectURL(preview) : undefined), [preview]);
 
+  /** The picture just chosen, waiting in the crop dialog. */
+  const [toCrop, setToCrop] = useState<File | null>(null);
+
   const pick = (file: File | undefined) => {
     if (!file) return;
     if (!AVATAR_TYPES.includes(file.type)) return setError("Photos must be JPEG, PNG, WebP or GIF.");
-    if (file.size > AVATAR_MAX_BYTES) return setError("Photos must be 2 MB or smaller.");
     setError("");
-    setAvatar(file);
+    setToCrop(file);
   };
 
   const submit = async () => {
@@ -245,7 +246,11 @@ function ProfileStep() {
               <Icon name="camera" size={18} />
             </span>
           </button>
-          <input ref={fileRef} className={styles.fileInput} type="file" accept={AVATAR_TYPES.join(",")} onChange={(e) => pick(e.target.files?.[0])} />
+          <input ref={fileRef} className={styles.fileInput} type="file" accept={AVATAR_TYPES.join(",")} onChange={(e) => {
+              pick(e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
         </div>
         <TextField
           label="Name"
@@ -268,6 +273,16 @@ function ProfileStep() {
           maxLength={ABOUT_MAX}
           onChange={(e) => setAbout(e.target.value)}
         />
+        {toCrop ? (
+          <AvatarCropper
+            file={toCrop}
+            onCancel={() => setToCrop(null)}
+            onDone={(cropped) => {
+              setToCrop(null);
+              setAvatar(cropped);
+            }}
+          />
+        ) : null}
         {error && name.trim() ? (
           <p role="alert" className={styles.error}>
             {error}
