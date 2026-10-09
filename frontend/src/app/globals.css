@@ -16,7 +16,7 @@
 /*
  * Phone metrics (Figma). Below 600px the whole app switches; .sg-mobile forces the
  * same variables on any subtree (gallery phone frame, previews).
- * Selector includes :root[data-theme] so it beats the dark block (phone dark is true black).
+ * Selector includes :root[data-theme] so it beats the dark block (phone dark now uses the same greys as desktop dark).
  */
 .sg-mobile,
 :root .sg-mobile {
