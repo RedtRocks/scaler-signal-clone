@@ -101,7 +101,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --surface-pane: #1a1a1a;
-  --surface-pane-mobile: #000000;
+  --surface-pane-mobile: #1a1a1a;
   --surface-sidebar: #2e2e2e;
   --surface-selected: #474747;
   --surface-hover: #363636;
@@ -109,7 +109,7 @@
   --surface-composer: #2d2d2d;
   --surface-raised: #2e2e2e;
   --bubble-incoming: #3b3b3b;
-  --bubble-incoming-mobile: #2e2e2e;
+  --bubble-incoming-mobile: #3b3b3b;
   --ink: #e9e9e9;
   --ink-secondary: #b9b9b9;
   --icon: #e9e9e9;
@@ -126,16 +126,16 @@
   --toast-ink: #1b1b1b;
   --ios-action-blue: #4369de;
   --ios-secondary: #3b3b3b;
-  --ios-field: #2e2e2e;
+  --ios-field: #363636;
   --ios-placeholder: #8e8e8e;
   --ios-incoming-text: #e9e9e9;
-  --ios-grouped-bg: #000000;
-  --ios-navbar: #1c1c1c;
-  --ios-card: #1c1c1c;
+  --ios-grouped-bg: #1a1a1a;
+  --ios-navbar: #2e2e2e;
+  --ios-card: #2e2e2e;
   --ios-separator: rgba(84,84,88,0.6);
   --ios-row-icon: #e9e9e9;
   --ios-destructive: #ff6961;
-  --ios-pill: #2e2e2e;
+  --ios-pill: #363636;
   --ios-illustration-bg: #26292f;
   --shadow-popover: 0 4px 16px rgba(0,0,0,0.5);
   --shadow-modal: 0 12px 40px rgba(0,0,0,0.6);

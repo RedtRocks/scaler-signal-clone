@@ -172,14 +172,10 @@ export function Sidebar() {
               />
             ) : null}
             {listEmpty && !searching ? <EmptyState filter={filter} hasAny={totalCount > 0} /> : null}
-            {!searching && filter === "inbox" ? (
-              totalCount === 0 ? (
+            {!searching && filter === "inbox" && totalCount > 0 ? (
+              <div className={styles.phoneOnly}>
                 <GetStartedRow />
-              ) : (
-                <div className={styles.phoneOnly}>
-                  <GetStartedRow />
-                </div>
-              )
+              </div>
             ) : null}
           </>
         )}
