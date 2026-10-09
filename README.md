@@ -101,7 +101,7 @@ All REST paths are under `/api` with `Authorization: Bearer <token>`; errors are
 - One direct conversation per pair of users; groups have admins (creator first) and the oldest member is promoted if the last admin leaves.
 - "Online" means at least one open WebSocket; "last seen" is the time the last one closed.
 - The seed (`python -m app.seed`) resets the database and creates 8 users; log in as `+15550000001` (Aarav Dudeja). The seed covers 1:1 and group chats, replies, reactions, a photo, disappearing messages, and sent/delivered/read/unread states.
-- Any new number that signs up is given 3 direct chats and a "Weekend Plans" group with the demo users (`welcome()` in `backend/app/seed.py`), so an evaluator who registers sees a populated app right away.
+- A brand-new number starts with an empty chat list (first-run experience); the demo people are saved as its contacts so it can start a chat (`welcome()` in `backend/app/seed.py`). Pre-filled data lives on the reviewer accounts below.
 - SQLite is enough for a demo-scale deployment, and it needs a persistent disk when hosted.
 - Features the brief marks as placeholders (linked devices) show "Coming soon". Calls and stories go beyond the placeholder: see the checklist above.
 
@@ -128,7 +128,15 @@ Or run both with one command: `scripts/dev.sh` (seeds the database first). With 
 
 Sign in with any of `+15550000001` to `+15550000008`; the OTP is always `123456`. `+15550000001` is **Aarav Dudeja**, who has the most data (about six direct chats, three groups, unread messages, replies, reactions, one disappearing-message chat). Open a second browser profile signed in as `+15550000002` (Maya Patel) to see both sides live.
 
-Any other phone number creates a new account and takes you through the profile step.
+**Reviewer accounts** (listed on the sign-in screen, OTP `123456`), each with different chats from its own point of view:
+
+| Number | Person | What they see |
+| --- | --- | --- |
+| `+15550000001` | Aarav Dudeja | the full demo: six direct chats, three groups, stories |
+| `+15550000002` | Maya Patel | the climbing chat with Aarav and the "Climbing crew" group |
+| `+15550000005` | Sunita Dudeja | the "Family" group and a chat with her son Aarav |
+
+Any other phone number creates a new account, takes you through the profile step and lands on an empty chat list.
 
 ## Configuration
 
