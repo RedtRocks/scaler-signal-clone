@@ -150,3 +150,19 @@
     padding-top: var(--space-6);
   }
 }
+
+/* From 900px the settings menu sits in the list column, so the pane needs no index and no Back. */
+.wideOnly {
+  display: none;
+}
+@media (min-width: 900px) {
+  .narrowOnly {
+    display: none;
+  }
+  .wideOnly {
+    display: block;
+  }
+  .wideHidden {
+    display: none;
+  }
+}

@@ -34,7 +34,7 @@ Supporting files:
 
 - `main.py`: the app factory (`create_app`). Wires settings, DB, CORS, routers, the `/media` static folder and the background task. Tests call `create_app` with a temporary database.
 - `auth.py`: sessions. Login creates a random token; only its **SHA-256 hash** is stored (`sessions` table), so a leaked database can't be used to log in. `current_user` is the FastAPI dependency every protected route uses.
-- `schemas.py`: Pydantic request and response shapes. Validation (phone must be E.164, body at most 4000 characters, picture URLs must start with `/media/`) is declared here, so routers stay thin.
+- `schemas.py`: Pydantic request and response shapes. Validation (phone must have a valid length for its country, checked with the `phonenumbers` library in `phones.py`; body at most 4000 characters, picture URLs must start with `/media/`) is declared here, so routers stay thin.
 - `presenter.py`: turns database rows into API objects **from one viewer's point of view** (the title of a chat is the other person's name; `status` ticks only appear on my own messages; unread count is mine).
 - `errors.py`: domain errors (`NotFound`, `Forbidden`, `BadRequest`, `Conflict`). Services raise them, `main.py` turns them into JSON `{"detail": ...}` with the right status code.
 - `tasks.py`: a loop that runs every 5 s: expires disappearing messages, deletes unclaimed uploads and expired stories.
@@ -146,7 +146,7 @@ The free Railway plan sleeps the backend: open the site a minute before so the f
 
 **How do you handle a lost connection?** Exponential backoff with jitter in `lib/socket.ts`, a queue for non-ephemeral frames, and a resync on reconnect.
 
-**Is the encryption real?** No. The assignment allows it to be mocked; the "Messages are end-to-end encrypted" notice and safety-number screens are UI only. Login is a fixed OTP `123456`.
+**Is the encryption real?** No. The assignment allows it to be mocked; the "Messages are end-to-end encrypted" notice and safety-number screens are UI only. Login is a fixed OTP `123456`; wrong-length phone numbers are rejected, but no SMS is sent. Real SMS would plug into `request_otp` / `verify_otp` with a provider such as Twilio Verify (needs their account).
 
 **Why SQLite?** Required by the assignment. Foreign keys are enabled explicitly, and the deployment keeps the file on a persistent volume.
 

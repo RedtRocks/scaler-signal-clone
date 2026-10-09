@@ -7,6 +7,7 @@ import { ApiError } from "@/lib/api";
 import { useContactStore, useConversationStore, useToastStore } from "@/store";
 import { useDialogStore } from "./dialogStore";
 import { ContactRow } from "./PersonRow";
+import { INVALID_PHONE_MESSAGE, isValidPhone } from "@/features/auth/otp";
 import styles from "./Dialogs.module.css";
 
 const ADD_ERRORS: Record<number, string> = {
@@ -49,12 +50,11 @@ export function ContactsDialog() {
   };
 
   const submit = async () => {
-    const digits = national.replace(/\D/g, "");
-    if (digits.length < 4) {
-      setError("Enter a valid phone number.");
+    const dial = COUNTRIES.find((c) => c.iso === country)?.dial ?? "+1";
+    if (!isValidPhone(toE164(dial, national))) {
+      setError(INVALID_PHONE_MESSAGE);
       return;
     }
-    const dial = COUNTRIES.find((c) => c.iso === country)?.dial ?? "+1";
     setBusy(true);
     setError("");
     try {

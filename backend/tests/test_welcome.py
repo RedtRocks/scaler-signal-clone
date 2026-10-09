@@ -16,7 +16,7 @@ def test_new_signup_starts_empty_with_demo_contacts(tmp_path: Path) -> None:
         seed(session, settings.media_dir)
 
     with TestClient(create_app(settings)) as client:
-        auth = client.post("/api/auth/verify-otp", json={"phone": "+19998887777", "code": "123456"})
+        auth = client.post("/api/auth/verify-otp", json={"phone": "+14155550126", "code": "123456"})
         headers = {"Authorization": f"Bearer {auth.json()['token']}"}
         chats = client.get("/api/conversations", headers=headers)
         assert chats.status_code == 200, chats.text

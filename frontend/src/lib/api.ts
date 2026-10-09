@@ -67,7 +67,7 @@ async function readDetail(response: Response): Promise<string> {
   try {
     const { detail } = await response.json();
     if (typeof detail === "string") return detail;
-    if (Array.isArray(detail) && typeof detail[0]?.msg === "string") return detail[0].msg;
+    if (Array.isArray(detail) && typeof detail[0]?.msg === "string") return detail[0].msg.replace(/^Value error, /, "");
   } catch {
     // Not JSON: fall through to the status text.
   }

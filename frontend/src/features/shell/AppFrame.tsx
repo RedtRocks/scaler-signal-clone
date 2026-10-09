@@ -6,6 +6,7 @@ import { AppShell, NavRail, TabBar, ToastViewport, type NavRailId } from "@/comp
 import { mediaUrl } from "@/lib/config";
 import { CallScreen } from "@/features/calls/CallScreen";
 import { DialogHost } from "@/features/dialogs/DialogHost";
+import { SettingsList } from "@/features/settings/SettingsList";
 import { useShortcuts } from "./useShortcuts";
 import { Sidebar } from "@/features/sidebar/Sidebar";
 import { useAuthStore, useConversationStore, useToastStore } from "@/store";
@@ -44,7 +45,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
             settingsActive={section === "settings"}
           />
         }
-        list={<Sidebar />}
+        list={section === "settings" ? <SettingsList /> : <Sidebar />}
         pane={children}
         tabBar={
           <TabBar

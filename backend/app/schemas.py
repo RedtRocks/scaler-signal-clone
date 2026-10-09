@@ -14,6 +14,7 @@ from pydantic import (
 )
 
 from app.models import ConversationKind, MemberRole, MessageKind
+from app.phones import normalize_phone
 
 
 def _to_utc_string(value: datetime) -> str:
@@ -26,8 +27,10 @@ UtcDateTime = Annotated[
 ]
 
 Phone = Annotated[
-    str, StringConstraints(strip_whitespace=True, pattern=r"^\+[1-9]\d{6,14}$")
-]  # E.164
+    str,
+    StringConstraints(strip_whitespace=True, pattern=r"^\+[1-9]\d{6,14}$"),
+    AfterValidator(normalize_phone),
+]  # E.164, and a number that really exists (see app/phones.py)
 DisplayName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=64)]
 Nickname = Annotated[str, StringConstraints(strip_whitespace=True, max_length=64)]
 Emoji = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=16)]
