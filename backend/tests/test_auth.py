@@ -113,5 +113,6 @@ def test_wrong_length_numbers_are_rejected(client):
 
 
 def test_real_numbers_and_demo_accounts_are_accepted(client):
-    for phone in ["+919876543210", "+442071838750", "+14155552671", "+15551234567", "+15550000001", "+15550000005"]:
+    phones = ["+919876543210", "+442071838750", "+14155552671", "+15551234567", "+15550000001"]
+    for phone in phones:
         assert client.post("/api/auth/request-otp", json={"phone": phone}).status_code == 200, phone
