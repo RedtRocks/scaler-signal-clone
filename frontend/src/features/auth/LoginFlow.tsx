@@ -169,26 +169,36 @@ function SignInSteps() {
           Next
         </Button>
         <p className={styles.footnote}>
-          Demo account: +1 555 000 0001, code 123456.{" "}
-          <Button
-            variant="link"
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              setCountry("US");
-              setNational("5550000001");
-            }}
-            style={{ height: "auto", padding: 0 }}
-          >
-            Use demo account
-          </Button>
+          Reviewer accounts (code 123456), each with its own chats:
           <br />
-          New numbers start with a few sample chats.
+          {REVIEWER_ACCOUNTS.map((account) => (
+            <Button
+              key={account.national}
+              variant="link"
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setCountry("US");
+                setNational(account.national);
+              }}
+              style={{ height: "auto", padding: 0, marginRight: 12 }}
+            >
+              {account.name}
+            </Button>
+          ))}
+          <br />
+          Any other number starts fresh, with no chats.
         </p>
       </form>
     </>
   );
 }
+
+const REVIEWER_ACCOUNTS = [
+  { name: "Aarav (+1 555 000 0001)", national: "5550000001" },
+  { name: "Maya (+1 555 000 0002)", national: "5550000002" },
+  { name: "Sunita (+1 555 000 0005)", national: "5550000005" },
+];
 
 function ProfileStep() {
   const saveProfile = useAuthStore((s) => s.saveProfile);

@@ -730,77 +730,13 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
 
 
 def welcome(db: Session, user: User) -> None:
-    """Give a brand-new account a few conversations with the demo people, so someone who
-    signs up with their own number lands in a populated app. No-op when the demo world
+    """A brand-new account starts with an empty chat list, but the demo people are saved
+    as its contacts so it can start a conversation with them. No-op when the demo world
     isn't seeded (e.g. in tests)."""
-    found = {key: find_by_phone(db, phone) for key, (phone, _, _) in PEOPLE.items()}
-    if any(u is None for k, u in found.items() if k in ("maya", "kai", "zoe", "daniel")):
-        return
-    people = {k: u for k, u in found.items() if u is not None} | {"me": user}
-    now = utcnow()
-
-    def at(minutes: float) -> datetime:
-        return now - timedelta(minutes=minutes)
-
-    for who in ("maya", "kai", "zoe", "daniel"):
-        db.add(Contact(owner_id=user.id, contact_user_id=people[who].id, created_at=now))
-
-    def direct(other: str) -> Timeline:
-        conversation = Conversation(
-            kind=ConversationKind.DIRECT,
-            direct_key=Conversation.direct_key_for(user.id, people[other].id),
-            created_by=people[other].id,
-            created_at=at(180),
-            members=[
-                Member(user_id=user.id, joined_at=at(180)),
-                Member(user_id=people[other].id, joined_at=at(180)),
-            ],
-        )
-        db.add(conversation)
-        db.flush()
-        return Timeline(db, conversation, people)
-
-    t = direct("maya")
-    hi = t.text("maya", at(120), "Hey! Welcome to Signal 👋")
-    t.text("me", at(118), "Thanks! Just trying it out", reactions={"maya": "❤️"})
-    t.text("maya", at(117), "Try replying to a message, reacting, or sending a photo")
-    t.text("maya", at(3), "Also check out the group chat I added you to", reply_to=hi)
-    t.settle(unread={"me": 1})
-
-    t = direct("kai")
-    t.text("me", at(90), "Are we still on for coffee tomorrow?")
-    t.text("kai", at(88), "Yes, 9am at the usual place ☕")
-    t.text("me", at(87), "See you there", reactions={"kai": "👍"})
-    t.settle()
-
-    t = direct("daniel")
-    t.text("daniel", at(30), "Quick one: can you look at the new mockups later?")
-    t.text("daniel", at(29), "No rush, whenever you get a minute")
-    t.settle(unread={"me": 2})
-
-    since = at(150)
-    conversation = Conversation(
-        kind=ConversationKind.GROUP,
-        name="Weekend Plans",
-        created_by=people["maya"].id,
-        created_at=since,
-        members=[Member(user_id=people["maya"].id, role=MemberRole.ADMIN, joined_at=since)]
-        + [Member(user_id=people[w].id, joined_at=since) for w in ("kai", "zoe", "me")],
-    )
-    db.add(conversation)
-    db.flush()
-    t = Timeline(db, conversation, people)
-    t.system("maya", since, {"type": "group_created"})
-    t.system(
-        "maya",
-        since,
-        {"type": "members_added", "user_ids": sorted(people[w].id for w in ("kai", "zoe", "me"))},
-    )
-    plan = t.text("maya", at(60), "Hike on Saturday? Weather looks perfect")
-    t.text("zoe", at(55), "I'm in!", reactions={"maya": "🙌", "kai": "👍"})
-    t.text("kai", at(50), "I can drive, 4 seats", reply_to=plan)
-    t.text("zoe", at(5), "Leaving at 8, don't be late 😄")
-    t.settle(unread={"me": 3})
+    for key in ("maya", "kai", "zoe", "daniel"):
+        other = find_by_phone(db, PEOPLE[key][0])
+        if other is not None and other.id != user.id:
+            db.add(Contact(owner_id=user.id, contact_user_id=other.id, created_at=utcnow()))
 
 
 def main() -> None:

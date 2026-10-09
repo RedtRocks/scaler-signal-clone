@@ -38,7 +38,7 @@ Supporting files:
 - `presenter.py`: turns database rows into API objects **from one viewer's point of view** (the title of a chat is the other person's name; `status` ticks only appear on my own messages; unread count is mine).
 - `errors.py`: domain errors (`NotFound`, `Forbidden`, `BadRequest`, `Conflict`). Services raise them, `main.py` turns them into JSON `{"detail": ...}` with the right status code.
 - `tasks.py`: a loop that runs every 5 s: expires disappearing messages, deletes unclaimed uploads and expired stories.
-- `seed.py`: demo data (8 users, chats, reactions, a photo, stories, every tick state). `welcome()` gives each new sign-up three chats and a group.
+- `seed.py`: demo data (8 users, chats, reactions, a photo, stories, every tick state). `welcome()` only saves a few demo people as contacts for a new sign-up, whose chat list starts empty; pre-filled data lives on the reviewer accounts (+15550000001, 02, 05).
 - `services/access.py`: two small, important helpers. `get_membership` (non-members get **404, not 403**, so conversation ids don't leak) and `only_visible_to` (a person only sees messages from the time they joined until they left).
 
 ### The database (12 tables)
@@ -122,7 +122,7 @@ The rules that keep it explainable:
 
 ## 6. Live demo script (3 minutes)
 
-1. Open the app in two browser windows (one normal, one private). Sign in as the demo account (**Use demo account**, OTP `123456`) and, in the other window, with a new phone number to show onboarding, the photo **crop dialog** and the profile step.
+1. Open the app in two browser windows (one normal, one private). Sign in as the demo account (**Use demo account**, OTP `123456`) and, in the other window, with a new phone number (empty chat list, then start a chat from contacts) to show onboarding, the photo **crop dialog** and the profile step.
 2. Send a message from one window: show the clock → ✓ → ✓✓ → blue ✓✓ as the other window receives and opens it. Show the typing indicator.
 3. Reply to a message, add a reaction, edit it, delete it for everyone.
 4. Create a group, add and remove a member (admin controls), send a message in it.
