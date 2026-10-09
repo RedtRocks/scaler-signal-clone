@@ -71,11 +71,18 @@ export function SettingsScreen({ section }: { section?: string }) {
         <Button
           variant="icon"
           icon="back"
-          className={known ? styles.back : `${styles.back} ${styles.phoneOnly}`}
+          className={known ? `${styles.back} ${styles.wideHidden}` : `${styles.back} ${styles.phoneOnly}`}
           aria-label="Back"
           onClick={() => router.push(known ? "/settings" : "/")}
         />
-        <h1 className={styles.title}>{title}</h1>
+        {known ? (
+          <h1 className={styles.title}>{title}</h1>
+        ) : (
+          <h1 className={styles.title}>
+            <span className={styles.narrowOnly}>Settings</span>
+            <span className={styles.wideOnly}>Profile</span>
+          </h1>
+        )}
       </header>
       <div className={styles.scroll}>
         <div className={styles.content}>
@@ -86,7 +93,14 @@ export function SettingsScreen({ section }: { section?: string }) {
           ) : known ? (
             <Body section={section} />
           ) : (
-            <SettingsIndex />
+            <>
+              <div className={styles.narrowOnly}>
+                <SettingsIndex />
+              </div>
+              <div className={styles.wideOnly}>
+                <ProfileSection />
+              </div>
+            </>
           )}
         </div>
       </div>
