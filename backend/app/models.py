@@ -247,7 +247,7 @@ class Reaction(Base):
 
 
 class Attachment(Base):
-    """One uploaded file. `message_id` stays NULL until a message claims it (see docs/CONTRACT.md)."""
+    """One uploaded file; `message_id` stays NULL until a message claims it (docs/CONTRACT.md)."""
 
     __tablename__ = "attachments"
 

@@ -88,3 +88,17 @@ def test_avatar_rejects_non_images_and_large_files(client, signup):
         "/api/me/avatar", files={"file": ("a.png", big, "image/png")}, headers=maya.headers
     )
     assert large.status_code == 400
+
+
+def test_profile_picture_must_be_one_of_our_own_uploads(client, signup):
+    maya = signup("Maya")
+    elsewhere = client.patch(
+        "/api/me", json={"avatar_url": "http://evil.example/x.png"}, headers=maya.headers
+    )
+    assert elsewhere.status_code == 422
+    ours = client.patch(
+        "/api/me", json={"avatar_url": "/media/avatars/1-a.png"}, headers=maya.headers
+    )
+    assert ours.status_code == 200
+    cleared = client.patch("/api/me", json={"avatar_url": ""}, headers=maya.headers)
+    assert cleared.json()["avatar_url"] is None

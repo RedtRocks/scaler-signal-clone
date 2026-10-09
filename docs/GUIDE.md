@@ -1,6 +1,6 @@
 # Project Guide: how this Signal clone works and why
 
-This is your study guide for the evaluation interview. It explains what was built, how the pieces fit, and *why* each decision was made. Read it top to bottom once, then use the "Likely interview questions" section to rehearse.
+This is your study guide for the evaluation interview. It explains what was built, how the pieces fit, and *why* each decision was made. For a file-by-file map and the end-to-end trace of one message, read [`WALKTHROUGH.md`](./WALKTHROUGH.md) first. Read this guide top to bottom once, then use the "Likely interview questions" section to rehearse.
 
 > Status: **complete for the submitted build.** Section 11 lists what is mocked or not built.
 

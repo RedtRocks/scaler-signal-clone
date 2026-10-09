@@ -55,6 +55,8 @@ interface MessagesState {
   applyReceipt: (receipt: ReceiptEvent) => void;
   /** Moves this client's read pointer to the newest incoming message; returns it if it moved. */
   advanceReadPointer: (conversationId: Id) => Id | undefined;
+  /** Undo advanceReadPointer after a failed POST /read, so the read is retried. */
+  rewindReadPointer: (conversationId: Id, failedUpTo: Id) => void;
   react: (messageId: Id, emoji: string) => Promise<void>;
   removeReaction: (messageId: Id) => Promise<void>;
   /** Delete for everyone; the message.updated push updates the timeline. */
@@ -252,6 +254,10 @@ export const useMessageStore = create<MessagesState>()((set, get) => {
       if (latest === undefined || latest <= current.readUpTo) return undefined;
       patchThread(conversationId, () => ({ readUpTo: latest }));
       return latest;
+    },
+
+    rewindReadPointer: (conversationId, failedUpTo) => {
+      if (thread(conversationId).readUpTo === failedUpTo) patchThread(conversationId, () => ({ readUpTo: 0 }));
     },
 
     react: (messageId, emoji) => api.setReaction(messageId, emoji),

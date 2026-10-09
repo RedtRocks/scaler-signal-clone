@@ -26,6 +26,7 @@ export { SettingsRow, type SettingsRowProps } from "./SettingsRow/SettingsRow";
 export { GetStartedCard, type GetStartedCardProps } from "./GetStartedCard/GetStartedCard";
 export { Toast, type ToastProps } from "./Toast/Toast";
 export { Modal, type ModalProps } from "./Modal/Modal";
+export { AvatarCropper, type AvatarCropperProps } from "./AvatarCropper/AvatarCropper";
 export { ComingSoon, type ComingSoonProps } from "./ComingSoon/ComingSoon";
 
 // Additions beyond the design system

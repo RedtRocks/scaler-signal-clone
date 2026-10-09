@@ -2,7 +2,7 @@
 
 A full-stack clone of Signal: Signal Desktop's layout on wide screens, and Signal iOS's layout below 600px. Next.js (App Router) + TypeScript on the front, FastAPI + SQLAlchemy + SQLite on the back, with real-time delivery over WebSockets.
 
-Built for the Scaler SDE Fullstack assignment. Domain words (User, Contact, Conversation, Member, Receipt, ...) are defined in [`CONTEXT.md`](CONTEXT.md); the API and database are specified in [`docs/CONTRACT.md`](docs/CONTRACT.md); how and why it is built is in [`docs/GUIDE.md`](docs/GUIDE.md).
+Built for the Scaler SDE Fullstack assignment. Domain words (User, Contact, Conversation, Member, Receipt, ...) are defined in [`CONTEXT.md`](CONTEXT.md); the API and database are specified in [`docs/CONTRACT.md`](docs/CONTRACT.md); how and why it is built is in [`docs/GUIDE.md`](docs/GUIDE.md); a file-by-file map with the end-to-end trace of one message is in [`docs/WALKTHROUGH.md`](docs/WALKTHROUGH.md).
 
 ## Features
 
@@ -162,7 +162,7 @@ frontend/       Next.js app
   src/lib/        API client, WebSocket client, formatting, types
   src/styles/tokens.css   design tokens (light and dark)
 design-system/  the design reference the UI components were ported from
-docs/           CONTRACT.md (API + schema), GUIDE.md (architecture), RUNNING.md
+docs/           CONTRACT.md (API + schema), GUIDE.md (architecture), WALKTHROUGH.md (code map), RUNNING.md
 e2e/            Playwright smoke test
 scripts/        dev.sh
 docker-compose.yml, backend/Dockerfile, frontend/Dockerfile

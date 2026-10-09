@@ -269,3 +269,28 @@ def test_new_nullable_columns_are_added_to_an_old_database(tmp_path):
     database.create_all()
     columns = {c["name"] for c in inspect(database.engine).get_columns("messages")}
     assert "edited_at" in columns
+
+
+def test_cannot_quote_a_message_from_before_you_joined(client, signup):
+    aarav, maya, kai = signup("Aarav"), signup("Maya"), signup("Kai")
+    chat = group(client, aarav, "Trip", maya)
+    old = send(client, aarav, chat["id"], "secret plan")
+    client.post(
+        f"/api/conversations/{chat['id']}/members",
+        json={"user_ids": [kai.id]},
+        headers=aarav.headers,
+    )
+    response = client.post(
+        f"/api/conversations/{chat['id']}/messages",
+        json={"body": "?", "client_id": "q1", "reply_to_id": old["id"]},
+        headers=kai.headers,
+    )
+    assert response.status_code == 400
+    # A message Kai can see is still fine to quote.
+    new = send(client, aarav, chat["id"], "welcome")
+    ok = client.post(
+        f"/api/conversations/{chat['id']}/messages",
+        json={"body": "thanks", "client_id": "q2", "reply_to_id": new["id"]},
+        headers=kai.headers,
+    )
+    assert ok.status_code == 201

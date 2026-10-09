@@ -33,6 +33,11 @@ Nickname = Annotated[str, StringConstraints(strip_whitespace=True, max_length=64
 Emoji = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=16)]
 
 
+# Profile and group pictures are uploaded to this server, so only our own /media/ paths
+# (or empty, to clear) are accepted. Anything else would let a user point at any website.
+MediaPath = Annotated[str, StringConstraints(max_length=512, pattern=r"^(/media/[\w./-]+)?$")]
+
+
 def _empty_to_none(value: str | None) -> str | None:
     return value or None
 
@@ -80,7 +85,7 @@ class AuthResult(BaseModel):
 class MeUpdate(BaseModel):
     display_name: DisplayName | None = None
     about: Annotated[str, StringConstraints(strip_whitespace=True, max_length=140)] | None = None
-    avatar_url: Annotated[str, StringConstraints(max_length=512)] | None = None
+    avatar_url: MediaPath | None = None
 
 
 # --- Users & contacts --------------------------------------------------------------------
@@ -243,7 +248,7 @@ class ConversationUpdate(BaseModel):
     description: Annotated[str, StringConstraints(strip_whitespace=True, max_length=512)] | None = (
         None
     )
-    avatar_url: Annotated[str, StringConstraints(max_length=512)] | None = None
+    avatar_url: MediaPath | None = None
     disappearing_seconds: Annotated[int, Field(gt=0, le=60 * 60 * 24 * 7 * 4)] | None = None
 
 
