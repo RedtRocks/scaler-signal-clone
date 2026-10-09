@@ -1,4 +1,4 @@
-import { isValidPhoneNumber } from "libphonenumber-js/min";
+import { isPossiblePhoneNumber } from "libphonenumber-js/min";
 
 /** Seconds before "Resend code" can be used again. */
 export const RESEND_SECONDS = 30;
@@ -12,12 +12,9 @@ export function formatPhoneForDisplay(e164: string): string {
   return e164;
 }
 
-/** Fictional numbers of the seeded demo people (the backend allows exactly these, see backend/app/phones.py). */
-const DEMO_PHONES = new Set(Array.from({ length: 8 }, (_, i) => `+1555000000${i + 1}`));
-
-/** True when `e164` ("+14155552671") is a real number, or one of the demo accounts. */
+/** True when `e164` ("+14155552671") has a possible length for its country (10 digits for +1, etc.). */
 export function isValidPhone(e164: string): boolean {
-  return DEMO_PHONES.has(e164) || isValidPhoneNumber(e164);
+  return isPossiblePhoneNumber(e164);
 }
 
-export const INVALID_PHONE_MESSAGE = "That doesn't look like a real phone number. Check the country and digits.";
+export const INVALID_PHONE_MESSAGE = "Enter a phone number with the right number of digits for its country.";
