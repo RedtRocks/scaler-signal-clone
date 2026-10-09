@@ -39,7 +39,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
             selfAvatar={mediaUrl(me?.avatar_url ?? null) ?? undefined}
             onSelect={go}
             onSettings={() => router.push("/settings")}
-            onProfile={() => router.push("/settings/profile")}
+            onProfile={() => router.push("/settings")}
             settingsActive={section === "settings"}
           />
         }

@@ -44,6 +44,24 @@ def ago(days: float = 0, hours: float = 0, minutes: float = 0) -> datetime:
 
 
 # key -> (phone, display name, about)
+# Stock placeholder portraits (randomuser.me), shown as profile photos.
+PHOTOS = {
+    "aarav": "men/32",
+    "maya": "women/44",
+    "kai": "men/75",
+    "ishita": "women/65",
+    "mom": "women/79",
+    "rohan": "men/46",
+    "zoe": "women/12",
+    "daniel": "men/22",
+}
+
+
+def photo_url(key: str) -> str | None:
+    path = PHOTOS.get(key)
+    return f"https://randomuser.me/api/portraits/{path}.jpg" if path else None
+
+
 PEOPLE = {
     "aarav": ("+15550000001", "Aarav Dudeja", "Building things, one commit at a time"),
     "maya": ("+15550000002", "Maya Patel", "Probably at the crag 🧗‍♀️"),
@@ -91,9 +109,11 @@ def demo_png(width: int = 640, height: int = 420) -> bytes:
                 rows += bytes((shade, shade + 8, shade + 24))
             else:  # sky: deep blue at the top, orange at the horizon
                 rows += bytes((int(40 + 215 * t**1.5), int(60 + 120 * t), int(150 - 90 * t)))
+
     def chunk(kind: bytes, data: bytes) -> bytes:
         body = kind + data
         return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+
     return (
         b"\x89PNG\r\n\x1a\n"
         + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
@@ -227,6 +247,7 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
             phone=phone,
             display_name=name,
             about=about,
+            avatar_url=photo_url(key),
             created_at=ago(days=30),
             last_seen_at=LAST_SEEN.get(key),
         )
@@ -310,7 +331,13 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
         reactions={"aarav": "😂"},
     )
     if media_dir is not None:
-        t.photo("maya", ago(hours=2, minutes=58), "Sunrise from last time", media_dir, "crag-sunrise.png")
+        t.photo(
+            "maya",
+            ago(hours=2, minutes=58),
+            "Sunrise from last time",
+            media_dir,
+            "crag-sunrise.png",
+        )
     t.text("aarav", ago(hours=2, minutes=55), "No promises")
     t.settle()
 
@@ -539,12 +566,12 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
         if author == "aarav":
             for viewer in ("maya", "kai"):
                 db.add(
-                    StoryView(
-                        story_id=story.id, viewer_id=users[viewer].id, viewed_at=ago(hours=1)
-                    )
+                    StoryView(story_id=story.id, viewer_id=users[viewer].id, viewed_at=ago(hours=1))
                 )
         elif author == "ishita":
-            db.add(StoryView(story_id=story.id, viewer_id=users["aarav"].id, viewed_at=ago(hours=6)))
+            db.add(
+                StoryView(story_id=story.id, viewer_id=users["aarav"].id, viewed_at=ago(hours=6))
+            )
 
     db.commit()
 
