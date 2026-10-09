@@ -1,3 +1,5 @@
+"use client";
+
 import clsx from "clsx";
 import { useState, type ReactNode } from "react";
 import { Icon } from "../Icon/Icon";
