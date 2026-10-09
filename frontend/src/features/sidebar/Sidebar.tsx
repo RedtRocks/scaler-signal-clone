@@ -105,7 +105,7 @@ export function Sidebar() {
         selfAvatar={mediaUrl(me?.avatar_url ?? null) ?? undefined}
         menuItems={menuItems}
         onCompose={() => showDialog("newChat")}
-        onProfile={() => router.push("/settings/profile")}
+        onProfile={() => router.push("/settings")}
         onCamera={() => push("Camera is coming soon.")}
       />
       <div className={styles.search}>
