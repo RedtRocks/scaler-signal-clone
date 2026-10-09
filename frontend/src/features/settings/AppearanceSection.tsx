@@ -6,7 +6,7 @@ import styles from "./SettingsScreen.module.css";
 export function AppearanceSection() {
   const [theme, setTheme] = useThemePreference();
   return (
-    <SettingsGroup footer="System follows your device’s light or dark setting. This choice is saved on this device.">
+    <SettingsGroup footer="System follows your device’s light or dark setting. The color of each chat is set from that chat’s settings. This choice is saved on this device.">
       <div className={styles.radios}>
         <RadioGroup<ThemePreference>
           label="Theme"

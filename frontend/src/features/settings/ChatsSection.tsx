@@ -1,16 +1,12 @@
 "use client";
 
-import { SettingsGroup, SettingsRow, Switch } from "@/components/ui";
-import { usePreference } from "./preferences";
+import { SettingsGroup } from "@/components/ui";
+import { ToggleRow } from "./Rows";
 
 export function ChatsSection() {
-  const [enterSends, setEnterSends] = usePreference("enterSends");
   return (
-    <SettingsGroup footer="Saved on this device. When off, Enter starts a new line.">
-      <SettingsRow
-        label="Enter Sends Message"
-        control={<Switch checked={enterSends} onChange={setEnterSends} label="Enter sends message" />}
-      />
+    <SettingsGroup title="Text input" footer="Saved on this device. When Enter sends is off, Enter starts a new line and Ctrl or Cmd+Enter sends.">
+      <ToggleRow pref="enterSends" label="Enter sends message" sublabel="Shift+Enter adds a new line." />
     </SettingsGroup>
   );
 }

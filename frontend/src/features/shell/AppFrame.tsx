@@ -3,13 +3,12 @@
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppShell, NavRail, TabBar, ToastViewport, type NavRailId } from "@/components/ui";
-import { mediaUrl } from "@/lib/config";
 import { CallScreen } from "@/features/calls/CallScreen";
 import { DialogHost } from "@/features/dialogs/DialogHost";
 import { SettingsList } from "@/features/settings/SettingsList";
 import { useShortcuts } from "./useShortcuts";
 import { Sidebar } from "@/features/sidebar/Sidebar";
-import { useAuthStore, useConversationStore, useToastStore } from "@/store";
+import { useConversationStore, useToastStore } from "@/store";
 
 function sectionOf(pathname: string): NavRailId | "settings" {
   if (pathname.startsWith("/calls")) return "calls";
@@ -23,7 +22,6 @@ export function AppFrame({ children }: { children: ReactNode }) {
   useShortcuts();
   const router = useRouter();
   const pathname = usePathname();
-  const me = useAuthStore((s) => s.me);
   const toast = useToastStore((s) => s.toast);
   const dismiss = useToastStore((s) => s.dismiss);
   const unread = useConversationStore((s) => Object.values(s.byId).reduce((n, c) => n + (c.unread_count ?? 0), 0));
@@ -37,11 +35,8 @@ export function AppFrame({ children }: { children: ReactNode }) {
           <NavRail
             active={section === "settings" ? undefined : section}
             badges={{ chats: unread }}
-            selfName={me?.display_name}
-            selfAvatar={mediaUrl(me?.avatar_url ?? null) ?? undefined}
             onSelect={go}
             onSettings={() => router.push("/settings")}
-            onProfile={() => router.push("/settings")}
             settingsActive={section === "settings"}
           />
         }

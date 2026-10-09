@@ -5,6 +5,9 @@ import { Button, ComingSoon, Spinner, type IconName } from "@/components/ui";
 import { useSession } from "@/store";
 import { AboutSection } from "./AboutSection";
 import { AccountSection } from "./AccountSection";
+import { CallsSection } from "./CallsSection";
+import { DataUsageSection } from "./DataUsageSection";
+import { GeneralSection } from "./GeneralSection";
 import { AppearanceSection } from "./AppearanceSection";
 import { ChatsSection } from "./ChatsSection";
 import { NotificationsSection } from "./NotificationsSection";
@@ -31,8 +34,6 @@ const TITLES: Record<string, string> = {
 };
 
 const SOON: Record<string, { icon: IconName; text: string }> = {
-  calls: { icon: "phone", text: "Call settings are not available in this build yet." },
-  "data-usage": { icon: "data-usage", text: "Data usage settings are not available in this build yet." },
   backups: { icon: "backups", text: "Backups are not available in this build yet." },
   "linked-devices": { icon: "contact", text: "Linked devices are not available in this build yet." },
   help: { icon: "requests", text: "Help and support are not available in this build yet." },
@@ -52,8 +53,13 @@ function Body({ section }: { section: string }) {
     case "notifications":
       return <NotificationsSection />;
     case "about":
-    case "general":
       return <AboutSection />;
+    case "general":
+      return <GeneralSection />;
+    case "calls":
+      return <CallsSection />;
+    case "data-usage":
+      return <DataUsageSection />;
     case "account":
       return <AccountSection />;
     default: {

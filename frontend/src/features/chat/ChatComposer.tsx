@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type ClipboardEvent, type Ref } from "react";
-import { usePreference } from "@/features/settings/preferences";
+import { readPreference, usePreference } from "@/features/settings/preferences";
 import { Composer, QuoteBlock, StagedAttachments, useIsPhone } from "@/components/ui";
 import { FILE_PICKER_ACCEPT, formatFileSize, messageSummary } from "@/lib/attachments";
 import { mediaUrl } from "@/lib/config";
@@ -92,7 +92,9 @@ export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, on
         layout={phone ? "mobile" : "desktop"}
         value={text}
         onChange={update}
-        onTyping={() => notifyTyping(conversationId)}
+        onTyping={() => {
+          if (readPreference("typingIndicators")) notifyTyping(conversationId);
+        }}
         inputRef={inputRef}
         autoFocus={!phone}
         enterSends={enterSends}
