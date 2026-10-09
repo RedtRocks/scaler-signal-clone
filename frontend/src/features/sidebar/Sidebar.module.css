@@ -172,3 +172,39 @@
     display: none;
   }
 }
+
+/* Phone: Android-style floating camera and compose buttons (hidden from 600px up). */
+.fabs {
+  display: none;
+}
+@media (max-width: 599px) {
+  .fabs {
+    position: fixed;
+    right: 16px;
+    bottom: calc(var(--ios-tabbar-height) + 16px + env(safe-area-inset-bottom, 0px));
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .fab {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    background: var(--surface-sidebar);
+    color: var(--icon);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+  }
+  .fabPrimary {
+    background: var(--surface-selected);
+  }
+  .fab:focus-visible {
+    outline: 2px solid var(--ultramarine);
+    outline-offset: 2px;
+  }
+}

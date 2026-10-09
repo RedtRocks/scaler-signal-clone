@@ -59,7 +59,6 @@ export function ListColumn({
       <ChatListHeader
         selfName="Alex Rivera"
         onCompose={() => onToast("New chat")}
-        onCamera={() => onToast("Camera is coming soon")}
         menuItems={[
           { label: "New group", icon: "add-member", onSelect: () => onToast("New group") },
           { label: "Mark all read", icon: "check", onSelect: () => onToast("Marked all read") },
