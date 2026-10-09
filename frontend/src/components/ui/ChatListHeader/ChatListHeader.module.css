@@ -27,7 +27,8 @@
 .phoneOnly {
   display: none;
 }
-.desktopOnly {
+.desktopOnly,
+.composeSlot {
   display: contents;
 }
 
@@ -55,7 +56,8 @@
 :global(.sg-mobile) .phoneOnly {
   display: contents;
 }
-:global(.sg-mobile) .desktopOnly {
+:global(.sg-mobile) .desktopOnly,
+:global(.sg-mobile) .composeSlot {
   display: none;
 }
 :global(.sg-mobile) .title {
@@ -81,7 +83,8 @@
   .phoneOnly {
     display: contents;
   }
-  .desktopOnly {
+  .desktopOnly,
+  .composeSlot {
     display: none;
   }
   .title {

@@ -8,15 +8,14 @@ export interface ChatListHeaderProps {
   onCompose?: () => void;
   /** Desktop ⋯ menu (e.g. New group, Mark all read, Settings). */
   menuItems?: MenuEntry[];
-  /** Phone: left avatar (opens settings/profile) and camera. */
+  /** Phone: left avatar (opens settings/profile)  */
   selfName?: string;
   selfAvatar?: string;
   onProfile?: () => void;
-  onCamera?: () => void;
 }
 
 /**
- * Desktop: "Chats" · ✎ · ⋯.  Phone (<600px or .sg-mobile): avatar · "Chats" centred · camera · compose.
+ * Desktop: "Chats" · ✎ · ⋯.  Phone (<600px or .sg-mobile): avatar · "Chats" centred; camera and compose float (see Sidebar).
  * Both are rendered; CSS picks one so it follows the viewport without JS.
  */
 export function ChatListHeader({
@@ -26,7 +25,6 @@ export function ChatListHeader({
   selfName = "Me",
   selfAvatar,
   onProfile,
-  onCamera,
 }: ChatListHeaderProps) {
   return (
     <header className={styles.header}>
@@ -35,10 +33,9 @@ export function ChatListHeader({
       </button>
       <h1 className={styles.title}>{title}</h1>
       <div className={styles.actions}>
-        <span className={styles.phoneOnly}>
-          <Button variant="icon" icon="camera" iconSize={24} aria-label="Camera" onClick={onCamera} />
+        <span className={styles.composeSlot}>
+          <Button variant="icon" icon="compose" iconSize={22} aria-label="New chat" onClick={onCompose} />
         </span>
-        <Button variant="icon" icon="compose" iconSize={22} aria-label="New chat" onClick={onCompose} />
         {menuItems?.length ? (
           <span className={styles.desktopOnly}>
             <DropdownMenu items={menuItems} label="More options" />

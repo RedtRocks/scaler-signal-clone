@@ -1,8 +1,9 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import clsx from "clsx";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChatListHeader, SearchField, Spinner, type MenuEntry } from "@/components/ui";
+import { ChatListHeader, Icon, SearchField, Spinner, type MenuEntry } from "@/components/ui";
 import { useDialogStore } from "@/features/dialogs/dialogStore";
 import { FOCUS_SEARCH_EVENT } from "@/features/shell/useShortcuts";
 import { mediaUrl } from "@/lib/config";
@@ -108,7 +109,6 @@ export function Sidebar() {
         menuItems={menuItems}
         onCompose={() => showDialog("newChat")}
         onProfile={() => router.push("/settings")}
-        onCamera={() => push("Camera is coming soon.")}
       />
       <div className={styles.search}>
         <SearchField
@@ -179,6 +179,14 @@ export function Sidebar() {
             ) : null}
           </>
         )}
+      </div>
+      <div className={styles.fabs}>
+        <button type="button" className={styles.fab} aria-label="Camera" onClick={() => push("Camera is coming soon.")}>
+          <Icon name="camera" size={28} />
+        </button>
+        <button type="button" className={clsx(styles.fab, styles.fabPrimary)} aria-label="New chat" onClick={() => showDialog("newChat")}>
+          <Icon name="compose" size={26} />
+        </button>
       </div>
     </div>
   );

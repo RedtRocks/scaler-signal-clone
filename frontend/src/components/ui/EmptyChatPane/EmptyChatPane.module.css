@@ -36,3 +36,8 @@
   margin-top: var(--space-2);
   font-size: 14px;
 }
+
+/* Dark mode: the white logo (the ultramarine one turned white). */
+:global(:root[data-theme="dark"]) .logo {
+  filter: brightness(0) invert(1);
+}
