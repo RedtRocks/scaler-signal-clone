@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ProfileHeader, SettingsGroup, SettingsRow } from "@/components/ui";
+import { Avatar, SettingsGroup, SettingsRow } from "@/components/ui";
 import { mediaUrl } from "@/lib/config";
 import { logout, useSession } from "@/store";
+import { MENU_MAIN, MENU_TOP } from "./SettingsMenu";
 
+/** Settings list for phones and tablets. Same entries and icons as the desktop menu; the account is on top. */
 export function SettingsIndex() {
   const router = useRouter();
   const { me } = useSession();
@@ -13,28 +15,23 @@ export function SettingsIndex() {
 
   return (
     <>
-      <ProfileHeader
-        name={me.display_name}
-        subtitle={me.phone}
-        avatarSrc={mediaUrl(me.avatar_url) ?? undefined}
-        size={96}
-      />
       <SettingsGroup>
-        <SettingsRow label="Profile" sublabel={me.about || "Name, about and photo"} icon="contact" onClick={go("profile")} />
+        <SettingsRow
+          label={me.display_name || me.phone}
+          sublabel={me.about ? `${me.phone} · ${me.about}` : me.phone}
+          avatar={<Avatar name={me.display_name || me.phone} src={mediaUrl(me.avatar_url) ?? undefined} size={48} />}
+          onClick={go("profile")}
+        />
       </SettingsGroup>
       <SettingsGroup>
-        <SettingsRow label="Appearance" icon="chat-color" onClick={go("appearance")} />
-        <SettingsRow label="Chats" icon="tab-chats" onClick={go("chats")} />
-        <SettingsRow label="Notifications" icon="bell" onClick={go("notifications")} />
-        <SettingsRow label="Privacy" icon="safety-number" onClick={go("privacy")} />
+        {MENU_TOP.map((i) => (
+          <SettingsRow key={i.id} label={i.label} icon={i.icon} onClick={go(i.id)} />
+        ))}
       </SettingsGroup>
       <SettingsGroup>
-        <SettingsRow label="Linked Devices" icon="laptop" value="Coming soon" onClick={go("linked-devices")} />
-        <SettingsRow label="Help" icon="help" value="Coming soon" onClick={go("help")} />
-        <SettingsRow label="Donate to Signal" icon="heart" value="Coming soon" onClick={go("donate")} />
-      </SettingsGroup>
-      <SettingsGroup>
-        <SettingsRow label="About" icon="info" onClick={go("about")} />
+        {MENU_MAIN.map((i) => (
+          <SettingsRow key={i.id} label={i.label} icon={i.icon} onClick={go(i.id)} />
+        ))}
       </SettingsGroup>
       <SettingsGroup>
         <SettingsRow label="Log Out" destructive onClick={() => void logout()} />

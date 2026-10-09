@@ -7,11 +7,11 @@ import { mediaUrl } from "@/lib/config";
 import { useSession } from "@/store";
 import styles from "./SettingsMenu.module.css";
 
-const TOP: { id: string; label: string; icon: IconName }[] = [
+export const MENU_TOP: { id: string; label: string; icon: IconName }[] = [
   { id: "account", label: "Account", icon: "account" },
   { id: "donate", label: "Donate to Signal", icon: "heart" },
 ];
-const MAIN: { id: string; label: string; icon: IconName }[] = [
+export const MENU_MAIN: { id: string; label: string; icon: IconName }[] = [
   { id: "general", label: "General", icon: "settings" },
   { id: "appearance", label: "Appearance", icon: "appearance" },
   { id: "chats", label: "Chats", icon: "chat-outline" },
@@ -50,8 +50,8 @@ export function SettingsMenu() {
           <span className={styles.phone}>{me.phone}</span>
         </span>
       </button>
-      <ul className={styles.list}>{TOP.map((i) => item(i.id, i.label, i.icon))}</ul>
-      <ul className={styles.list}>{MAIN.map((i) => item(i.id, i.label, i.icon))}</ul>
+      <ul className={styles.list}>{MENU_TOP.map((i) => item(i.id, i.label, i.icon))}</ul>
+      <ul className={styles.list}>{MENU_MAIN.map((i) => item(i.id, i.label, i.icon))}</ul>
     </nav>
   );
 }
