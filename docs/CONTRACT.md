@@ -27,7 +27,7 @@ conversations         id PK, kind ('direct'|'group') NOT NULL, name (group only)
                       direct_key UNIQUE NULL  -- "minId:maxId" for direct; enforces one per pair
 conversation_members  id PK, conversation_id FK CASCADE, user_id FK CASCADE,
                       role ('admin'|'member'), joined_at, left_at NULL,
-                      last_read_message_id NULL, muted BOOL, pinned BOOL, archived BOOL,
+                      last_read_message_id NULL, muted BOOL, pinned BOOL, archived BOOL, chat_color NULL,
                       UNIQUE(conversation_id, user_id), INDEX(user_id)
 messages              id PK, conversation_id FK CASCADE, sender_id FK→users NULL (NULL for system),
                       kind ('text'|'system'), body TEXT, system_event JSON NULL,
@@ -37,7 +37,9 @@ messages              id PK, conversation_id FK CASCADE, sender_id FK→users NU
 attachments           id PK, conversation_id FK→conversations CASCADE, uploader_id FK→users CASCADE,
                       message_id FK→messages CASCADE NULL (NULL until a message claims it),
                       position INT (order inside the message), file_name, content_type, size,
-                      width NULL, height NULL (images only), storage_name UNIQUE (random, on disk),
+                      width NULL, height NULL (images only),
+                      duration_ms NULL (audio only: set = a voice message),
+                      storage_name UNIQUE (random, on disk),
                       created_at, INDEX(message_id)
 message_receipts      message_id FK CASCADE, user_id FK CASCADE, delivered_at NULL, read_at NULL,
                       PK(message_id, user_id)   -- one row per recipient (not the sender)
@@ -83,12 +85,12 @@ Derived rules:
 | POST | `/api/conversations/group` | `{name, member_ids: int[]}` → `ConversationSummary` (201). The creator becomes admin, and a `group_created` system message is written plus `members_added`. |
 | GET | `/api/conversations/{id}` | → `ConversationDetail` |
 | PATCH | `/api/conversations/{id}` | `{name?, description?, avatar_url?, disappearing_seconds?}`. Groups need an admin for name and description; a direct conversation lets either member set the timer. Writes a system message. |
-| PATCH | `/api/conversations/{id}/settings` | `{muted?, pinned?, archived?}`. Per member. |
+| PATCH | `/api/conversations/{id}/settings` | `{muted?, pinned?, archived?, chat_color?}`. Per member. `chat_color` is a preset name (`crimson`, `vermilion`, `burlap`, `forest`, `wintergreen`, `teal`, `blue`, `indigo`, `violet`, `plum`, `taupe`, `steel`) or `"default"` to clear; other values → 422. The summary returns `chat_color` (null = default). |
 | POST | `/api/conversations/{id}/members` | `{user_ids}`, admin only → `ConversationDetail` |
 | DELETE | `/api/conversations/{id}/members/{user_id}` | Admin only (remove), or yourself (leave). If the last admin leaves, the oldest member becomes admin. |
 | PATCH | `/api/conversations/{id}/members/{user_id}` | `{role}`, admin only |
 | GET | `/api/conversations/{id}/messages?before_id=&limit=` | → `Message[]` (newest first). Side effect: marks my undelivered receipts in this conversation as delivered. |
-| POST | `/api/conversations/{id}/attachments` | multipart `file` → `Attachment` (201). Active members only. Uploads one file, not yet part of any message. See *Attachments*. |
+| POST | `/api/conversations/{id}/attachments` | multipart `file` (+ optional `duration_ms` for a voice message) → `Attachment` (201). Active members only. Uploads one file, not yet part of any message. See *Attachments*. |
 | GET | `/api/attachments/{id}` | → `Attachment`. Members who can see its message (the uploader, until it is claimed). Others get 404. |
 | POST | `/api/conversations/{id}/messages` | `{body?, client_id, reply_to_id?, attachment_ids?}` → `Message` (201). Idempotent on `client_id`. `body` defaults to `""` but body and `attachment_ids` cannot both be empty (422). |
 | POST | `/api/conversations/{id}/read` | `{up_to_message_id}` → 204 |
@@ -117,7 +119,8 @@ Message = {
   attachments: Attachment[] /* in send order; [] when deleted or none */
 }
 Attachment = { id, url /* "/media/attachments/<random>.<ext>" */, file_name, content_type, size /* bytes */,
-               width: number|null, height: number|null /* images only, measured by the server */ }
+               width: number|null, height: number|null /* images only, measured by the server */,
+               duration_ms: number|null /* audio only: a recorded voice message; capped at 1 hour, ignored for other types */ }
 MessageSearchHit = { message: Message, conversation_id, conversation_title }
 ```
 
@@ -132,7 +135,7 @@ Claiming rules: every id must be an unclaimed attachment uploaded by me in this 
 
 Limits and errors (all `{"detail": "…"}`):
 - over 10 MB → **413**; empty file → 400;
-- content type not in the allowlist → **400**. Allowed: `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `application/pdf`, `text/plain`, `application/zip`, `audio/mpeg`, `audio/ogg`, `audio/wav`, `audio/mp4`, `audio/webm`, `video/mp4`, `video/webm`, `video/quicktime`. SVG and HTML are refused on purpose (they run script when opened). Audio and video are plain downloadable files, with no player;
+- content type not in the allowlist → **400**. Allowed: `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `application/pdf`, `text/plain`, `application/zip`, `audio/mpeg`, `audio/ogg`, `audio/wav`, `audio/mp4`, `audio/webm`, `video/mp4`, `video/webm`, `video/quicktime`. SVG and HTML are refused on purpose (they run script when opened). Audio with a `duration_ms` is a voice message (the client draws a waveform and a play button); other audio and video are plain downloadable files;
 - an image whose bytes don't parse as its declared type → 400. The server reads `width` and `height` from the PNG/GIF/JPEG/WebP header itself (no Pillow dependency, and a client cannot lie about it);
 - not an active member of the conversation → 404 or 403, as for sending a message.
 
@@ -142,7 +145,7 @@ Storage: `MEDIA_DIR/attachments/<32 hex random>.<ext>`. The extension comes from
 
 Cleanup: deleting for everyone and disappearing-message expiry remove the rows and the files. A background pass (same 5 s task) removes unclaimed uploads older than one hour.
 
-Previews (built on the client from `body` and `attachments`, for the chat list, search hits and quotes): the caption if there is one, else `📷 Photo` (one image) / `📷 N photos` (only images), `📎 <file name>` (one other file) or `📎 N files` (anything else).
+Previews (built on the client from `body` and `attachments`, for the chat list, search hits and quotes): the caption if there is one, else `📷 Photo` (one image) / `📷 N photos` (only images), `🎤 Voice Message` (one voice message), `📎 File` (one other file) or `📎 N files` (anything else).
 
 ## WebSocket `/ws?token=…`
 
@@ -177,3 +180,20 @@ Disappearing: a background task runs every 5 s, soft-deletes messages past `expi
 
 There are 8 users with phones `+15550000001` to `+15550000008`. `+15550000001` is the demo login (**"Aarav Dudeja"**), OTP `123456`.
 The seed has about 6 direct chats and 3 groups (e.g. "Family", "Rock climbers", "Roommates") with realistic messages spread over the last 7 days, a mix of receipt states, one image attachment (a generated PNG) in one direct conversation, some unread counts, a reply, reactions, one conversation with a disappearing timer, and system events in the groups.
+
+
+## Stories
+
+A story is visible for 24 hours to everyone the author shares an active conversation with. `Story = { id, author, body, background, media_url: string|null, created_at, expires_at, viewed, views? }`.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/stories` | My stories and my audience's, newest first. |
+| POST | `/api/stories` | `{body, background}` → text story (201). |
+| POST | `/api/stories/photo` | multipart `file` (JPEG, PNG, WebP or GIF, at most 10 MB, bytes checked) + optional `caption` (≤ 700) → photo story (201). The file is stored under `MEDIA_DIR/stories/` with a random name and deleted with the story. |
+| POST | `/api/stories/{id}/view` | Records a view (idempotent). |
+| DELETE | `/api/stories/{id}` | Author only. |
+
+Replying to a story has no endpoint of its own: the client opens (or creates) the direct chat with the author and sends an ordinary message.
+
+Calls have no backend: the call screens and the Calls tab history are client-side (history lives in `localStorage` per account).

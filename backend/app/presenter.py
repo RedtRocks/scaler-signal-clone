@@ -161,6 +161,7 @@ class Presenter:
                     muted=member.muted,
                     pinned=member.pinned,
                     archived=member.archived,
+                    chat_color=member.chat_color,
                     left=not member.is_active,
                     disappearing_seconds=conversation.disappearing_seconds,
                     my_role=member.role,

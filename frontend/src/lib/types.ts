@@ -117,6 +117,8 @@ export interface ConversationSummary {
   muted: boolean;
   pinned: boolean;
   archived: boolean;
+  /** My bubble colour in this chat (a preset name); null = default. */
+  chat_color?: string | null;
   left: boolean;
   disappearing_seconds: number | null;
   my_role: MemberRole;
@@ -178,6 +180,8 @@ export interface ConversationSettingsPatch {
   muted?: boolean;
   pinned?: boolean;
   archived?: boolean;
+  /** A preset name from lib/chatColors, or "default" to clear. */
+  chat_color?: string;
 }
 
 export interface SendMessageBody {

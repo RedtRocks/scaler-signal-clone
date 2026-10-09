@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api";
 import { formatTimer } from "@/lib/format";
 import type { ConversationDetail, Id } from "@/lib/types";
 import { useContactStore, useConversationStore, useToastStore } from "@/store";
+import { CHAT_COLORS } from "@/lib/chatColors";
 import { safetyNumber, TIMER_CHOICES } from "./chatLogic";
 import styles from "./ChatModals.module.css";
 
@@ -44,6 +45,51 @@ export function ConfirmModal({ title, confirmLabel, destructive, onConfirm, onCl
 }
 
 /** Disappearing messages: pick how long new messages stay. */
+/** Pick the colour of my own bubbles in this chat. Saves on tap. */
+export function ChatColorModal({ conversationId, current, onClose }: { conversationId: Id; current: string | null | undefined; onClose: () => void }) {
+  const push = useToastStore((state) => state.push);
+  const choose = async (name: string) => {
+    try {
+      await useConversationStore.getState().updateSettings(conversationId, { chat_color: name });
+      onClose();
+    } catch (error) {
+      push(failure(error, "Couldn't change the chat color."));
+    }
+  };
+  return (
+    <Modal
+      title="Chat color"
+      onClose={onClose}
+      actions={
+        <Button variant="secondary" onClick={onClose}>
+          Close
+        </Button>
+      }
+    >
+      <p className={styles.text}>Only you see this color. It colors the messages you send in this chat.</p>
+      <div className={styles.swatches} role="radiogroup" aria-label="Chat color">
+        {CHAT_COLORS.map(([id, label, hex]) => {
+          const selected = (current ?? "default") === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={label}
+              title={label}
+              className={styles.swatch}
+              data-selected={selected || undefined}
+              style={{ background: hex }}
+              onClick={() => void choose(id)}
+            />
+          );
+        })}
+      </div>
+    </Modal>
+  );
+}
+
 export function TimerModal({ conversationId, current, onClose }: { conversationId: Id; current: number | null; onClose: () => void }) {
   const push = useToastStore((state) => state.push);
   const [value, setValue] = useState(String(current ?? "off"));

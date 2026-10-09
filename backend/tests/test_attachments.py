@@ -63,12 +63,18 @@ def test_upload_image_measures_size_and_stores_random_name(client, signup):
 def test_upload_limits_and_allowlist(client, signup):
     aarav, maya = signup("Aarav"), signup("Maya")
     c = direct(client, aarav, maya)
-    too_big = upload(client, aarav, c["id"], "x.pdf", b"%PDF" + b"0" * (10 * 1024 * 1024), "application/pdf")
+    too_big = upload(
+        client, aarav, c["id"], "x.pdf", b"%PDF" + b"0" * (10 * 1024 * 1024), "application/pdf"
+    )
     assert too_big.status_code == 413 and "10 MB" in too_big.json()["detail"]
     exactly = upload(client, aarav, c["id"], "x.pdf", b"0" * (10 * 1024 * 1024), "application/pdf")
     assert exactly.status_code == 201
 
-    for name, kind in [("a.svg", "image/svg+xml"), ("a.html", "text/html"), ("a.exe", "application/x-msdownload")]:
+    for name, kind in [
+        ("a.svg", "image/svg+xml"),
+        ("a.html", "text/html"),
+        ("a.exe", "application/x-msdownload"),
+    ]:
         rejected = upload(client, aarav, c["id"], name, b"<script>alert(1)</script>", kind)
         assert rejected.status_code == 400, kind
         assert isinstance(rejected.json()["detail"], str)
@@ -146,7 +152,9 @@ def test_claim_rules(client, signup):
 
     assert post_message(client, aarav, c["id"], "a", ids=[theirs["id"]]).status_code == 400
     assert post_message(client, aarav, c["id"], "b", ids=[elsewhere["id"]]).status_code == 400
-    assert post_message(client, aarav, c["id"], "c", ids=[mine["id"], mine["id"]]).status_code == 400
+    assert (
+        post_message(client, aarav, c["id"], "c", ids=[mine["id"], mine["id"]]).status_code == 400
+    )
     assert post_message(client, aarav, c["id"], "d", ids=[12345]).status_code == 400
     # A failed claim leaves nothing behind: the file is still free to use.
     assert client.get(f"/api/conversations/{c['id']}/messages", headers=aarav.headers).json() == []
@@ -173,7 +181,9 @@ def test_resend_with_same_client_id_is_idempotent(client, signup):
     assert (first.status_code, retry.status_code) == (201, 200)
     assert first.json()["id"] == retry.json()["id"]
     assert len(retry.json()["attachments"]) == 1
-    assert len(client.get(f"/api/conversations/{c['id']}/messages", headers=aarav.headers).json()) == 1
+    assert (
+        len(client.get(f"/api/conversations/{c['id']}/messages", headers=aarav.headers).json()) == 1
+    )
 
 
 def test_previews_search_and_quotes_include_attachments(client, signup):
@@ -247,7 +257,9 @@ def test_expiry_removes_files(client, signup):
 
     aarav, maya = signup("Aarav"), signup("Maya")
     c = direct(client, aarav, maya)
-    client.patch(f"/api/conversations/{c['id']}", json={"disappearing_seconds": 30}, headers=aarav.headers)
+    client.patch(
+        f"/api/conversations/{c['id']}", json={"disappearing_seconds": 30}, headers=aarav.headers
+    )
     photo = upload(client, aarav, c["id"]).json()
     post_message(client, aarav, c["id"], "t", "", [photo["id"]])
     media_dir = client.app.state.settings.media_dir
@@ -268,7 +280,10 @@ def test_unclaimed_uploads_are_purged_after_the_ttl(client, signup):
     with client.app.state.db.session() as session:
         now = utcnow()
         assert attachment_service.purge_unclaimed(session, media_dir, now, 3600) == 0
-        assert attachment_service.purge_unclaimed(session, media_dir, now + timedelta(hours=2), 3600) == 1
+        assert (
+            attachment_service.purge_unclaimed(session, media_dir, now + timedelta(hours=2), 3600)
+            == 1
+        )
         assert session.scalars(select(Attachment)).all() == []
     assert media_files(client) == []
 

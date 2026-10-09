@@ -19,7 +19,6 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.services.users import find_by_phone
 from app.db import Database, utcnow
 from app.models import (
     Attachment,
@@ -36,6 +35,7 @@ from app.models import (
     StoryView,
     User,
 )
+from app.services.users import find_by_phone
 
 NOW = utcnow()
 
@@ -602,6 +602,7 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
     t.text("ishita", ago(days=1, hours=5, minutes=45), "Same")
     t.settle()
     member(t, "aarav").pinned = True
+    member(t, "aarav").chat_color = "crimson"
 
     # --- Rock climbers: renamed, a new admin, someone left; three unread --------------
     t = group("Climbing crew", "maya", ["aarav", "kai", "zoe", "daniel"], ago(days=7, hours=3))

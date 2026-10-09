@@ -26,6 +26,8 @@ interface MessageRowProps {
   userOf: (userId: Id) => UserPublic | undefined;
   handlers: MessageHandlers;
   highlighted: boolean;
+  /** Colour of my own bubbles in this chat; undefined = theme blue. */
+  chatColor?: string;
 }
 
 /** One bubble with its quote, reactions, hover toolbar and long-press menu. */
@@ -37,6 +39,7 @@ export const MessageRow = memo(function MessageRow({
   userOf,
   handlers,
   highlighted,
+  chatColor,
 }: MessageRowProps) {
   const { message, direction, position } = item;
   const outgoing = direction === "outgoing";
@@ -119,6 +122,7 @@ export const MessageRow = memo(function MessageRow({
         reactions={summarizeReactions(message.reactions, meId)}
         onReactionsClick={() => handlers.showReactions(message)}
         highlighted={highlighted}
+        chatColor={chatColor}
         onContextMenu={
           stored && !message.deleted
             ? (event) => {

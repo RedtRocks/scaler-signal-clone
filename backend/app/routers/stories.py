@@ -68,7 +68,13 @@ async def create_photo_story(
     """A photo story: an image (up to the attachment limit) with an optional caption."""
     content = await file.read(settings.max_attachment_bytes + 1)
     story = stories.create_photo_story(
-        db, me, content, file.content_type, caption, settings.media_dir, settings.max_attachment_bytes
+        db,
+        me,
+        content,
+        file.content_type,
+        caption,
+        settings.media_dir,
+        settings.max_attachment_bytes,
     )
     return _out(story, me, presenter)
 

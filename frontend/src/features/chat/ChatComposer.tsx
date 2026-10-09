@@ -9,6 +9,7 @@ import type { Id, Message } from "@/lib/types";
 import { notifyTyping, sendMessage, stopTyping, useToastStore } from "@/store";
 import { senderColor } from "./chatLogic";
 import { getDraft, setDraft } from "./drafts";
+import { AttachTray, type AttachChoice } from "./AttachTray";
 import { VoiceRecorderBar } from "./VoiceRecorderBar";
 import { MicrophoneError, useVoiceRecorder } from "./voiceRecorder";
 import { useStaged, useStagingStore } from "./staging";
@@ -31,6 +32,7 @@ export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, on
   const [text, setText] = useState(() => getDraft(conversationId));
   const staged = useStaged(conversationId);
   const picker = useRef<HTMLInputElement>(null);
+  const [trayOpen, setTrayOpen] = useState(false);
 
   const update = (next: string) => {
     setText(next);
@@ -58,6 +60,15 @@ export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, on
 
   const startRecording = () => {
     recorder.start().catch((error) => push(error instanceof MicrophoneError ? error.message : "Couldn't start recording."));
+  };
+
+  const choose = (choice: AttachChoice) => {
+    setTrayOpen(false);
+    if (choice === "contact" || choice === "location") return push(`Sharing a ${choice} isn't available in this demo.`);
+    const input = picker.current;
+    if (!input) return;
+    input.accept = choice === "photos" ? "image/*" : choice === "gif" ? "image/gif" : FILE_PICKER_ACCEPT;
+    input.click();
   };
 
   const quotedImage = replyTo?.attachments.find((attachment) => attachment.content_type.startsWith("image/"));
@@ -93,7 +104,8 @@ export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, on
           const files = useStagingStore.getState().take(conversationId);
           void sendMessage(conversationId, body, reply, files);
         }}
-        onAttach={() => picker.current?.click()}
+        onAttach={() => (phone ? setTrayOpen((open) => !open) : picker.current?.click())}
+        tray={phone && trayOpen ? <AttachTray onChoose={choose} /> : undefined}
         onEmoji={() => push("Emoji picker is coming soon")}
         onSticker={() => push("Stickers are coming soon")}
         onVoice={startRecording}

@@ -122,3 +122,28 @@
     letter-spacing: -0.04em;
   }
 }
+
+.trayClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 1px;
+  border: 0;
+  border-radius: 50%;
+  background: #3b3b3b;
+  color: #fff;
+  cursor: pointer;
+}
+.tray {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding: var(--space-3) 0 var(--space-2);
+  scrollbar-width: none;
+}
+.tray::-webkit-scrollbar {
+  display: none;
+}

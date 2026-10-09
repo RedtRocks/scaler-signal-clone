@@ -18,9 +18,10 @@ import {
 import { ApiError } from "@/lib/api";
 import { formatLastSeen, formatTimer } from "@/lib/format";
 import type { ConversationDetail, ConversationSummary, Member } from "@/lib/types";
-import { useAuthStore, useConversationStore, usePresence, useToastStore } from "@/store";
+import { useAuthStore, useCallStore, useConversationStore, usePresence, useToastStore } from "@/store";
+import { CHAT_COLORS } from "@/lib/chatColors";
 import { useChatNames } from "./useChatNames";
-import { AddMembersModal, ConfirmModal, EditGroupModal, SafetyNumberModal, TimerModal } from "./ChatModals";
+import { AddMembersModal, ChatColorModal, ConfirmModal, EditGroupModal, SafetyNumberModal, TimerModal } from "./ChatModals";
 import styles from "./InfoPanel.module.css";
 
 interface InfoPanelProps {
@@ -32,7 +33,7 @@ interface InfoPanelProps {
   initialDialog?: Dialog;
 }
 
-export type Dialog = "timer" | "edit" | "add" | "leave" | "safety" | { remove: Member } | null;
+export type Dialog = "timer" | "color" | "edit" | "add" | "leave" | "safety" | { remove: Member } | null;
 
 /** Chat settings: right-hand drawer on desktop, the whole pane on a phone. */
 export function InfoPanel({ conversation, detail, onClose, onSearch, initialDialog = null }: InfoPanelProps) {
@@ -64,7 +65,7 @@ export function InfoPanel({ conversation, detail, onClose, onSearch, initialDial
     ["search-action", "search"],
   ];
   const onQuickAction = (label: string) => {
-    if (label === "video" || label === "audio") push("Calls are coming soon");
+    if (label === "video" || label === "audio") void useCallStore.getState().start(conversation.id, label === "video" ? "video" : "voice");
     else if (label === "search") onSearch();
     else void toggleMute();
   };
@@ -134,6 +135,12 @@ export function InfoPanel({ conversation, detail, onClose, onSearch, initialDial
             chevron={!conversation.left}
           />
           <SettingsRow
+            icon="chat-color"
+            label="Chat Color"
+            sublabel={CHAT_COLORS.find(([id]) => id === (conversation.chat_color ?? "default"))?.[1]}
+            onClick={() => setDialog("color")}
+          />
+          <SettingsRow
             icon="muted"
             label="Mute Notifications"
             control={<Switch label="Mute notifications" checked={conversation.muted} onChange={() => void toggleMute()} />}
@@ -183,6 +190,9 @@ export function InfoPanel({ conversation, detail, onClose, onSearch, initialDial
 
       {dialog === "timer" ? (
         <TimerModal conversationId={conversation.id} current={conversation.disappearing_seconds} onClose={() => setDialog(null)} />
+      ) : null}
+      {dialog === "color" ? (
+        <ChatColorModal conversationId={conversation.id} current={conversation.chat_color} onClose={() => setDialog(null)} />
       ) : null}
       {dialog === "edit" && detail ? <EditGroupModal detail={detail} onClose={() => setDialog(null)} /> : null}
       {dialog === "add" && detail ? <AddMembersModal detail={detail} onClose={() => setDialog(null)} /> : null}

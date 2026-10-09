@@ -117,6 +117,10 @@
 .phoneOnly {
   display: none;
 }
+/* "Pinned" / "Chats" labels: phone layout only. */
+.section {
+  display: none;
+}
 
 @media (max-width: 599px) {
   .search {
@@ -141,6 +145,15 @@
   }
   .phoneOnly {
     display: block;
+  }
+  .section {
+    display: block;
+    padding: 14px var(--ios-gutter) 6px;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
   }
   .started {
     padding: var(--space-4) var(--ios-gutter) var(--space-6);

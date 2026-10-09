@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session, aliased, selectinload
 
 from app.db import utcnow
 from app.errors import BadRequest, Forbidden, NotFound
-from app.services.imageinfo import image_size
 from app.models import Member, Story, StoryView, User
+from app.services.imageinfo import image_size
 
 STORY_LIFETIME = timedelta(hours=24)
 
@@ -59,7 +59,12 @@ def create_story(db: Session, author: User, body: str, background: str) -> Story
     return story
 
 
-PHOTO_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}
+PHOTO_TYPES = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/gif": ".gif",
+}
 MAX_CAPTION = 700
 
 

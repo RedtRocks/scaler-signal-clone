@@ -294,3 +294,35 @@ def test_conversation_list_query_count_does_not_grow_with_conversations(client, 
         send(client, friend, direct(client, aarav, friend)["id"], "hi")
     group(client, aarav, "Everyone", *friends)
     assert queries_for_list() == with_two
+
+
+def test_chat_color_is_per_member_and_can_be_cleared(client, signup):
+    aarav, maya = signup("Aarav"), signup("Maya")
+    c = direct(client, aarav, maya)
+    url = f"/api/conversations/{c['id']}/settings"
+    assert (
+        client.patch(url, json={"chat_color": "crimson"}, headers=aarav.headers).status_code == 200
+    )
+    mine = next(
+        x
+        for x in client.get("/api/conversations", headers=aarav.headers).json()
+        if x["id"] == c["id"]
+    )
+    theirs = next(
+        x
+        for x in client.get("/api/conversations", headers=maya.headers).json()
+        if x["id"] == c["id"]
+    )
+    assert mine["chat_color"] == "crimson" and theirs["chat_color"] is None
+    assert (
+        client.patch(url, json={"chat_color": "hotpink"}, headers=aarav.headers).status_code == 422
+    )
+    assert (
+        client.patch(url, json={"chat_color": "default"}, headers=aarav.headers).status_code == 200
+    )
+    again = next(
+        x
+        for x in client.get("/api/conversations", headers=aarav.headers).json()
+        if x["id"] == c["id"]
+    )
+    assert again["chat_color"] is None

@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-
 from pathlib import Path
 
 from app.db import Database, utcnow

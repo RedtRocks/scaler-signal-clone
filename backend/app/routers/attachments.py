@@ -14,9 +14,7 @@ from app.services.access import get_membership
 router = APIRouter(prefix="/api", tags=["attachments"])
 
 
-@router.post(
-    "/conversations/{conversation_id}/attachments", status_code=status.HTTP_201_CREATED
-)
+@router.post("/conversations/{conversation_id}/attachments", status_code=status.HTTP_201_CREATED)
 async def upload_attachment(
     conversation_id: int,
     file: UploadFile,
@@ -50,4 +48,3 @@ async def get_attachment(
     presenter: Presenter = Depends(get_presenter),
 ) -> schemas.Attachment:
     return presenter.attachment(attachments.get_for_viewer(db, me.id, attachment_id))
-

@@ -151,6 +151,8 @@ class Member(Base):
     muted: Mapped[bool] = mapped_column(Boolean, default=False)
     pinned: Mapped[bool] = mapped_column(Boolean, default=False)
     archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    # My colour for my own bubbles in this chat (a preset name); NULL = the default blue.
+    chat_color: Mapped[str | None] = mapped_column(String(16))
 
     conversation: Mapped[Conversation] = relationship(back_populates="members")
     user: Mapped[User] = relationship()

@@ -43,6 +43,8 @@ export interface ComposerProps {
   onCamera?: () => void;
   /** While set (a recording bar), it takes the place of the input row. */
   recording?: ReactNode;
+  /** Phone: the attach tray under the input row (Photos, GIF, File…); the + turns into a close button while it is open. */
+  tray?: ReactNode;
   disabled?: boolean;
   autoFocus?: boolean;
   /** true (default): Enter sends, Shift+Enter breaks the line. false: Enter breaks the line, Ctrl/Cmd+Enter sends. */
@@ -71,6 +73,7 @@ export function Composer({
   onVoice,
   onCamera,
   recording,
+  tray,
   disabled,
   autoFocus,
   enterSends = true,
@@ -150,7 +153,13 @@ export function Composer({
         <div className={styles.row}>{recording}</div>
       ) : layout === "mobile" ? (
         <div className={styles.row}>
-          <Button variant="icon" icon="plus" iconSize={22} aria-label="Attach" onClick={onAttach} />
+          {tray ? (
+            <button type="button" className={styles.trayClose} aria-label="Close attachments" onClick={onAttach}>
+              <Icon name="close" size={20} />
+            </button>
+          ) : (
+            <Button variant="icon" icon="plus" iconSize={22} aria-label="Attach" onClick={onAttach} />
+          )}
           <div className={styles.field}>
             {input}
             <Button variant="icon" icon="sticker" iconSize={20} className={styles.inner} aria-label="Stickers" onClick={onSticker} />
@@ -179,6 +188,7 @@ export function Composer({
           <Button variant="icon" icon="plus" iconSize={22} aria-label="Attach" onClick={onAttach} />
         </div>
       )}
+      {layout === "mobile" && tray ? <div className={styles.tray}>{tray}</div> : null}
     </div>
   );
 }
