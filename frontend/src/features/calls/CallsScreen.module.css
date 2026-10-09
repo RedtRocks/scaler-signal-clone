@@ -1,0 +1,90 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--surface-pane);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+.title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.link {
+  border: 0;
+  background: none;
+  color: var(--ultramarine);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.list {
+  flex: 1;
+  margin: 0;
+  padding: 0 var(--space-2);
+  list-style: none;
+  overflow-y: auto;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+}
+.row:hover {
+  background: var(--surface-hover);
+}
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.name,
+.missed {
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.missed {
+  color: var(--alert);
+}
+.detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+.when {
+  font-size: 13px;
+  color: var(--ink-tertiary);
+}
+.callBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--icon);
+  cursor: pointer;
+}
+.callBtn:hover {
+  background: var(--surface-selected);
+}

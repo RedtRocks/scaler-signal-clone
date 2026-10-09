@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/ui";
+import { CallsScreen } from "@/features/calls/CallsScreen";
 
 export default function CallsPage() {
-  return <ComingSoon icon="phone" title="Calls are coming soon" />;
+  return <CallsScreen />;
 }

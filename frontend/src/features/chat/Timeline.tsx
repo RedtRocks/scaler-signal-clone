@@ -43,6 +43,7 @@ import { EditMessageModal } from "./EditMessageModal";
 import { useChatNames } from "./useChatNames";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { messageMenu, type MessageHandlers } from "./messageMenu";
+import { chatColorHex } from "@/lib/chatColors";
 import { MessageRow } from "./MessageRow";
 import styles from "./Timeline.module.css";
 
@@ -260,6 +261,7 @@ export function Timeline({ conversation, unreadAtOpen, pinnedHighlight, onReply,
         userOf={userOf}
         handlers={handlers}
         highlighted={item.message.id === flashId || item.message.id === pinnedHighlight}
+        chatColor={chatColorHex(conversation.chat_color)}
       />,
     ];
   };

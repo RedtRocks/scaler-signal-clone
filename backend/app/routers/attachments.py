@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, status
+from fastapi import APIRouter, Depends, Form, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app import schemas
@@ -14,12 +14,11 @@ from app.services.access import get_membership
 router = APIRouter(prefix="/api", tags=["attachments"])
 
 
-@router.post(
-    "/conversations/{conversation_id}/attachments", status_code=status.HTTP_201_CREATED
-)
+@router.post("/conversations/{conversation_id}/attachments", status_code=status.HTTP_201_CREATED)
 async def upload_attachment(
     conversation_id: int,
     file: UploadFile,
+    duration_ms: int | None = Form(None),
     me: User = Depends(current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
@@ -36,6 +35,7 @@ async def upload_attachment(
         file.filename,
         settings.media_dir,
         settings.max_attachment_bytes,
+        duration_ms,
     )
     return Presenter.attachment(attachment)
 
@@ -48,4 +48,3 @@ async def get_attachment(
     presenter: Presenter = Depends(get_presenter),
 ) -> schemas.Attachment:
     return presenter.attachment(attachments.get_for_viewer(db, me.id, attachment_id))
-

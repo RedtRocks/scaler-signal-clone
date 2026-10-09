@@ -49,3 +49,14 @@ export function storyAge(iso: string, now: Date = new Date()): string {
   if (minutes < 60) return `${minutes}m`;
   return `${Math.floor(minutes / 60)}h`;
 }
+
+/** Pictures a photo story accepts (the server checks the bytes too). */
+export const STORY_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+export const STORY_PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+
+/** Why a picture can't be a story, or null when it can. */
+export function storyPhotoProblem(file: { type: string; size: number }): string | null {
+  if (!STORY_PHOTO_TYPES.includes(file.type)) return "Choose a JPEG, PNG, WebP or GIF picture.";
+  if (file.size > STORY_PHOTO_MAX_BYTES) return "Pictures must be 10 MB or smaller.";
+  return null;
+}

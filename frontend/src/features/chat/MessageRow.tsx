@@ -2,7 +2,7 @@
 
 import { memo, useRef, type TouchEvent } from "react";
 import { MessageActions, MessageAttachments, MessageBubble } from "@/components/ui";
-import { quoteSummary } from "@/lib/attachments";
+import { formatClock, quoteSummary } from "@/lib/attachments";
 import { mediaUrl } from "@/lib/config";
 import { formatBubbleTime } from "@/lib/format";
 import type { BubbleItem } from "@/lib/timeline";
@@ -26,6 +26,8 @@ interface MessageRowProps {
   userOf: (userId: Id) => UserPublic | undefined;
   handlers: MessageHandlers;
   highlighted: boolean;
+  /** Colour of my own bubbles in this chat; undefined = theme blue. */
+  chatColor?: string;
 }
 
 /** One bubble with its quote, reactions, hover toolbar and long-press menu. */
@@ -37,6 +39,7 @@ export const MessageRow = memo(function MessageRow({
   userOf,
   handlers,
   highlighted,
+  chatColor,
 }: MessageRowProps) {
   const { message, direction, position } = item;
   const outgoing = direction === "outgoing";
@@ -45,7 +48,7 @@ export const MessageRow = memo(function MessageRow({
   const uploadProgress = useMessageStore((state) =>
     message.id < 0 && message.client_id ? state.uploads[message.client_id] : undefined,
   );
-  const media = message.deleted || message.attachments.length === 0 ? null : mediaView(message.attachments, failed ? undefined : uploadProgress);
+  const media = message.deleted || message.attachments.length === 0 ? null : mediaView(message.attachments, failed ? undefined : uploadProgress, !outgoing);
   const press = useRef<{ timer: ReturnType<typeof setTimeout>; x: number; y: number } | null>(null);
 
   const cancelPress = () => {
@@ -105,6 +108,8 @@ export const MessageRow = memo(function MessageRow({
               layout={media.layout}
               extra={media.extra}
               files={media.files}
+              voices={media.voices}
+              formatClock={formatClock}
               onImageClick={(index) => useLightboxStore.getState().open(media.imageAttachments, index)}
               onFileClick={(index) =>
                 downloadAttachment(media.fileAttachments[index]).catch(() => handlers.notify("Couldn't download the file."))
@@ -117,6 +122,7 @@ export const MessageRow = memo(function MessageRow({
         reactions={summarizeReactions(message.reactions, meId)}
         onReactionsClick={() => handlers.showReactions(message)}
         highlighted={highlighted}
+        chatColor={chatColor}
         onContextMenu={
           stored && !message.deleted
             ? (event) => {

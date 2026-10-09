@@ -151,6 +151,8 @@ class Member(Base):
     muted: Mapped[bool] = mapped_column(Boolean, default=False)
     pinned: Mapped[bool] = mapped_column(Boolean, default=False)
     archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    # My colour for my own bubbles in this chat (a preset name); NULL = the default blue.
+    chat_color: Mapped[str | None] = mapped_column(String(16))
 
     conversation: Mapped[Conversation] = relationship(back_populates="members")
     user: Mapped[User] = relationship()
@@ -261,6 +263,8 @@ class Attachment(Base):
     size: Mapped[int] = mapped_column(Integer)
     width: Mapped[int | None] = mapped_column(Integer)
     height: Mapped[int | None] = mapped_column(Integer)
+    # Audio only: set for a recorded voice message (shown with a waveform), NULL for a plain file.
+    duration_ms: Mapped[int | None] = mapped_column(Integer)
     # Random file name under MEDIA_DIR/attachments/. The URL is derived from it.
     storage_name: Mapped[str] = mapped_column(String(64), unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
@@ -285,14 +289,17 @@ class HiddenMessage(Base):
 
 
 class Story(Base):
-    """A text Story: visible for 24 hours to everyone the author shares a conversation with."""
+    """A Story (text on a colour, or a photo with a caption): visible for 24 hours to everyone the
+    author shares a conversation with."""
 
     __tablename__ = "stories"
     __table_args__ = (Index("ix_stories_expires_at", "expires_at"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    body: Mapped[str] = mapped_column(String(700))
+    body: Mapped[str] = mapped_column(String(700), default="")
+    # A photo story: "/media/stories/<file>". NULL for a text story.
+    media_url: Mapped[str | None] = mapped_column(String(512))
     # One of the preset background names (see schemas.StoryBackground).
     background: Mapped[str] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

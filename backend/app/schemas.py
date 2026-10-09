@@ -128,6 +128,8 @@ class Attachment(BaseModel):
     size: int
     width: int | None
     height: int | None
+    # Set for a voice message.
+    duration_ms: int | None = None
 
 
 class ReplyPreview(BaseModel):
@@ -205,6 +207,7 @@ class ConversationSummary(BaseModel):
     muted: bool
     pinned: bool
     archived: bool
+    chat_color: str | None = None
     left: bool
     disappearing_seconds: int | None
     my_role: MemberRole
@@ -244,10 +247,29 @@ class ConversationUpdate(BaseModel):
     disappearing_seconds: Annotated[int, Field(gt=0, le=60 * 60 * 24 * 7 * 4)] | None = None
 
 
+ChatColor = Literal[
+    "default",
+    "crimson",
+    "vermilion",
+    "burlap",
+    "forest",
+    "wintergreen",
+    "teal",
+    "blue",
+    "indigo",
+    "violet",
+    "plum",
+    "taupe",
+    "steel",
+]
+
+
 class SettingsUpdate(BaseModel):
     muted: bool | None = None
     pinned: bool | None = None
     archived: bool | None = None
+    # "default" clears the colour.
+    chat_color: ChatColor | None = None
 
 
 class MembersAdd(BaseModel):
@@ -291,6 +313,7 @@ class Story(BaseModel):
     author: UserPublic
     body: str
     background: str
+    media_url: str | None = None
     created_at: UtcDateTime
     expires_at: UtcDateTime
     viewed: bool

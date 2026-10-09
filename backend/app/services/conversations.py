@@ -143,8 +143,11 @@ def update_conversation(db: Session, member: Member, update: ConversationUpdate)
 
 
 def update_settings(db: Session, member: Member, update: SettingsUpdate) -> None:
-    """Per-member flags: muted, pinned, archived. Left members may still tidy their list."""
+    """Per-member settings: muted, pinned, archived, chat colour. Left members may still tidy
+    their list."""
     for field, value in update.model_dump(exclude_none=True).items():
+        if field == "chat_color" and value == "default":
+            value = None
         setattr(member, field, value)
     db.commit()
 

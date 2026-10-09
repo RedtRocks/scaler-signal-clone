@@ -7,6 +7,8 @@ interface StoriesState {
   loaded: boolean;
   load: () => Promise<void>;
   post: (body: string, background: StoryBackground) => Promise<void>;
+  /** A photo story: the picture plus an optional caption. */
+  postPhoto: (file: File, caption: string) => Promise<void>;
   /** Marks a story viewed here at once and tells the server. */
   markViewed: (storyId: Id) => void;
   remove: (storyId: Id) => Promise<void>;
@@ -23,6 +25,10 @@ export const useStoryStore = create<StoriesState>()((set, get) => ({
   },
   post: async (body, background) => {
     const story = await api.createStory(body, background);
+    set((state) => ({ stories: [story, ...state.stories] }));
+  },
+  postPhoto: async (file, caption) => {
+    const story = await api.createPhotoStory(file, caption);
     set((state) => ({ stories: [story, ...state.stories] }));
   },
   markViewed: (storyId) => {

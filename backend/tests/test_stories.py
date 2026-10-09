@@ -65,3 +65,37 @@ def test_story_validation(client, signup):
         "/api/stories", json={"body": "x", "background": "neon"}, headers=aarav.headers
     )
     assert blank.status_code == 422 and odd.status_code == 422
+
+
+def post_photo(client, account, caption="sunset", data=None, content_type="image/png"):
+    from tests.test_attachments import png
+
+    return client.post(
+        "/api/stories/photo",
+        files={"file": ("p.png", png(8, 6) if data is None else data, content_type)},
+        data={"caption": caption},
+        headers=account.headers,
+    )
+
+
+def test_photo_story_is_stored_listed_and_removed_with_the_story(client, signup):
+    aarav, maya = signup("Aarav"), signup("Maya")
+    direct(client, aarav, maya)
+    response = post_photo(client, aarav)
+    assert response.status_code == 201, response.text
+    story = response.json()
+    assert story["body"] == "sunset" and story["media_url"].startswith("/media/stories/")
+    seen = client.get("/api/stories", headers=maya.headers).json()
+    assert seen[0]["media_url"] == story["media_url"]
+    folder = client.app.state.settings.media_dir / "stories"
+    assert len(list(folder.glob("*"))) == 1
+    assert client.get(story["media_url"]).status_code == 200
+    assert client.delete(f"/api/stories/{story['id']}", headers=aarav.headers).status_code == 204
+    assert list(folder.glob("*")) == []
+
+
+def test_photo_story_rejects_non_images_and_long_captions(client, signup):
+    aarav = signup("Aarav")
+    assert post_photo(client, aarav, data=b"hello", content_type="text/plain").status_code == 400
+    assert post_photo(client, aarav, data=b"not a png").status_code == 400
+    assert post_photo(client, aarav, caption="x" * 701).status_code == 400

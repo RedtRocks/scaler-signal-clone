@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
-import { Avatar, Icon, Spinner } from "@/components/ui";
+import { Avatar, DropdownMenu, Spinner } from "@/components/ui";
 import { mediaUrl } from "@/lib/config";
 import type { Story } from "@/lib/types";
 import { useAuthStore, useStoryStore, useToastStore } from "@/store";
@@ -18,7 +18,7 @@ export function StoriesScreen() {
   const me = useAuthStore((s) => s.me);
   const { stories, loaded, load } = useStoryStore();
   const push = useToastStore((s) => s.push);
-  const [composing, setComposing] = useState(false);
+  const [composing, setComposing] = useState<"text" | "photo" | null>(null);
   const [playing, setPlaying] = useState<{ queue: Story[][]; group: number } | null>(null);
 
   useEffect(() => {
@@ -41,16 +41,21 @@ export function StoriesScreen() {
     <div className={styles.screen}>
       <header className={styles.header}>
         <h1 className={styles.title}>Stories</h1>
-        <button type="button" className={styles.iconButton} aria-label="Add a story" onClick={() => setComposing(true)}>
-          <Icon name="edit" size={20} />
-        </button>
+        <DropdownMenu
+          label="Add a story"
+          icon="edit"
+          items={[
+            { label: "Photo story", icon: "camera", onSelect: () => setComposing("photo") },
+            { label: "Text story", icon: "edit", onSelect: () => setComposing("text") },
+          ]}
+        />
       </header>
 
       <div className={styles.scroll}>
         <button
           type="button"
           className={styles.row}
-          onClick={() => (mine.length ? setPlaying({ queue: [mine], group: 0 }) : setComposing(true))}
+          onClick={() => (mine.length ? setPlaying({ queue: [mine], group: 0 }) : setComposing("text"))}
         >
           <span className={clsx(styles.ring, mine.length > 0 && styles.ringViewed)}>
             <Avatar name={me?.display_name ?? "Me"} src={mediaUrl(me?.avatar_url ?? null) ?? undefined} size={48} />
@@ -89,7 +94,7 @@ export function StoriesScreen() {
         ) : null}
       </div>
 
-      {composing ? <StoryComposer onClose={() => setComposing(false)} /> : null}
+      {composing ? <StoryComposer mode={composing} onClose={() => setComposing(null)} /> : null}
       {playing ? (
         <StoryViewer
           queue={playing.queue}
@@ -115,7 +120,12 @@ function StoryRow({ group, onOpen }: { group: StoryGroup; onOpen: () => void }) 
         <span className={styles.sub}>{storyAge(latest.created_at)}</span>
       </span>
       <span className={clsx(styles.thumb, styles[`bg_${latest.background}`])} aria-hidden>
-        {Array.from(latest.body).slice(0, 24).join("")}
+        {latest.media_url ? (
+          // eslint-disable-next-line @next/next/no-img-element -- story pictures come from the API origin
+          <img className={styles.thumbPhoto} src={mediaUrl(latest.media_url) ?? ""} alt="" />
+        ) : (
+          Array.from(latest.body).slice(0, 24).join("")
+        )}
       </span>
     </button>
   );

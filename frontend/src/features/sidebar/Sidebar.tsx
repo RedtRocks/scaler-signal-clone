@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatListHeader, SearchField, Spinner, type MenuEntry } from "@/components/ui";
 import { useDialogStore } from "@/features/dialogs/dialogStore";
 import { FOCUS_SEARCH_EVENT } from "@/features/shell/useShortcuts";
@@ -97,6 +97,8 @@ export function Sidebar() {
 
   const meName = me?.display_name || me?.phone;
   const listEmpty = loaded && conversations.length === 0;
+  // On the phone Signal labels the pinned chats and the rest once something is pinned.
+  const sectioned = !searching && filter === "inbox" && conversations.some((c) => c.pinned);
 
   return (
     <div className={styles.sidebar}>
@@ -142,15 +144,21 @@ export function Sidebar() {
           <>
             {searching && conversations.length ? <h2 className={styles.heading}>Chats</h2> : null}
             <ul className={styles.list} aria-label="Chats">
-              {conversations.map((c) => (
-                <ConversationItem
-                  key={c.id}
-                  conversation={c}
-                  meId={me?.id ?? 0}
-                  nameOf={nameOf}
-                  selected={c.id === selectedId}
-                  onOpen={open}
-                />
+              {conversations.map((c, index) => (
+                <Fragment key={c.id}>
+                  {sectioned && (index === 0 || c.pinned !== conversations[index - 1].pinned) ? (
+                    <li role="presentation" className={styles.section}>
+                      {c.pinned ? "Pinned" : "Chats"}
+                    </li>
+                  ) : null}
+                  <ConversationItem
+                    conversation={c}
+                    meId={me?.id ?? 0}
+                    nameOf={nameOf}
+                    selected={c.id === selectedId}
+                    onOpen={open}
+                  />
+                </Fragment>
               ))}
             </ul>
             {searching ? (

@@ -22,9 +22,12 @@ Checked against the glossary in `CONTEXT.md`. Backend rules are covered by `pyte
 - [x] Settings: profile (name, about, photo upload), appearance (System / Light / Dark), chats, notifications, privacy, about, log out
 - [x] Keyboard shortcuts (bonus, press `?` in the app): Ctrl/Cmd+K search, Alt+N new chat, Alt+G new group, Alt+S settings, Alt+Up/Down switch chat, Esc close chat
 - [x] Dark mode (bonus) and responsive design (bonus): desktop three-column, tablet avatar strip, phone single-column with tab bar
-- [x] Stories: text stories that last 24 hours, with a full-screen viewer and view tracking
+- [x] Voice messages: record with the microphone (waveform bubble, play/pause, seek, length, unplayed dot), plus PDF/file cards like Signal's
+- [x] Stories: text and photo stories that last 24 hours, full-screen viewer with pause, "Reply" (sent as a message in your chat with the author) and view tracking
+- [x] Calls: voice and video call screens (ringing, people joining, speaker highlight, mute, camera self-view, raise hand, leave) and a Calls tab with history. The call itself is simulated; no audio or video travels between people
+- [x] Chat color per conversation (Settings of a chat), "Pinned" and "Chats" labels on the phone list, attach sheet on the phone
 - [x] Note to Self (bonus): a chat with yourself, started from New chat
-- [ ] Calls, Linked devices, Help and Donate: "Coming soon" placeholders, as intended
+- [ ] Linked devices, Help and Donate: "Coming soon" placeholders, as intended
 
 ## Tech stack
 
@@ -100,7 +103,7 @@ All REST paths are under `/api` with `Authorization: Bearer <token>`; errors are
 - The seed (`python -m app.seed`) resets the database and creates 8 users; log in as `+15550000001` (Aarav Dudeja). The seed covers 1:1 and group chats, replies, reactions, a photo, disappearing messages, and sent/delivered/read/unread states.
 - Any new number that signs up is given 3 direct chats and a "Weekend Plans" group with the demo users (`welcome()` in `backend/app/seed.py`), so an evaluator who registers sees a populated app right away.
 - SQLite is enough for a demo-scale deployment, and it needs a persistent disk when hosted.
-- Features the brief marks as placeholders (calls, stories, linked devices) show "Coming soon".
+- Features the brief marks as placeholders (linked devices) show "Coming soon". Calls and stories go beyond the placeholder: see the checklist above.
 
 ## Quickstart
 
@@ -181,7 +184,7 @@ Settings: [`docs/screenshots/desktop-settings-light.png`](docs/screenshots/deskt
 
 - The OTP is mocked, and "end-to-end encryption" and safety numbers are interface text only. Messages are stored in plain text.
 - SQLite with synchronous SQLAlchemy sessions inside async endpoints: fine for a demo, not for heavy load (see `backend/README.md`).
-- No voice notes, camera capture, calls, stories or linked devices. Audio and video attachments are downloadable files, with no inline player.
+- No camera capture, no real call media (calls are simulated screens), no video stories, no linked devices. Voice messages play inline; other audio and video attachments are downloadable files.
 - Attachment files are served from `/media/attachments/<random name>` without authentication: the 128-bit random name is the only protection (metadata endpoints do check membership). A real deployment would use signed, expiring URLs. Uploads are limited to 10 MB each and an allowlist of types (no SVG or HTML on purpose).
 - Settings for chats and notifications are stored in the browser (`localStorage`), per device. The notification switches do not send push notifications yet.
 - Disappearing-message timers are set per conversation; there is no account-wide default.

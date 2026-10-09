@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { Icon } from "../Icon/Icon";
+import { VoiceMessage } from "../VoiceMessage/VoiceMessage";
 import styles from "./MessageAttachments.module.css";
 
 export interface MediaImage {
@@ -18,10 +19,24 @@ export interface MediaFile {
   name: string;
   /** "1.2 MB · PDF". */
   detail: string;
+  /** Short type label drawn on the file icon ("PDF", "ZIP"); omit for a generic file glyph. */
+  badge?: string;
   progress?: number;
 }
 
+export interface MediaVoice {
+  key: string | number;
+  src: string;
+  durationMs: number;
+  seed: number;
+  incoming: boolean;
+  uploading: boolean;
+}
+
 export interface MessageAttachmentsProps {
+  /** Voice messages, drawn first, each with a waveform. */
+  voices?: MediaVoice[];
+  formatClock?: (ms: number) => string;
   images: MediaImage[];
   /** How the tiles are arranged. */
   layout: "single" | "pair" | "trio" | "quad";
@@ -61,9 +76,29 @@ function UploadRing({ progress }: { progress: number }) {
 const isUploading = (progress: number | undefined) => progress !== undefined && progress < 1;
 
 /** The media of one message: an image grid (Signal style) followed by file rows. */
-export function MessageAttachments({ images, layout, extra = 0, files, onImageClick, onFileClick }: MessageAttachmentsProps) {
+export function MessageAttachments({
+  images,
+  layout,
+  extra = 0,
+  files,
+  voices = [],
+  formatClock = (ms) => `${Math.round(ms / 1000)}s`,
+  onImageClick,
+  onFileClick,
+}: MessageAttachmentsProps) {
   return (
     <div className={clsx(styles.root, images.length > 0 && styles.withImages)}>
+      {voices.map((voice) => (
+        <VoiceMessage
+          key={voice.key}
+          src={voice.src}
+          durationMs={voice.durationMs}
+          seed={Number(voice.key) || 1}
+          incoming={voice.incoming}
+          uploading={voice.uploading}
+          formatClock={formatClock}
+        />
+      ))}
       {images.length > 0 ? (
         <div
           className={clsx(styles.grid, styles[layout])}
@@ -87,14 +122,20 @@ export function MessageAttachments({ images, layout, extra = 0, files, onImageCl
       ) : null}
       {files.map((file, index) => (
         <button key={file.key} type="button" className={styles.file} onClick={() => onFileClick?.(index)} aria-label={`Download ${file.name}`}>
-          <span className={styles.fileIcon}>
-            {isUploading(file.progress) ? <UploadRing progress={file.progress!} /> : <Icon name="file" size={22} />}
+          <span className={clsx(styles.fileIcon, file.badge && styles.fileBadge)}>
+            {isUploading(file.progress) ? (
+              <UploadRing progress={file.progress!} />
+            ) : file.badge ? (
+              <span className={styles.badgeText}>{file.badge}</span>
+            ) : (
+              <Icon name="file" size={22} />
+            )}
           </span>
           <span className={styles.fileText}>
             <span className={styles.fileName}>{file.name}</span>
             <span className={styles.fileDetail}>{file.detail}</span>
           </span>
-          {isUploading(file.progress) ? null : <Icon name="download" size={20} className={styles.fileDownload} />}
+          {isUploading(file.progress) || file.badge ? null : <Icon name="download" size={20} className={styles.fileDownload} />}
         </button>
       ))}
     </div>

@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-
 from pathlib import Path
 
 from app.db import Database, utcnow
@@ -31,6 +30,6 @@ async def expire_messages_forever(
                 for message in expire_due_messages(session, now, media_dir):
                     await notifier.message_updated(session, message)
                 purge_unclaimed(session, media_dir, now, unclaimed_ttl_seconds)
-                delete_expired(session)
+                delete_expired(session, media_dir)
         except Exception:  # Keep the loop alive; one bad run must not stop future expiries.
             logger.exception("Expiring disappearing messages failed")

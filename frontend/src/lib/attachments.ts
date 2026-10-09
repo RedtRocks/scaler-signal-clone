@@ -45,6 +45,22 @@ export function contentTypeOf(file: { name: string; type: string }): string | nu
   return TYPE_BY_EXTENSION[extensionOf(file.name)] ?? null;
 }
 
+/** A recorded voice message: audio the sender gave a length, drawn with a waveform and play button. */
+export type VoiceFile = File & { durationMs?: number };
+export const withDuration = (file: File, durationMs: number): VoiceFile => Object.assign(file, { durationMs });
+export const durationOf = (file: File): number | undefined => (file as VoiceFile).durationMs;
+export const isVoice = (attachment: Pick<Attachment, "content_type" | "duration_ms">): boolean =>
+  attachment.content_type.startsWith("audio/") && typeof attachment.duration_ms === "number";
+
+/** "0:07", "1:32", "1:02:03". */
+export function formatClock(ms: number): string {
+  const total = Math.max(0, Math.round(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = String(total % 60).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+}
+
 export const isImageType = (contentType: string): boolean => contentType.startsWith("image/");
 export const isImage = (attachment: Pick<Attachment, "content_type">): boolean => isImageType(attachment.content_type);
 
@@ -83,10 +99,13 @@ export function formatFileSize(bytes: number): string {
 }
 
 /** What stands in for the text of a message that only carries files, Signal style. */
-export function attachmentLabel(attachments: readonly Pick<Attachment, "content_type" | "file_name">[]): string {
+export function attachmentLabel(
+  attachments: readonly Pick<Attachment, "content_type" | "file_name" | "duration_ms">[],
+): string {
   if (attachments.length === 0) return "";
   if (attachments.every(isImage)) return attachments.length === 1 ? "📷 Photo" : `📷 ${attachments.length} photos`;
-  return attachments.length === 1 ? `📎 ${attachments[0].file_name}` : `📎 ${attachments.length} files`;
+  if (attachments.length === 1 && isVoice(attachments[0])) return "🎤 Voice Message";
+  return attachments.length === 1 ? "📎 File" : `📎 ${attachments.length} files`;
 }
 
 /** The one-line text for chat list rows, quotes and search hits: the caption, else the label. */

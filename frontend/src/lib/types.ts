@@ -60,6 +60,8 @@ export interface Attachment {
   /** Images only. */
   width: number | null;
   height: number | null;
+  /** Set for a recorded voice message (audio with a waveform); null for any other file. */
+  duration_ms?: number | null;
 }
 
 export interface ReplyPreview {
@@ -115,6 +117,8 @@ export interface ConversationSummary {
   muted: boolean;
   pinned: boolean;
   archived: boolean;
+  /** My bubble colour in this chat (a preset name); null = default. */
+  chat_color?: string | null;
   left: boolean;
   disappearing_seconds: number | null;
   my_role: MemberRole;
@@ -176,6 +180,8 @@ export interface ConversationSettingsPatch {
   muted?: boolean;
   pinned?: boolean;
   archived?: boolean;
+  /** A preset name from lib/chatColors, or "default" to clear. */
+  chat_color?: string;
 }
 
 export interface SendMessageBody {
@@ -244,6 +250,8 @@ export interface Story {
   author: UserPublic;
   body: string;
   background: StoryBackground;
+  /** A photo story's picture (server-relative; pass through mediaUrl()). Null for a text story. */
+  media_url?: string | null;
   created_at: IsoTime;
   expires_at: IsoTime;
   /** Always true for my own stories. */
