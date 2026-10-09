@@ -54,6 +54,7 @@ export function ConversationRow({
       aria-current={selected ? "true" : undefined}
     >
       <Avatar name={name} src={avatarSrc} kind={kind} online={online} size={avatarSize} />
+      {unread ? <UnreadBadge count={unread} className={styles.stripBadge} /> : null}
       <span className={styles.main}>
         <span className={styles.top}>
           <span className={styles.name}>{name}</span>

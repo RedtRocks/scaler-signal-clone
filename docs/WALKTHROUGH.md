@@ -159,7 +159,7 @@ The free Railway plan sleeps the backend: open the site a minute before so the f
 - **Uploaded files are served from `/media/...` without a login check.** The file names are 128-bit random, so they cannot be guessed, but anyone who has a link can open it. A production version would serve files through an authenticated route or signed, expiring URLs. (The images and audio tags in the browser can't send an `Authorization` header, which is why this build uses unguessable names.)
 - Sessions do not expire, and there is no rate limiting on the OTP (it is fixed and mocked).
 - The disappearing-message timer starts when a message is sent. Signal starts it when the recipient reads it.
-- Calls, linked devices and encryption are mocked. Not built: video stories, view-once media, stickers, emoji picker, camera capture. Unread badges are missing on the collapsed avatar column (600–900 px).
+- Calls, linked devices and encryption are mocked. Not built: video stories, view-once media, stickers, emoji picker, camera capture.
 - Seed profile photos are hotlinked from randomuser.me; if it is down, initials show instead.
 - SQLite columns added later are added by `Database._add_missing_columns` rather than a migration tool.
 
