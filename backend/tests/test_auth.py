@@ -1,6 +1,6 @@
 def test_request_otp_reports_whether_phone_is_registered(client, signup):
-    response = client.post("/api/auth/request-otp", json={"phone": "+15550009999"})
-    assert response.json() == {"phone": "+15550009999", "is_registered": False}
+    response = client.post("/api/auth/request-otp", json={"phone": "+14155550123"})
+    assert response.json() == {"phone": "+14155550123", "is_registered": False}
 
     maya = signup("Maya")
     response = client.post("/api/auth/request-otp", json={"phone": maya.phone})
@@ -12,7 +12,7 @@ def test_invalid_phone_is_rejected(client):
 
 
 def test_verify_otp_creates_user_and_session(client):
-    response = client.post("/api/auth/verify-otp", json={"phone": "+15550001111", "code": "123456"})
+    response = client.post("/api/auth/verify-otp", json={"phone": "+14155550124", "code": "123456"})
     assert response.status_code == 200
     data = response.json()
     assert data["is_new"] is True
@@ -20,11 +20,11 @@ def test_verify_otp_creates_user_and_session(client):
     assert data["user"]["created_at"].endswith("Z")
 
     headers = {"Authorization": f"Bearer {data['token']}"}
-    assert client.get("/api/me", headers=headers).json()["phone"] == "+15550001111"
+    assert client.get("/api/me", headers=headers).json()["phone"] == "+14155550124"
 
 
 def test_wrong_code_is_400(client):
-    response = client.post("/api/auth/verify-otp", json={"phone": "+15550001111", "code": "000000"})
+    response = client.post("/api/auth/verify-otp", json={"phone": "+14155550124", "code": "000000"})
     assert response.status_code == 400
     assert response.json() == {"detail": "That code is incorrect"}
 
@@ -102,3 +102,16 @@ def test_profile_picture_must_be_one_of_our_own_uploads(client, signup):
     assert ours.status_code == 200
     cleared = client.patch("/api/me", json={"avatar_url": ""}, headers=maya.headers)
     assert cleared.json()["avatar_url"] is None
+
+
+def test_fake_and_malformed_numbers_are_rejected(client):
+    for phone in ["+15551234567", "+11234567890", "+1555", "5550001111", "+441234", "abc"]:
+        response = client.post("/api/auth/request-otp", json={"phone": phone})
+        assert response.status_code == 422, phone
+        response = client.post("/api/auth/verify-otp", json={"phone": phone, "code": "123456"})
+        assert response.status_code == 422, phone
+
+
+def test_real_numbers_and_demo_accounts_are_accepted(client):
+    for phone in ["+919876543210", "+442071838750", "+14155552671", "+15550000001", "+15550000005"]:
+        assert client.post("/api/auth/request-otp", json={"phone": phone}).status_code == 200, phone

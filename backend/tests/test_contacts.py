@@ -33,7 +33,7 @@ def test_contact_errors(client, signup):
     aarav, maya = signup("Aarav"), signup("Maya")
     assert (
         client.post(
-            "/api/contacts", json={"phone": "+15559999999"}, headers=aarav.headers
+            "/api/contacts", json={"phone": "+14155550125"}, headers=aarav.headers
         ).status_code
         == 404
     )
@@ -58,7 +58,7 @@ def test_lookup_user_by_phone(client, signup):
     assert response.json()["id"] == maya.id
     assert response.json()["online"] is False
     missing = client.get(
-        "/api/users/lookup", params={"phone": "+15559999999"}, headers=aarav.headers
+        "/api/users/lookup", params={"phone": "+14155550125"}, headers=aarav.headers
     )
     assert missing.status_code == 404
 

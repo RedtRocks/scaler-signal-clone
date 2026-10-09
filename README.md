@@ -96,7 +96,7 @@ All REST paths are under `/api` with `Authorization: Bearer <token>`; errors are
 
 ## Assumptions
 
-- Identity is a phone number; the OTP is mocked and always `123456`. Encryption is simulated (interface text only), as the brief allows.
+- Identity is a phone number; the OTP is mocked and always `123456`. Numbers are checked for real on both sides (libphonenumber-js in the browser, `phonenumbers` in the API), so made-up numbers like `+1 555 123 4567` are rejected; only the eight fictional demo numbers `+15550000001` to `+15550000008` are allowed by exact match. Encryption is simulated (interface text only), as the brief allows.
 - A "contact" is a private, one-way address-book entry; anyone with an account can be messaged by phone number.
 - One direct conversation per pair of users; groups have admins (creator first) and the oldest member is promoted if the last admin leaves.
 - "Online" means at least one open WebSocket; "last seen" is the time the last one closed.
@@ -136,7 +136,7 @@ Sign in with any of `+15550000001` to `+15550000008`; the OTP is always `123456`
 | `+15550000002` | Maya Patel | the climbing chat with Aarav and the "Climbing crew" group |
 | `+15550000005` | Sunita Dudeja | the "Family" group and a chat with her son Aarav |
 
-Any other phone number creates a new account, takes you through the profile step and lands on an empty chat list.
+Any other *valid* phone number creates a new account, takes you through the profile step and lands on an empty chat list.
 
 ## Configuration
 
@@ -190,6 +190,7 @@ Settings: [`docs/screenshots/desktop-settings-light.png`](docs/screenshots/deskt
 
 ## Known limitations
 
+- The OTP is mocked: no SMS is sent. Numbers are validated, but ownership is not proven. To send real codes, replace the body of `request_otp` in `backend/app/routers/auth.py` with a call to an SMS provider (e.g. Twilio Verify) and compare the code it checks in `accounts.verify_otp`; this needs the provider's account and keys.
 - The OTP is mocked, and "end-to-end encryption" and safety numbers are interface text only. Messages are stored in plain text.
 - SQLite with synchronous SQLAlchemy sessions inside async endpoints: fine for a demo, not for heavy load (see `backend/README.md`).
 - No camera capture, no real call media (calls are simulated screens), no video stories, no linked devices. Voice messages play inline; other audio and video attachments are downloadable files.

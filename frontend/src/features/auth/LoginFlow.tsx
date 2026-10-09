@@ -6,7 +6,7 @@ import { Avatar, AvatarCropper, Button, COUNTRIES, Icon, OtpInput, PhoneInput, S
 import { ApiError } from "@/lib/api";
 import { Splash } from "@/features/shell/Splash";
 import { bootstrap, useAuthStore, useSession } from "@/store";
-import { RESEND_SECONDS, formatPhoneForDisplay, isPlausibleNational } from "./otp";
+import { RESEND_SECONDS, formatPhoneForDisplay, INVALID_PHONE_MESSAGE, isValidPhone } from "./otp";
 import styles from "./LoginFlow.module.css";
 
 type Step = "phone" | "otp";
@@ -68,8 +68,8 @@ function SignInSteps() {
   }, [wait]);
 
   const sendCode = async (resend = false) => {
-    if (!isPlausibleNational(national)) {
-      setError("Enter a valid phone number.");
+    if (!isValidPhone(phone)) {
+      setError(INVALID_PHONE_MESSAGE);
       return;
     }
     setBusy(true);

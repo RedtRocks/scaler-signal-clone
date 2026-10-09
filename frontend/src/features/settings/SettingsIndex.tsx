@@ -25,16 +25,16 @@ export function SettingsIndex() {
       <SettingsGroup>
         <SettingsRow label="Appearance" icon="chat-color" onClick={go("appearance")} />
         <SettingsRow label="Chats" icon="tab-chats" onClick={go("chats")} />
-        <SettingsRow label="Notifications" icon="sounds" onClick={go("notifications")} />
+        <SettingsRow label="Notifications" icon="bell" onClick={go("notifications")} />
         <SettingsRow label="Privacy" icon="safety-number" onClick={go("privacy")} />
       </SettingsGroup>
       <SettingsGroup>
-        <SettingsRow label="Linked Devices" icon="phone" value="Coming soon" onClick={go("linked-devices")} />
-        <SettingsRow label="Help" icon="requests" value="Coming soon" onClick={go("help")} />
-        <SettingsRow label="Donate to Signal" icon="verified" value="Coming soon" onClick={go("donate")} />
+        <SettingsRow label="Linked Devices" icon="laptop" value="Coming soon" onClick={go("linked-devices")} />
+        <SettingsRow label="Help" icon="help" value="Coming soon" onClick={go("help")} />
+        <SettingsRow label="Donate to Signal" icon="heart" value="Coming soon" onClick={go("donate")} />
       </SettingsGroup>
       <SettingsGroup>
-        <SettingsRow label="About" icon="permissions" onClick={go("about")} />
+        <SettingsRow label="About" icon="info" onClick={go("about")} />
       </SettingsGroup>
       <SettingsGroup>
         <SettingsRow label="Log Out" destructive onClick={() => void logout()} />
