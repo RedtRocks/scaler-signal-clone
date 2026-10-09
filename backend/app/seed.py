@@ -7,6 +7,7 @@ everyone out, because sessions are dropped with the rest.
 Sign in as +15550000001 ("Aarav Dudeja") with OTP 123456.
 """
 
+import math
 import secrets
 import shutil
 import struct
@@ -122,6 +123,78 @@ def demo_png(width: int = 640, height: int = 420) -> bytes:
     )
 
 
+def demo_voice(seconds: float = 6.0, rate: int = 8000) -> bytes:
+    """A short synthesized "voice note" (a wobbling tone with gaps like words), as 8-bit mono
+    WAV, so voice messages in the demo really play. No audio library, no download."""
+    samples = bytearray()
+    for i in range(int(seconds * rate)):
+        t = i / rate
+        word = 0.5 + 0.5 * math.sin(2 * math.pi * 1.7 * t)  # syllable-like swell
+        pitch = 180 + 60 * math.sin(2 * math.pi * 0.6 * t)
+        value = word * math.sin(2 * math.pi * pitch * t) * 0.6
+        samples.append(int(128 + 127 * value))
+    header = (
+        b"RIFF"
+        + struct.pack("<I", 36 + len(samples))
+        + b"WAVEfmt "
+        + struct.pack("<IHHIIHH", 16, 1, 1, rate, rate, 1, 8)
+        + b"data"
+        + struct.pack("<I", len(samples))
+    )
+    return header + bytes(samples)
+
+
+def demo_pdf() -> bytes:
+    """A one-page PDF with a line of text, so the demo has a real file attachment."""
+    stream = b"BT /F1 24 Tf 72 700 Td (Family Tree and Stories) Tj ET"
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R"
+        b" /Resources << /Font << /F1 5 0 R >> >> >>",
+        b"<< /Length %d >>\nstream\n" % len(stream) + stream + b"\nendstream",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    out = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(out))
+        out += b"%d 0 obj\n" % number + body + b"\nendobj\n"
+    xref = len(out)
+    out += b"xref\n0 %d\n0000000000 65535 f \n" % (len(objects) + 1)
+    for offset in offsets:
+        out += b"%010d 00000 n \n" % offset
+    out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (
+        len(objects) + 1,
+        xref,
+    )
+    return bytes(out)
+
+
+def demo_story_png(palette: int, width: int = 360, height: int = 640) -> bytes:
+    """A portrait gradient with soft circles, used as the demo photo stories."""
+    top, bottom = [((255, 140, 90), (90, 60, 160)), ((70, 160, 200), (20, 40, 90))][palette % 2]
+    rows = bytearray()
+    for y in range(height):
+        rows.append(0)
+        t = y / height
+        base = [int(top[c] + (bottom[c] - top[c]) * t) for c in range(3)]
+        for x in range(width):
+            glow = max(0.0, 1 - math.hypot(x - width * 0.7, y - height * 0.3) / (width * 0.55))
+            rows += bytes(min(255, int(base[c] + 90 * glow * glow)) for c in range(3))
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        body = kind + data
+        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(bytes(rows), 9))
+        + chunk(b"IEND", b"")
+    )
+
+
 @dataclass
 class Timeline:
     """Writes one conversation's messages in order and settles its receipts at the end."""
@@ -187,6 +260,51 @@ class Timeline:
             )
         )
         return message
+
+    def media(
+        self,
+        sender: str,
+        at: datetime,
+        media_dir: Path,
+        file_name: str,
+        content_type: str,
+        data: bytes,
+        extension: str,
+        caption: str = "",
+        duration_ms: int | None = None,
+    ) -> Message:
+        """A message carrying one stored file (a voice message when `duration_ms` is set)."""
+        message = self.text(sender, at, caption)
+        folder = media_dir / "attachments"
+        folder.mkdir(parents=True, exist_ok=True)
+        storage_name = f"{secrets.token_hex(16)}{extension}"
+        (folder / storage_name).write_bytes(data)
+        self.db.add(
+            Attachment(
+                conversation_id=self.conversation.id,
+                uploader_id=self.users[sender].id,
+                message_id=message.id,
+                file_name=file_name,
+                content_type=content_type,
+                size=len(data),
+                duration_ms=duration_ms,
+                storage_name=storage_name,
+                created_at=at,
+            )
+        )
+        return message
+
+    def voice(self, sender: str, at: datetime, media_dir: Path, seconds: float = 6.0) -> Message:
+        return self.media(
+            sender,
+            at,
+            media_dir,
+            "Voice message.wav",
+            "audio/wav",
+            demo_voice(seconds),
+            ".wav",
+            duration_ms=int(seconds * 1000),
+        )
 
     def system(self, actor: str | None, at: datetime, event: dict) -> Message:
         actor_id = self.users[actor].id if actor else None
@@ -338,7 +456,9 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
             media_dir,
             "crag-sunrise.png",
         )
-    t.text("aarav", ago(hours=2, minutes=55), "No promises")
+    if media_dir is not None:
+        t.voice("maya", ago(hours=2, minutes=52), media_dir, seconds=9)
+    t.text("aarav", ago(hours=2, minutes=50), "No promises")
     t.settle()
 
     # --- Aarav & Kai: disappearing messages turned on a few hours ago ------------------
@@ -461,6 +581,17 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
         reply_to=photos,
         reactions={"mom": "❤️", "aarav": "💯"},
     )
+    if media_dir is not None:
+        t.voice("mom", ago(days=4, hours=3), media_dir, seconds=12)
+        t.media(
+            "ishita",
+            ago(days=4, hours=2),
+            media_dir,
+            "Family Tree & Stories.pdf",
+            "application/pdf",
+            demo_pdf(),
+            ".pdf",
+        )
     t.text("mom", ago(days=1, hours=6), "Reminder: Nani's birthday is on Sunday. Call her!")
     t.text(
         "aarav",
@@ -573,6 +704,27 @@ def seed(db: Session, media_dir: Path | None = None) -> None:
                 StoryView(story_id=story.id, viewer_id=users["aarav"].id, viewed_at=ago(hours=6))
             )
 
+    # Photo stories (generated pictures, stored like uploads).
+    if media_dir is not None:
+        folder = media_dir / "stories"
+        folder.mkdir(parents=True, exist_ok=True)
+        for index, (author, hours, caption) in enumerate(
+            [("zoe", 2, "Golden hour 🌇"), ("maya", 0.5, "Crag day, no regrets")]
+        ):
+            posted = ago(hours=hours)
+            name = f"{secrets.token_hex(16)}.png"
+            (folder / name).write_bytes(demo_story_png(index))
+            db.add(
+                Story(
+                    author_id=users[author].id,
+                    body=caption,
+                    background="ink",
+                    media_url=f"/media/stories/{name}",
+                    created_at=posted,
+                    expires_at=posted + timedelta(hours=24),
+                )
+            )
+
     db.commit()
 
 
@@ -657,6 +809,7 @@ def main() -> None:
     database.create_all()
     # Files of the previous demo world would be orphans now.
     shutil.rmtree(settings.media_dir / "attachments", ignore_errors=True)
+    shutil.rmtree(settings.media_dir / "stories", ignore_errors=True)
     with database.session() as session:
         seed(session, settings.media_dir)
     print("Seeded demo data. Sign in as +15550000001 with code 123456.")

@@ -289,3 +289,39 @@ def test_plain_text_messages_still_work(client, signup):
     aarav, maya = signup("Aarav"), signup("Maya")
     c = direct(client, aarav, maya)
     assert send(client, aarav, c["id"], "hello")["attachments"] == []
+
+
+def test_audio_upload_with_a_duration_is_a_voice_message(client, signup):
+    aarav, maya = signup("Aarav"), signup("Maya")
+    c = direct(client, aarav, maya)
+    response = client.post(
+        f"/api/conversations/{c['id']}/attachments",
+        files={"file": ("Voice message.weba", b"OggS-not-really", "audio/webm")},
+        data={"duration_ms": "4200"},
+        headers=aarav.headers,
+    )
+    assert response.status_code == 201, response.text
+    assert response.json()["duration_ms"] == 4200
+    sent = post_message(client, aarav, c["id"], "v1", "", [response.json()["id"]]).json()
+    assert sent["attachments"][0]["duration_ms"] == 4200
+
+
+def test_duration_is_ignored_for_non_audio_and_capped(client, signup):
+    aarav, maya = signup("Aarav"), signup("Maya")
+    c = direct(client, aarav, maya)
+    image = client.post(
+        f"/api/conversations/{c['id']}/attachments",
+        files={"file": ("pic.png", png(), "image/png")},
+        data={"duration_ms": "5000"},
+        headers=aarav.headers,
+    )
+    assert image.json()["duration_ms"] is None
+    long_note = client.post(
+        f"/api/conversations/{c['id']}/attachments",
+        files={"file": ("v.wav", b"RIFF....", "audio/wav")},
+        data={"duration_ms": str(10**9)},
+        headers=aarav.headers,
+    )
+    assert long_note.json()["duration_ms"] == 3_600_000
+    plain = upload(client, aarav, c["id"], "song.mp3", b"ID3", "audio/mpeg")
+    assert plain.json()["duration_ms"] is None

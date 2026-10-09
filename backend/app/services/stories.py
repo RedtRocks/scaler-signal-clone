@@ -1,12 +1,15 @@
 """Stories: 24-hour text posts shown to everyone the author shares a conversation with."""
 
+import secrets
 from datetime import timedelta
+from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, aliased, selectinload
 
 from app.db import utcnow
-from app.errors import Forbidden, NotFound
+from app.errors import BadRequest, Forbidden, NotFound
+from app.services.imageinfo import image_size
 from app.models import Member, Story, StoryView, User
 
 STORY_LIFETIME = timedelta(hours=24)
@@ -56,6 +59,52 @@ def create_story(db: Session, author: User, body: str, background: str) -> Story
     return story
 
 
+PHOTO_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}
+MAX_CAPTION = 700
+
+
+def create_photo_story(
+    db: Session,
+    author: User,
+    content: bytes,
+    content_type: str | None,
+    caption: str,
+    media_dir: Path,
+    max_bytes: int,
+) -> Story:
+    """Store an uploaded picture under `<media_dir>/stories/` and post it as a 24-hour story."""
+    kind = (content_type or "").split(";")[0].strip().lower()
+    extension = PHOTO_TYPES.get(kind)
+    if extension is None:
+        raise BadRequest("A photo story must be a JPEG, PNG, WebP or GIF image")
+    if not content:
+        raise BadRequest("That file is empty")
+    if len(content) > max_bytes:
+        raise BadRequest(f"Photos must be {max_bytes // (1024 * 1024)} MB or smaller")
+    if image_size(kind, content) is None:
+        raise BadRequest("This image file is damaged or isn't really a " + kind[6:].upper())
+    caption = caption.strip()
+    if len(caption) > MAX_CAPTION:
+        raise BadRequest(f"Captions can be at most {MAX_CAPTION} characters")
+    folder = media_dir / "stories"
+    folder.mkdir(parents=True, exist_ok=True)
+    storage_name = f"{secrets.token_hex(16)}{extension}"
+    (folder / storage_name).write_bytes(content)
+    now = utcnow()
+    story = Story(
+        author_id=author.id,
+        body=caption,
+        background="ink",
+        media_url=f"/media/stories/{storage_name}",
+        created_at=now,
+        expires_at=now + STORY_LIFETIME,
+    )
+    db.add(story)
+    db.commit()
+    db.refresh(story)
+    return story
+
+
 def _visible_story(db: Session, viewer: User, story_id: int) -> Story:
     story = db.get(Story, story_id)
     if story is None or story.expires_at <= utcnow():
@@ -74,17 +123,27 @@ def mark_viewed(db: Session, viewer: User, story_id: int) -> None:
     db.commit()
 
 
-def delete_story(db: Session, author: User, story_id: int) -> None:
+def delete_story(db: Session, author: User, story_id: int, media_dir: Path | None = None) -> None:
     story = _visible_story(db, author, story_id)
     if story.author_id != author.id:
         raise Forbidden("You can only delete your own stories")
+    media_url = story.media_url
     db.delete(story)
     db.commit()
+    _remove_photo(media_dir, media_url)
 
 
-def delete_expired(db: Session) -> int:
+def _remove_photo(media_dir: Path | None, media_url: str | None) -> None:
+    if media_dir is not None and media_url:
+        (media_dir / "stories" / media_url.rsplit("/", 1)[-1]).unlink(missing_ok=True)
+
+
+def delete_expired(db: Session, media_dir: Path | None = None) -> int:
     expired = list(db.scalars(select(Story).where(Story.expires_at <= utcnow())))
+    photos = [story.media_url for story in expired]
     for story in expired:
         db.delete(story)
     db.commit()
+    for media_url in photos:
+        _remove_photo(media_dir, media_url)
     return len(expired)

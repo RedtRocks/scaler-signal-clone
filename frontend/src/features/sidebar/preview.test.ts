@@ -44,7 +44,9 @@ describe("rowPreview", () => {
     const photo = { id: 9, url: "/media/attachments/a.png", file_name: "a.png", content_type: "image/png", size: 5, width: 1, height: 1 };
     const pdf = { ...photo, file_name: "Invoice.pdf", content_type: "application/pdf" };
     expect(rowPreview({ kind: "direct" }, msg({ body: "", attachments: [photo] }), 1, nameOf).text).toBe("📷 Photo");
-    expect(rowPreview({ kind: "direct" }, msg({ body: "", attachments: [pdf] }), 1, nameOf).text).toBe("📎 Invoice.pdf");
+    expect(rowPreview({ kind: "direct" }, msg({ body: "", attachments: [pdf] }), 1, nameOf).text).toBe("📎 File");
+    const voice = { ...photo, file_name: "v.weba", content_type: "audio/webm", duration_ms: 3000 };
+    expect(rowPreview({ kind: "direct" }, msg({ body: "", attachments: [voice] }), 1, nameOf).text).toBe("🎤 Voice Message");
     expect(rowPreview({ kind: "direct" }, msg({ body: "look!", attachments: [photo] }), 1, nameOf).text).toBe("look!");
   });
 });

@@ -9,6 +9,8 @@ import type { Id, Message } from "@/lib/types";
 import { notifyTyping, sendMessage, stopTyping, useToastStore } from "@/store";
 import { senderColor } from "./chatLogic";
 import { getDraft, setDraft } from "./drafts";
+import { VoiceRecorderBar } from "./VoiceRecorderBar";
+import { MicrophoneError, useVoiceRecorder } from "./voiceRecorder";
 import { useStaged, useStagingStore } from "./staging";
 
 interface ChatComposerProps {
@@ -43,6 +45,19 @@ export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, on
     if (files.length === 0) return;
     event.preventDefault();
     stage(files);
+  };
+
+  const recorder = useVoiceRecorder({
+    onRecorded: (file) => {
+      const reply = replyTo;
+      onCancelReply();
+      void sendMessage(conversationId, "", reply, [file]);
+    },
+    onTooShort: () => push("Voice message too short. Hold on a little longer."),
+  });
+
+  const startRecording = () => {
+    recorder.start().catch((error) => push(error instanceof MicrophoneError ? error.message : "Couldn't start recording."));
   };
 
   const quotedImage = replyTo?.attachments.find((attachment) => attachment.content_type.startsWith("image/"));
@@ -81,7 +96,16 @@ export function ChatComposer({ conversationId, isGroup, replyTo, replyAuthor, on
         onAttach={() => picker.current?.click()}
         onEmoji={() => push("Emoji picker is coming soon")}
         onSticker={() => push("Stickers are coming soon")}
-        onVoice={() => push("Voice messages are coming soon")}
+        onVoice={startRecording}
+        recording={
+          recorder.state.status === "recording" ? (
+            <VoiceRecorderBar
+              elapsedMs={recorder.state.elapsedMs}
+              onCancel={() => recorder.stop(false)}
+              onSend={() => recorder.stop(true)}
+            />
+          ) : undefined
+        }
         onCamera={() => push("Camera is coming soon")}
         staged={
           <StagedAttachments

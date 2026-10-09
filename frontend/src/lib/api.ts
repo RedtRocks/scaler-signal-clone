@@ -1,3 +1,4 @@
+import { durationOf } from "./attachments";
 import { API_URL } from "./config";
 import type {
   Attachment,
@@ -129,6 +130,8 @@ export function uploadAttachment(
     };
     const form = new FormData();
     form.append("file", file, file.name);
+    const duration = durationOf(file);
+    if (duration !== undefined) form.append("duration_ms", String(Math.round(duration)));
     xhr.send(form);
   });
 }
@@ -193,6 +196,12 @@ export const api = {
   listStories: () => request<Story[]>("GET", "/stories"),
   createStory: (body: string, background: StoryBackground) =>
     request<Story>("POST", "/stories", { json: { body, background } }),
+  createPhotoStory: (file: File, caption: string) => {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    form.append("caption", caption);
+    return request<Story>("POST", "/stories/photo", { form });
+  },
   viewStory: (storyId: Id) => request<void>("POST", `/stories/${storyId}/view`),
   deleteStory: (storyId: Id) => request<void>("DELETE", `/stories/${storyId}`),
 };

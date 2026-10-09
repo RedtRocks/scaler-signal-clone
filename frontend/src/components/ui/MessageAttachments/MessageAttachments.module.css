@@ -145,3 +145,25 @@
 .withImages .file {
   padding: 8px 12px;
 }
+
+/* A document with a type label, like Signal's PDF card: a white page with the label on it. */
+.fileBadge {
+  width: 36px;
+  height: 46px;
+  border-radius: 4px 12px 4px 4px;
+  background: #fff;
+  color: #1b1b1b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.badgeText {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.file:has(.fileBadge) .fileName {
+  font-size: 16px;
+  font-weight: 400;
+}
+.file:has(.fileBadge) {
+  gap: var(--space-4);
+}

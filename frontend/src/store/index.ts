@@ -8,6 +8,7 @@ export { useContactStore } from "./contacts";
 export { usePresenceStore, type Presence } from "./presence";
 export { useSearchStore } from "./search";
 export { useStoryStore } from "./stories";
+export { useCallStore, type ActiveCall } from "./calls";
 export { useToastStore, type Toast, type ToastAction } from "./toasts";
 export type { ConversationFilter } from "./conversationLogic";
 export * from "./hooks";

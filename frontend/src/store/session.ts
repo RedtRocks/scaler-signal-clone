@@ -4,6 +4,7 @@ import { ApiError, api, configureApi } from "@/lib/api";
 import { WS_URL } from "@/lib/config";
 import { SignalSocket } from "@/lib/socket";
 import { useAuthStore } from "./auth";
+import { useCallStore } from "./calls";
 import { useContactStore } from "./contacts";
 import { useConversationStore } from "./conversations";
 import { useMessageStore } from "./messages";
@@ -58,6 +59,7 @@ export function endSession(): void {
   usePresenceStore.getState().reset();
   useSearchStore.getState().reset();
   useStoryStore.getState().reset();
+  useCallStore.getState().reset();
   useToastStore.getState().dismiss();
   useAuthStore.getState().reset();
 }

@@ -60,6 +60,8 @@ export interface Attachment {
   /** Images only. */
   width: number | null;
   height: number | null;
+  /** Set for a recorded voice message (audio with a waveform); null for any other file. */
+  duration_ms?: number | null;
 }
 
 export interface ReplyPreview {
@@ -244,6 +246,8 @@ export interface Story {
   author: UserPublic;
   body: string;
   background: StoryBackground;
+  /** A photo story's picture (server-relative; pass through mediaUrl()). Null for a text story. */
+  media_url?: string | null;
   created_at: IsoTime;
   expires_at: IsoTime;
   /** Always true for my own stories. */

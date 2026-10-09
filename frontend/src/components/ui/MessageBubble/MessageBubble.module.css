@@ -43,12 +43,16 @@
 .in .bubble {
   --sg-meta: var(--ink-secondary);
   --sg-status-bg: var(--bubble-incoming);
+  --voice-play-bg: var(--surface-pane);
+  --voice-play-ink: var(--ink);
   background: var(--bubble-incoming);
   color: var(--ink);
 }
 .out .bubble {
   --sg-meta: var(--on-ultramarine-muted);
   --sg-status-bg: var(--bubble-outgoing);
+  --voice-play-bg: rgba(255, 255, 255, 0.28);
+  --voice-play-ink: #fff;
   background: var(--bubble-outgoing);
   color: var(--on-ultramarine);
 }

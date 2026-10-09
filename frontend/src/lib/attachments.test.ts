@@ -22,6 +22,7 @@ const att = (file_name: string, content_type: string): Attachment => ({
   size: 10,
   width: null,
   height: null,
+  duration_ms: null,
 });
 
 describe("contentTypeOf", () => {
@@ -73,7 +74,9 @@ describe("previews", () => {
     expect(attachmentLabel([])).toBe("");
     expect(attachmentLabel([att("a.png", "image/png")])).toBe("📷 Photo");
     expect(attachmentLabel([att("a.png", "image/png"), att("b.jpg", "image/jpeg")])).toBe("📷 2 photos");
-    expect(attachmentLabel([att("Invoice.pdf", "application/pdf")])).toBe("📎 Invoice.pdf");
+    expect(attachmentLabel([att("Invoice.pdf", "application/pdf")])).toBe("📎 File");
+    expect(attachmentLabel([{ ...att("v.weba", "audio/webm"), duration_ms: 4000 }])).toBe("🎤 Voice Message");
+    expect(attachmentLabel([att("song.mp3", "audio/mpeg")])).toBe("📎 File");
     expect(attachmentLabel([att("a.png", "image/png"), att("b.pdf", "application/pdf")])).toBe("📎 2 files");
   });
   it("prefers the caption", () => {
@@ -82,7 +85,7 @@ describe("previews", () => {
     expect(messageSummary({ body: "plain", attachments: [] })).toBe("plain");
   });
   it("describes a quoted attachment", () => {
-    expect(quoteSummary({ body: "", attachment: att("a.pdf", "application/pdf") })).toBe("📎 a.pdf");
+    expect(quoteSummary({ body: "", attachment: att("a.pdf", "application/pdf") })).toBe("📎 File");
     expect(quoteSummary({ body: "text", attachment: null })).toBe("text");
   });
 });

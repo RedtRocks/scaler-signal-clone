@@ -1,0 +1,79 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: min(300px, 62vw);
+  min-width: 220px;
+  padding: 4px 0 0;
+}
+.play {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--voice-play-bg, rgba(255, 255, 255, 0.9));
+  color: var(--voice-play-ink, #1b1b1b);
+  cursor: pointer;
+}
+.play:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.play:focus-visible {
+  outline: 2px solid var(--ultramarine);
+  outline-offset: 2px;
+}
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wave {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 30px;
+  cursor: pointer;
+}
+.bar {
+  flex: 1;
+  min-width: 2px;
+  max-width: 3px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.4;
+}
+.bar.played {
+  opacity: 1;
+}
+.head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}

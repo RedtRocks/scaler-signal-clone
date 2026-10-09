@@ -1,6 +1,6 @@
 // Turns a message's Attachments into what the presentational media components draw.
-import type { MediaFile, MediaImage } from "@/components/ui";
-import { clampedAspect, formatFileSize, isImage, planImageGrid, type ImageGridPlan } from "@/lib/attachments";
+import type { MediaFile, MediaImage, MediaVoice } from "@/components/ui";
+import { clampedAspect, formatFileSize, isImage, isVoice, planImageGrid, type ImageGridPlan } from "@/lib/attachments";
 import { mediaUrl } from "@/lib/config";
 import type { Attachment } from "@/lib/types";
 
@@ -9,6 +9,7 @@ export interface MediaView {
   layout: ImageGridPlan["layout"];
   extra: number;
   files: MediaFile[];
+  voices: MediaVoice[];
   /** Every image of the message (the lightbox pages through all, not only the tiles). */
   imageAttachments: Attachment[];
   /** Non-image attachments, in the same order as `files`. */
@@ -28,14 +29,28 @@ function typeLabel(contentType: string): string {
 }
 
 /** `progress[i]` is the upload progress of `attachments[i]` while the message is still sending. */
-export function mediaView(attachments: readonly Attachment[], progress?: readonly number[]): MediaView {
+export function mediaView(
+  attachments: readonly Attachment[],
+  progress?: readonly number[],
+  incoming = false,
+): MediaView {
+  const voices: MediaVoice[] = [];
   const imageAttachments: Attachment[] = [];
   const fileAttachments: Attachment[] = [];
   const imageProgress: (number | undefined)[] = [];
   const fileProgress: (number | undefined)[] = [];
   attachments.forEach((attachment, index) => {
     const value = progress?.[index];
-    if (isImage(attachment)) {
+    if (isVoice(attachment)) {
+      voices.push({
+        key: attachment.id,
+        src: mediaUrl(attachment.url) ?? attachment.url,
+        durationMs: attachment.duration_ms ?? 0,
+        seed: Math.abs(attachment.id),
+        incoming,
+        uploading: value !== undefined && value < 1,
+      });
+    } else if (isImage(attachment)) {
       imageAttachments.push(attachment);
       imageProgress.push(value);
     } else {
@@ -57,9 +72,13 @@ export function mediaView(attachments: readonly Attachment[], progress?: readonl
     files: fileAttachments.map((attachment, index) => ({
       key: attachment.id,
       name: attachment.file_name,
-      detail: `${formatFileSize(attachment.size)} · ${typeLabel(attachment.content_type)}`,
+      detail: TYPE_LABEL[attachment.content_type]
+        ? formatFileSize(attachment.size).replace(" ", "")
+        : `${formatFileSize(attachment.size)} · ${typeLabel(attachment.content_type)}`,
+      badge: TYPE_LABEL[attachment.content_type],
       progress: fileProgress[index],
     })),
+    voices,
     imageAttachments,
     fileAttachments,
   };

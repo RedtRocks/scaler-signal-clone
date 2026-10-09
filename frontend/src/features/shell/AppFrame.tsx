@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppShell, NavRail, TabBar, ToastViewport, type NavRailId } from "@/components/ui";
 import { mediaUrl } from "@/lib/config";
+import { CallScreen } from "@/features/calls/CallScreen";
 import { DialogHost } from "@/features/dialogs/DialogHost";
 import { useShortcuts } from "./useShortcuts";
 import { Sidebar } from "@/features/sidebar/Sidebar";
@@ -60,6 +61,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
         onDismiss={dismiss}
       />
       <DialogHost />
+      <CallScreen />
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { api, ApiError, uploadAttachment } from "@/lib/api";
-import { contentTypeOf, isImageType, measureImage } from "@/lib/attachments";
+import { contentTypeOf, durationOf, isImageType, measureImage, withDuration } from "@/lib/attachments";
 import { newClientId } from "@/lib/clientId";
 import type { Attachment, Id, Message, ReceiptEvent } from "@/lib/types";
 import { useAuthStore } from "./auth";
@@ -90,6 +90,7 @@ async function localAttachment(file: File): Promise<Attachment> {
     size: file.size,
     width: size?.width ?? null,
     height: size?.height ?? null,
+    duration_ms: contentType.startsWith("audio/") ? (durationOf(file) ?? null) : null,
   };
 }
 
@@ -133,7 +134,9 @@ export const useMessageStore = create<MessagesState>()((set, get) => {
       job.files.map(async (file, index) => {
         if (job.uploaded[index]) return;
         const type = contentTypeOf(file) ?? file.type;
-        const upload = file.type === type ? file : new File([file], file.name, { type });
+        const rewrapped = file.type === type ? file : new File([file], file.name, { type });
+        const duration = durationOf(file);
+        const upload = duration === undefined ? rewrapped : withDuration(rewrapped, duration);
         job.uploaded[index] = await uploadAttachment(conversationId, upload, (fraction) =>
           setProgress(clientId, (all) => all.map((value, i) => (i === index ? fraction : value))),
         );

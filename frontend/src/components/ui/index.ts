@@ -54,6 +54,7 @@ export {
   type MessageAttachmentsProps,
   type MediaImage,
   type MediaFile,
+  type MediaVoice,
 } from "./MessageAttachments/MessageAttachments";
 export { StagedAttachments, type StagedAttachmentsProps, type StagedItem } from "./StagedAttachments/StagedAttachments";
 export { Lightbox, type LightboxProps, type LightboxItem } from "./Lightbox/Lightbox";
@@ -75,3 +76,4 @@ export {
   type ThemePreference,
 } from "./theme";
 export { useThemePreference } from "./useThemePreference";
+export { VoiceMessage, waveform, type VoiceMessageProps } from "./VoiceMessage/VoiceMessage";

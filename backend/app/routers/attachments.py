@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, status
+from fastapi import APIRouter, Depends, Form, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app import schemas
@@ -20,6 +20,7 @@ router = APIRouter(prefix="/api", tags=["attachments"])
 async def upload_attachment(
     conversation_id: int,
     file: UploadFile,
+    duration_ms: int | None = Form(None),
     me: User = Depends(current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
@@ -36,6 +37,7 @@ async def upload_attachment(
         file.filename,
         settings.media_dir,
         settings.max_attachment_bytes,
+        duration_ms,
     )
     return Presenter.attachment(attachment)
 

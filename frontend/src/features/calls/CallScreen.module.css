@@ -1,0 +1,306 @@
+/* Signal call window: near-black stage, photo tiles, a floating control bar. */
+.screen {
+  --call-bg: #1d1f1e;
+  --call-bar: #3a3a3a;
+  --call-round: #555555;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--call-bg);
+  color: #fff;
+}
+.topRight {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6) 0;
+}
+.topRight .round {
+  width: 44px;
+  height: 44px;
+  background: #2f3130;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4) var(--space-6);
+}
+.grid {
+  --gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: var(--gap);
+  width: min(100%, 1080px);
+  height: 100%;
+}
+.grid[data-count="1"] {
+  width: min(100%, 720px);
+}
+.tile {
+  position: relative;
+  flex: none;
+  width: calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));
+  height: calc((100% - (var(--rows) - 1) * var(--gap)) / var(--rows));
+  max-height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #2b2d2c;
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+  transition: outline-color 150ms ease;
+  animation: arrive 260ms ease-out;
+}
+.tile.speaking {
+  outline-color: #fff;
+}
+.tile.waiting {
+  opacity: 0.7;
+}
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.name {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  max-width: calc(100% - 20px);
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  line-height: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.speakBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+}
+.alone {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.round {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--call-round);
+  color: #fff;
+  cursor: pointer;
+}
+.round:hover {
+  filter: brightness(1.15);
+}
+.round:focus-visible,
+.leaveBtn:focus-visible,
+.back:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.round.on {
+  background: #fff;
+  color: #1b1b1b;
+}
+
+.bottom {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-6) var(--space-6);
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 14px 24px;
+  border-radius: 24px;
+  background: var(--call-bar);
+}
+.meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  max-width: 220px;
+}
+.callTitle {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.callStatus {
+  font-size: 14px;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.78);
+  font-variant-numeric: tabular-nums;
+}
+.controls {
+  display: flex;
+  gap: var(--space-3);
+}
+.leaveBtn {
+  padding: 0 20px;
+  height: 40px;
+  margin-left: var(--space-3);
+  border: 0;
+  border-radius: 20px;
+  background: #e5493a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.leaveBtn:hover {
+  background: #cf3f31;
+}
+.self {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 160px;
+  height: 100px;
+  border-radius: 12px;
+  background: #2b2d2c;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.bottom > .self {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-6);
+}
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+/* Phone: header on the grid, two columns, big round buttons at the bottom. */
+.phone {
+  --call-bg: #000;
+}
+.phoneHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: max(var(--space-3), env(safe-area-inset-top)) var(--space-4) var(--space-2);
+}
+.back {
+  border: 0;
+  background: none;
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+}
+.phoneTitle {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 17px;
+}
+.phone .stage {
+  padding: var(--space-2);
+  align-items: stretch;
+}
+.phone .grid {
+  --gap: 6px;
+  width: 100%;
+}
+.phone .tile {
+  max-height: none;
+  border-radius: 10px;
+}
+.controlsPhone {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4) max(var(--space-6), env(safe-area-inset-bottom));
+}
+.controlsPhone .round {
+  width: 64px;
+  height: 64px;
+  background: #4a4a4a;
+}
+.controlsPhone .round.on {
+  background: #fff;
+}
+.controlsPhone .leave {
+  background: #e5493a;
+}
+.selfPhone {
+  position: absolute;
+  right: var(--space-3);
+  top: 64px;
+}
+.selfPhone .self {
+  width: 96px;
+  height: 128px;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    animation: none;
+    transition: none;
+  }
+}
+@media (max-width: 760px) {
+  .bar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .bottom > .self {
+    display: none;
+  }
+}

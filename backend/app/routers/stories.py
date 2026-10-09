@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Form, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app import schemas
 from app.auth import current_user
+from app.config import Settings
 from app.db import get_db
-from app.deps import get_presenter
+from app.deps import get_presenter, get_settings
 from app.models import Story, User
 from app.presenter import Presenter
 from app.services import stories
@@ -19,6 +20,7 @@ def _out(story: Story, me: User, presenter: Presenter) -> schemas.Story:
         author=presenter.user(story.author),
         body=story.body,
         background=story.background,
+        media_url=story.media_url,
         created_at=story.created_at,
         expires_at=story.expires_at,
         viewed=mine or any(view.viewer_id == me.id for view in story.views),
@@ -54,6 +56,23 @@ async def create_story(
     return _out(story, me, presenter)
 
 
+@router.post("/photo", status_code=status.HTTP_201_CREATED)
+async def create_photo_story(
+    file: UploadFile,
+    caption: str = Form(""),
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    presenter: Presenter = Depends(get_presenter),
+    settings: Settings = Depends(get_settings),
+) -> schemas.Story:
+    """A photo story: an image (up to the attachment limit) with an optional caption."""
+    content = await file.read(settings.max_attachment_bytes + 1)
+    story = stories.create_photo_story(
+        db, me, content, file.content_type, caption, settings.media_dir, settings.max_attachment_bytes
+    )
+    return _out(story, me, presenter)
+
+
 @router.post("/{story_id}/view", status_code=status.HTTP_204_NO_CONTENT)
 async def view_story(
     story_id: int, me: User = Depends(current_user), db: Session = Depends(get_db)
@@ -63,6 +82,9 @@ async def view_story(
 
 @router.delete("/{story_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_story(
-    story_id: int, me: User = Depends(current_user), db: Session = Depends(get_db)
+    story_id: int,
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
 ) -> None:
-    stories.delete_story(db, me, story_id)
+    stories.delete_story(db, me, story_id, settings.media_dir)

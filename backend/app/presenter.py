@@ -107,6 +107,7 @@ class Presenter:
             size=attachment.size,
             width=attachment.width,
             height=attachment.height,
+            duration_ms=attachment.duration_ms,
         )
 
     # --- Conversations -------------------------------------------------------------------

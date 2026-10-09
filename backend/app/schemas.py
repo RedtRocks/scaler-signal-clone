@@ -128,6 +128,8 @@ class Attachment(BaseModel):
     size: int
     width: int | None
     height: int | None
+    # Set for a voice message.
+    duration_ms: int | None = None
 
 
 class ReplyPreview(BaseModel):
@@ -291,6 +293,7 @@ class Story(BaseModel):
     author: UserPublic
     body: str
     background: str
+    media_url: str | None = None
     created_at: UtcDateTime
     expires_at: UtcDateTime
     viewed: bool

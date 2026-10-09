@@ -10,6 +10,7 @@ import type { Id, Message } from "@/lib/types";
 import {
   closeConversation,
   openConversation,
+  useCallStore,
   useAuthStore,
   useConversation,
   useConversationDetail,
@@ -99,7 +100,10 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
     setReplyTo(message);
     input.current?.focus();
   }, []);
-  const comingSoon = () => push("Calls are coming soon");
+  const call = (kind: "voice" | "video") => () => {
+    if (conversation.left) return push("You can't call a group you've left.");
+    void useCallStore.getState().start(id, kind);
+  };
   const toggleMute = () =>
     useConversationStore
       .getState()
@@ -169,8 +173,8 @@ function ChatView({ conversation }: { conversation: NonNullable<ReturnType<typeo
           online={!isGroup && online}
           onBack={phone ? () => router.push("/") : undefined}
           onTitleClick={() => openInfo()}
-          onVideoCall={comingSoon}
-          onVoiceCall={comingSoon}
+          onVideoCall={call("video")}
+          onVoiceCall={call("voice")}
           onSearch={startSearch}
           moreItems={menu}
         />

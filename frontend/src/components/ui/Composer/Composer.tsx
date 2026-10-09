@@ -41,6 +41,8 @@ export interface ComposerProps {
   onSticker?: () => void;
   onVoice?: () => void;
   onCamera?: () => void;
+  /** While set (a recording bar), it takes the place of the input row. */
+  recording?: ReactNode;
   disabled?: boolean;
   autoFocus?: boolean;
   /** true (default): Enter sends, Shift+Enter breaks the line. false: Enter breaks the line, Ctrl/Cmd+Enter sends. */
@@ -68,6 +70,7 @@ export function Composer({
   onSticker,
   onVoice,
   onCamera,
+  recording,
   disabled,
   autoFocus,
   enterSends = true,
@@ -143,7 +146,9 @@ export function Composer({
     <div className={clsx(styles.composer, layout === "mobile" && styles.mobile)}>
       {staged}
       {quote ? <div className={styles.quote}>{quote}</div> : null}
-      {layout === "mobile" ? (
+      {recording ? (
+        <div className={styles.row}>{recording}</div>
+      ) : layout === "mobile" ? (
         <div className={styles.row}>
           <Button variant="icon" icon="plus" iconSize={22} aria-label="Attach" onClick={onAttach} />
           <div className={styles.field}>

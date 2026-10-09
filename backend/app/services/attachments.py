@@ -45,6 +45,7 @@ ALIASES = {
     "audio/x-m4a": "audio/mp4",
 }
 MAX_FILE_NAME = 255
+MAX_VOICE_MS = 60 * 60 * 1000
 
 
 class TooLarge(BadRequest):
@@ -72,6 +73,7 @@ def save_upload(
     file_name: str | None,
     media_dir: Path,
     max_bytes: int,
+    duration_ms: int | None = None,
 ) -> Attachment:
     """Validate and store one file as an unclaimed Attachment of `member`'s conversation."""
     require_active(member)
@@ -103,6 +105,10 @@ def save_upload(
         size=len(content),
         width=width,
         height=height,
+        # Only audio can be a voice message; the length is capped at an hour.
+        duration_ms=min(max(duration_ms, 0), MAX_VOICE_MS)
+        if duration_ms is not None and kind.startswith("audio/")
+        else None,
         storage_name=storage_name,
     )
     db.add(attachment)
