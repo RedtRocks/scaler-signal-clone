@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { Button, ComingSoon, Spinner, type IconName } from "@/components/ui";
 import { useSession } from "@/store";
 import { AboutSection } from "./AboutSection";
+import { AccountSection } from "./AccountSection";
+import { CallsSection } from "./CallsSection";
+import { DataUsageSection } from "./DataUsageSection";
+import { GeneralSection } from "./GeneralSection";
 import { AppearanceSection } from "./AppearanceSection";
 import { ChatsSection } from "./ChatsSection";
 import { NotificationsSection } from "./NotificationsSection";
@@ -13,6 +17,11 @@ import { SettingsIndex } from "./SettingsIndex";
 import styles from "./SettingsScreen.module.css";
 
 const TITLES: Record<string, string> = {
+  account: "Account",
+  general: "General",
+  calls: "Calls",
+  "data-usage": "Data usage",
+  backups: "Backups",
   profile: "Profile",
   appearance: "Appearance",
   chats: "Chats",
@@ -25,6 +34,7 @@ const TITLES: Record<string, string> = {
 };
 
 const SOON: Record<string, { icon: IconName; text: string }> = {
+  backups: { icon: "backups", text: "Backups are not available in this build yet." },
   "linked-devices": { icon: "contact", text: "Linked devices are not available in this build yet." },
   help: { icon: "requests", text: "Help and support are not available in this build yet." },
   donate: { icon: "sounds", text: "Donations are not available in this build yet." },
@@ -44,6 +54,14 @@ function Body({ section }: { section: string }) {
       return <NotificationsSection />;
     case "about":
       return <AboutSection />;
+    case "general":
+      return <GeneralSection />;
+    case "calls":
+      return <CallsSection />;
+    case "data-usage":
+      return <DataUsageSection />;
+    case "account":
+      return <AccountSection />;
     default: {
       const soon = SOON[section];
       return (

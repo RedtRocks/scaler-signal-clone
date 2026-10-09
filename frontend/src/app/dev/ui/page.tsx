@@ -82,7 +82,6 @@ function DesktopDemo({ onToast }: { onToast: (m: string) => void }) {
           <NavRail
             active={rail}
             badges={{ chats: 14, stories: 2 }}
-            selfName="Alex Rivera"
             onSelect={setRail}
             onSettings={() => onToast("Settings")}
           />

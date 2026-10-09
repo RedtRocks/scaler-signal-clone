@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { Avatar } from "../Avatar/Avatar";
 import { Button } from "../Button/Button";
 import { Icon, type IconName } from "../Icon/Icon";
 import { UnreadBadge } from "../UnreadBadge/UnreadBadge";
@@ -10,13 +9,10 @@ export type NavRailId = "chats" | "calls" | "stories";
 export interface NavRailProps {
   active?: NavRailId;
   badges?: Partial<Record<NavRailId, number>>;
-  selfName?: string;
-  selfAvatar?: string;
   onSelect?: (id: NavRailId) => void;
   /** Extras beyond index.d.ts: the rail's other buttons. */
   onMenu?: () => void;
   onSettings?: () => void;
-  onProfile?: () => void;
   settingsActive?: boolean;
 }
 
@@ -29,12 +25,9 @@ const ITEMS: [NavRailId, IconName, string][] = [
 export function NavRail({
   active = "chats",
   badges,
-  selfName = "Me",
-  selfAvatar,
   onSelect,
   onMenu,
   onSettings,
-  onProfile,
   settingsActive,
 }: NavRailProps) {
   return (
@@ -74,9 +67,6 @@ export function NavRail({
           onClick={onSettings}
         >
           <Icon name="settings" />
-        </button>
-        <button type="button" className={styles.self} aria-label="Profile" onClick={onProfile}>
-          <Avatar name={selfName} src={selfAvatar} size={32} />
         </button>
       </div>
     </nav>

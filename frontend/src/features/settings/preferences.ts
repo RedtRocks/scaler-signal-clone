@@ -11,6 +11,18 @@ export interface Preferences {
   notifySound: boolean;
   /** Desktop notifications. Local only. */
   notifyDesktop: boolean;
+  /** Notify when someone reacts to a message. Local only. */
+  notifyReactions: boolean;
+  /** Calls are simulated, so these two only mirror Signal's Calls page. Local only. */
+  incomingCalls: boolean;
+  callSounds: boolean;
+  /** Tell the other person when you are typing. The composer reads this. */
+  typingIndicators: boolean;
+  /** Media auto-download choices. Saved on this device; the app always loads media. */
+  dlPhotos: boolean;
+  dlVideos: boolean;
+  dlAudio: boolean;
+  dlDocuments: boolean;
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -18,6 +30,14 @@ export const DEFAULT_PREFERENCES: Preferences = {
   notifyPreview: true,
   notifySound: true,
   notifyDesktop: true,
+  notifyReactions: true,
+  incomingCalls: true,
+  callSounds: true,
+  typingIndicators: true,
+  dlPhotos: true,
+  dlVideos: true,
+  dlAudio: true,
+  dlDocuments: true,
 };
 
 export const PREFERENCES_KEY = "signal.prefs";
