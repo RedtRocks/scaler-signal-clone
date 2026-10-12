@@ -118,7 +118,7 @@ You pick, paste or drop files, type an optional caption and press Send
 - `src/lib/`: framework-free logic, including API calls, the socket client, time formatting, and timeline grouping (which bubbles join into a run).
 - `src/store/`: app state and the actions that change it.
 - `src/features/`: screens that connect store hooks to UI components. `auth/` (login, OTP, profile), `sidebar/` (list, search, filters), `dialogs/` (new chat, new group, contacts), `chat/` (header, timeline, composer, info panel), `settings/`, and `shell/` (session gate and the three-column frame).
-- `src/app/`: thin routes: `/login`, `/` (empty pane), `/c/[id]`, `/settings/[section]`, `/calls` and `/stories` (coming soon). Routes only pick a feature; they hold no logic.
+- `src/app/`: thin routes: `/login`, `/` (empty pane), `/c/[id]`, `/settings/[section]`, `/calls` and `/stories`. Routes only pick a feature; they hold no logic.
 
 Request flow for one action, e.g. reacting to a message: `MessageRow` (UI) calls a store action, the store calls `lib/api.ts` (REST), the server saves it and pushes a `reaction` event, `lib/socket.ts` receives it, `store/realtime.ts` updates the message store, and every open tab re-renders from that one source of truth.
 
@@ -167,8 +167,8 @@ Everything needed is in [`RUNNING.md`](./RUNNING.md): backend and frontend comma
 - *How do you keep two tabs of one user in sync?* The server pushes every change to all of that user's open sockets, including the sender's other tabs, and the store reconciles by `client_id` and message id.
 - *What happens to messages from someone who left a group?* The conversation detail returns `former_members`, so old messages and "X left" lines still show their name.
 - *How is auth done?* Phone plus mocked OTP gives a random session token. Only its sha256 is stored, so a database leak does not leak live tokens. REST sends it as `Authorization: Bearer`, the socket as `?token=`.
-- *What would you do next with more time?* Real SMS, end-to-end encryption, message editing, signed URLs for attachments, thumbnails and image compression, and replacing the polling expiry task with a scheduler or queue.
-- *What is deliberately not built?* See section 11 and the README's known limitations: editing messages, delete-for-me, forwarding, group avatars, calls, stories, voice notes.
+- *What would you do next with more time?* Real SMS, end-to-end encryption, signed URLs for attachments, thumbnails and image compression, and replacing the polling expiry task with a scheduler or queue.
+- *What is deliberately not built?* See section 11 and the README's known limitations: real calls (they are simulated screens), real encryption, real SMS, linked devices, video stories, view-once media, stickers, emoji picker and camera capture. Editing, delete-for-me, forwarding, stories, voice messages and Note to Self are built.
 - *Why upload attachments separately instead of one multipart message request?* Per-file progress and retry in the browser, the message request stays small JSON so `client_id` idempotency and the optimistic bubble work exactly as for text, and a resend can never attach a file twice (4.1, point 11). The cost is orphan uploads when a user abandons a draft; a background task deletes unclaimed files after an hour.
 - *Is it safe that anyone with the file URL can download it?* No, and the README lists it. The name is 128 random bits and is only sent to conversation members, and the metadata endpoint checks membership, but the static `/media` route has no auth. The fix is signed expiring URLs or a download endpoint that checks membership (it would need cookies or a short-lived token, since `<img>` cannot send an Authorization header). The upload side is hardened: allowlist, size limit, extension from the content type, image headers verified, no SVG or HTML.
 
