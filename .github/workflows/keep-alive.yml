@@ -1,0 +1,22 @@
+name: Keep alive
+
+# Pings the live backend and frontend every 5 minutes so Railway's app sleeping
+# (which triggers after 5-10 minutes with no traffic) does not put the API to sleep.
+# GitHub may delay scheduled runs, so the occasional slow start is still possible.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping backend health endpoint
+        run: curl --fail --silent --show-error --location --max-time 60 --retry 3 --retry-delay 5 --retry-all-errors https://scaler-signal-clone-production.up.railway.app/api/health
+      - name: Ping frontend
+        run: curl --fail --silent --show-error --location --max-time 30 --retry 2 --retry-delay 5 --output /dev/null https://scaler-signal-clone.vercel.app/
