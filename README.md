@@ -59,7 +59,7 @@ Checked against the glossary in `CONTEXT.md`. Backend rules are covered by `pyte
 
 ## Database schema
 
-Nine tables, all with foreign keys and indexes defined in `backend/app/models.py` (exact columns in [`docs/CONTRACT.md`](docs/CONTRACT.md#database-schema-sqlite-via-sqlalchemy-2)).
+Twelve tables, all with foreign keys and indexes defined in `backend/app/models.py` (exact columns in [`docs/CONTRACT.md`](docs/CONTRACT.md#database-schema-sqlite-via-sqlalchemy-2)).
 
 | Table | Purpose | Key constraints |
 |---|---|---|
@@ -72,12 +72,17 @@ Nine tables, all with foreign keys and indexes defined in `backend/app/models.py
 | `attachments` | Uploaded files, ordered within a message | `storage_name` unique (random) |
 | `message_receipts` | Per-recipient `delivered_at` / `read_at` | PK `(message, user)` |
 | `message_reactions` | One emoji per user per message | PK `(message, user)` |
+| `hidden_messages` | "Delete for me": messages a user hid from their own history | PK `(message, user)` |
+| `stories` | 24-hour text or photo posts | index on `expires_at` |
+| `story_views` | Who has viewed a story | PK `(story, viewer)` |
 
 ```
 users ─< contacts >─ users
 users ─< conversation_members >─ conversations ─< messages ─< message_receipts
                                                       │  └─< message_reactions
-                                                      └─< attachments
+                                                      ├─< attachments
+                                                      └─< hidden_messages
+users ─< stories ─< story_views
 ```
 
 ## API overview
@@ -90,7 +95,8 @@ All REST paths are under `/api` with `Authorization: Bearer <token>`; errors are
 | Contacts & search | `GET /users/lookup`, `GET/POST /contacts`, `PATCH/DELETE /contacts/{user_id}`, `GET /search?q=` |
 | Conversations | `GET /conversations`, `POST /conversations/direct`, `POST /conversations/group`, `GET/PATCH /conversations/{id}`, `PATCH /conversations/{id}/settings` |
 | Group admin | `POST /conversations/{id}/members`, `PATCH/DELETE /conversations/{id}/members/{user_id}` |
-| Messages | `GET/POST /conversations/{id}/messages`, `POST /conversations/{id}/read`, `DELETE /messages/{id}`, `PUT/DELETE /messages/{id}/reaction` |
+| Messages | `GET/POST /conversations/{id}/messages`, `POST /conversations/{id}/read`, `PATCH /messages/{id}` (edit), `DELETE /messages/{id}` (for everyone), `POST /messages/{id}/hide` (for me), `PUT/DELETE /messages/{id}/reaction` |
+| Stories | `GET/POST /stories`, `POST /stories/photo`, `POST /stories/{id}/view`, `DELETE /stories/{id}` |
 | Attachments | `POST /conversations/{id}/attachments`, `GET /attachments/{id}` |
 | WebSocket | `/ws?token=`: client sends `typing`, `delivered`, `ping`; server pushes `message.new`, `message.updated`, `receipt`, `conversation.updated`, `conversation.removed`, `read`, `typing`, `presence` |
 
@@ -153,8 +159,8 @@ Examples: [`.env.example`](.env.example) (docker compose), [`backend/.env.exampl
 ## Tests
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 50 tests: REST rules, receipts, WebSocket pushes
-cd frontend && npx tsc --noEmit && npx eslint src && npx vitest run && npx next build
+cd backend && .venv/bin/pytest -q                  # 87 tests: REST rules, receipts, WebSocket pushes, attachments, stories
+cd frontend && npx tsc --noEmit && npx eslint src && npx vitest run && npx next build   # vitest: 138 tests
 cd e2e && npm install && npm run smoke            # needs both servers running; see e2e/smoke.mjs
 ```
 
@@ -191,7 +197,7 @@ Settings: [`docs/screenshots/desktop-settings-light.png`](docs/screenshots/deskt
 ## Known limitations
 
 - The OTP is mocked: no SMS is sent. Numbers are validated, but ownership is not proven. To send real codes, replace the body of `request_otp` in `backend/app/routers/auth.py` with a call to an SMS provider (e.g. Twilio Verify) and compare the code it checks in `accounts.verify_otp`; this needs the provider's account and keys.
-- The OTP is mocked, and "end-to-end encryption" and safety numbers are interface text only. Messages are stored in plain text.
+- "End-to-end encryption" and safety numbers are interface text only. Messages are stored in plain text.
 - SQLite with synchronous SQLAlchemy sessions inside async endpoints: fine for a demo, not for heavy load (see `backend/README.md`).
 - No camera capture, no real call media (calls are simulated screens), no video stories, no linked devices. Voice messages play inline; other audio and video attachments are downloadable files.
 - Attachment files are served from `/media/attachments/<random name>` without authentication: the 128-bit random name is the only protection (metadata endpoints do check membership). A real deployment would use signed, expiring URLs. Uploads are limited to 10 MB each and an allowlist of types (no SVG or HTML on purpose).

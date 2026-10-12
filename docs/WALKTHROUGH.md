@@ -169,11 +169,11 @@ The free Railway plan sleeps the backend: open the site a minute before so the f
 # backend (http://localhost:8000, docs at /docs)
 cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload
 python -m app.seed            # demo data
-pytest -q                     # 85 tests
+pytest -q                     # 87 tests
 ruff check . && ruff format --check .
 
 # frontend (http://localhost:3000)
 cd frontend && npm install && npm run dev
-npm test                      # unit tests (vitest)
+npm test                      # unit tests (vitest, 138 tests)
 npm run lint
 ```
